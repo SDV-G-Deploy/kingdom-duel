@@ -89,6 +89,7 @@ let selectedCell: Cell | null = null;
 let hoverCell: Cell | null = null;
 let activeSpell: SpellId | null = null;
 let enemyThinking = false;
+let logOpen = false;
 
 function gemIcon(kind: GemKind): string {
   void kind;
@@ -293,6 +294,115 @@ function renderEffectPill(effect: PreviewEffect): string {
   return `<em class="effect-pill tone-${effect.tone}">${effect.tone === 'risk' ? '-' : '+'}${effect.value} ${effect.label}</em>`;
 }
 
+function latestEvent(): string {
+  return duel.log[0] ?? 'Battle ready. Select a tile to begin.';
+}
+
+function renderTopGameBar(canMove: boolean): string {
+  return `
+    <nav class="game-bar" aria-label="Kingdom Duel cockpit">
+      <div class="game-brand">
+        <strong>Kingdom Duel</strong>
+        <span>${duel.winner ? (duel.winner === 'player' ? 'Victory' : 'Defeat') : canMove ? 'Your move' : enemyThinking ? 'Enemy thinking' : 'Resolving'}</span>
+      </div>
+      <div class="game-actions">
+        <button class="icon-action" data-action="restart" type="button" aria-label="Restart duel" title="Restart duel">↻</button>
+        <button class="icon-action" data-action="toggle-log" type="button" aria-expanded="${logOpen}" aria-label="Open combat log" title="Combat log">Log</button>
+        <button class="icon-action" data-view="moodboard" type="button" aria-label="Open moodboard" title="Moodboard">Style</button>
+      </div>
+    </nav>
+  `;
+}
+
+function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
+  return `
+    <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''}">
+      <span class="portrait-orb" aria-hidden="true"></span>
+      <div class="combatant-body">
+        <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
+        <strong>${actor.name}</strong>
+        ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
+        <div class="mini-stats" aria-label="${actor.name} resources">
+          <b>G ${actor.guard}</b>
+          <b>S ${actor.sun}</b>
+          <b>M ${actor.moon}</b>
+          <b>C ${actor.crown}</b>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): string {
+  return `
+    <section class="combat-strip" aria-label="Combat state">
+      ${renderActorMeters(duel.player, 'hero')}
+      <div class="duel-pulse">
+        <span>${duel.winner ? 'Battle ended' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
+        <strong>${duel.winner ? (duel.winner === 'player' ? 'You win' : 'Shade wins') : duel.current === 'player' ? 'Your move' : 'Enemy move'}</strong>
+        <em>${legalMoves} moves</em>
+        ${intent ? `<p>Intent: ${intent.preview.summary}</p>` : ''}
+      </div>
+      ${renderActorMeters(duel.enemy, 'enemy')}
+    </section>
+  `;
+}
+
+function renderBoardFrame(preview: MovePreview | null, intent: EnemyIntent | null, canMove: boolean, activeSpellName: string | null): string {
+  return `
+    <section class="board-frame ${canMove ? 'is-ready' : ''}" aria-label="Battle board">
+      <div class="board-status">
+        <span>${activeSpellName ? 'Spell targeting' : preview?.valid ? 'Move preview' : canMove ? 'Board ready' : 'Board locked'}</span>
+        <strong>${
+          activeSpellName
+            ? `Choose target for ${activeSpellName}`
+            : preview?.valid
+              ? preview.summary
+              : canMove
+                ? 'Swap adjacent tiles'
+                : enemyThinking
+                  ? 'Shade Knight is choosing'
+                  : 'Resolving cascades'
+        }</strong>
+      </div>
+      ${renderPlayableBoard(preview, intent)}
+    </section>
+  `;
+}
+
+function renderActionDock(preview: MovePreview | null, canMove: boolean): string {
+  return `
+    <section class="action-dock" aria-label="Actions">
+      ${renderPreviewPanel(preview)}
+      ${renderSpellRow(canMove)}
+    </section>
+  `;
+}
+
+function renderLatestEvent(): string {
+  return `
+    <section class="latest-event" aria-label="Latest combat event">
+      <span>${latestEvent()}</span>
+      <button data-action="toggle-log" type="button" aria-expanded="${logOpen}">Full log</button>
+    </section>
+  `;
+}
+
+function renderLogSheet(): string {
+  if (!logOpen) return '';
+  return `
+    <aside class="log-sheet" role="dialog" aria-modal="false" aria-label="Full combat log">
+      <div class="log-sheet-head">
+        <strong>Combat log</strong>
+        <button class="icon-action" data-action="toggle-log" type="button" aria-label="Close combat log">Close</button>
+      </div>
+      <ol class="combat-log">
+        ${duel.log.map((entry) => `<li>${entry}</li>`).join('')}
+      </ol>
+    </aside>
+  `;
+}
+
 function renderPlayable(): string {
   const canMove = duel.current === 'player' && !duel.winner && !enemyThinking;
   const legalMoves = findLegalMoves(duel.board).length;
@@ -301,46 +411,13 @@ function renderPlayable(): string {
   const activeSpellName = activeSpell ? DEFAULT_DUEL_RULES.spells[activeSpell].name : null;
   return `
     <main class="aero-shell play-shell">
-      ${renderTopNav()}
-      <section class="play-stage">
-        <div class="play-header">
-          <div>
-            <p class="kicker">Kingdom Duel playable core v0.1</p>
-            <h1>Match Duel</h1>
-          </div>
-          <button class="glass-action" data-action="restart" type="button">Restart seed</button>
-        </div>
-        <div class="play-layout">
-          ${actorPanel(duel.player, 'hero')}
-          <section class="board-zone ${canMove ? 'is-ready' : ''}">
-            <div class="turn-banner">
-              <span>${duel.winner ? `${duel.winner === 'player' ? 'Victory' : 'Defeat'}` : duel.current === 'player' ? 'Your move' : 'Enemy move'}</span>
-              <strong>${
-                duel.winner
-                  ? 'Battle ended'
-                  : activeSpellName
-                    ? `Choose target for ${activeSpellName}`
-                    : preview?.valid
-                      ? preview.summary
-                      : canMove
-                        ? 'Read the board, then swap'
-                        : enemyThinking
-                          ? 'Shade Knight thinking'
-                          : 'Resolving'
-              }</strong>
-              <em>${legalMoves} legal moves</em>
-            </div>
-            ${renderPlayableBoard(preview, intent)}
-          </section>
-          ${actorPanel(duel.enemy, 'enemy')}
-        </div>
-        <section class="play-bottom">
-          ${renderPreviewPanel(preview)}
-          ${renderSpellRow(canMove)}
-          <ol class="combat-log">
-            ${duel.log.map((entry) => `<li>${entry}</li>`).join('')}
-          </ol>
-        </section>
+      <section class="play-stage cockpit-stage">
+        ${renderTopGameBar(canMove)}
+        ${renderCombatStrip(intent, legalMoves)}
+        ${renderBoardFrame(preview, intent, canMove, activeSpellName)}
+        ${renderActionDock(preview, canMove)}
+        ${renderLatestEvent()}
+        ${renderLogSheet()}
       </section>
     </main>
   `;
@@ -627,6 +704,13 @@ app.addEventListener('click', (event) => {
     hoverCell = null;
     activeSpell = null;
     enemyThinking = false;
+    logOpen = false;
+    renderApp();
+    return;
+  }
+
+  if (action === 'toggle-log') {
+    logOpen = !logOpen;
     renderApp();
     return;
   }
