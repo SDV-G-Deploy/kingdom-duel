@@ -152,19 +152,6 @@ function adjacentCellSet(cell: Cell | null): Set<string> {
   return cells;
 }
 
-function legalTargetSet(cell: Cell | null): Set<string> {
-  const cells = new Set<string>();
-  if (!cell) return cells;
-
-  for (const key of adjacentCellSet(cell)) {
-    const [x, y] = key.split(',').map(Number);
-    const next = { x, y };
-    if (previewSwap(duel.board, cell, next).valid) cells.add(key);
-  }
-
-  return cells;
-}
-
 function statBar(label: string, value: number, max: number, tone: string): string {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return `
@@ -246,7 +233,6 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
   const intentCells = intentCellSet(intent);
   const spellTargetCells = spellTargetCellSet();
   const neighborCells = activeSpell ? new Set<string>() : adjacentCellSet(selectedCell);
-  const legalTargets = activeSpell ? new Set<string>() : legalTargetSet(selectedCell);
   return `
     <div class="play-board ${activeSpell ? 'is-targeting' : ''}" aria-label="Playable match-3 board">
       ${duel.board.tiles
@@ -257,7 +243,6 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
             sameCell(selectedCell, cell) ? 'is-selected' : '',
             sameCell(hoverCell, cell) ? 'is-hovered' : '',
             neighborCells.has(key) ? 'is-neighbor' : '',
-            legalTargets.has(key) ? 'is-legal-target' : '',
             sameCell(bumpCell, cell) ? 'is-bumped' : '',
             previewCells.has(key) ? 'is-preview' : '',
             intentCells.has(key) ? 'is-threat' : '',
@@ -869,29 +854,33 @@ app.addEventListener('click', (event) => {
 
 app.addEventListener('pointerdown', (event) => {
   const target = event.target as HTMLElement | null;
-  const cellValue = target?.closest<HTMLElement>('[data-cell]')?.dataset.cell;
-  if (cellValue === undefined || !canUseBoard()) return;
+  const gem = target?.closest<HTMLElement>('[data-cell]');
+  const cellValue = gem?.dataset.cell;
+  if (!gem || cellValue === undefined || !canUseBoard()) return;
 
   event.preventDefault();
+  try {
+    gem.setPointerCapture(event.pointerId);
+  } catch {
+    // Some mobile browsers reject capture during synthetic or interrupted touches.
+  }
   const startCell = cellFromIndex(Number(cellValue));
   dragState = { pointerId: event.pointerId, startCell, startX: event.clientX, startY: event.clientY };
-  selectedCell = startCell;
-  hoverCell = null;
-  bumpCell = null;
-  renderApp();
 });
 
-app.addEventListener('pointermove', (event) => {
+window.addEventListener('pointermove', (event) => {
   if (!dragState || dragState.pointerId !== event.pointerId || !canUseBoard()) return;
   event.preventDefault();
 
   const targetCell = dragTargetCell(dragState.startCell, event.clientX - dragState.startX, event.clientY - dragState.startY);
   if (!targetCell || sameCell(hoverCell, targetCell)) return;
+  selectedCell = dragState.startCell;
   hoverCell = targetCell;
+  bumpCell = null;
   renderApp();
 });
 
-app.addEventListener('pointerup', (event) => {
+window.addEventListener('pointerup', (event) => {
   if (!dragState || dragState.pointerId !== event.pointerId) return;
   event.preventDefault();
   suppressNextCellClick = true;
@@ -911,7 +900,7 @@ app.addEventListener('pointerup', (event) => {
   handleBoardTap(cellValue === undefined ? endedDrag.startCell : cellFromIndex(Number(cellValue)));
 });
 
-app.addEventListener('pointercancel', (event) => {
+window.addEventListener('pointercancel', (event) => {
   if (!dragState || dragState.pointerId !== event.pointerId) return;
   dragState = null;
   hoverCell = null;

@@ -1744,13 +1744,17 @@ button {
 @media (max-width: 680px) {
   .play-shell {
     --shell-pad: 8px;
+    height: auto;
     min-height: 620px;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .cockpit-stage {
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto auto auto auto;
     gap: 7px;
-    min-height: calc(100dvh - (var(--shell-pad) * 2));
+    height: auto;
+    min-height: 0;
   }
 
   .game-bar {
