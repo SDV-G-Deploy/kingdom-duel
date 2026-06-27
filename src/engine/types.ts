@@ -35,6 +35,9 @@ export type ActorTemplate = {
 };
 
 export type ManaTile = 'sun' | 'moon' | 'crown';
+export type SpellId = 'sun_bloom' | 'glass_ward' | 'crown_strike';
+
+export type ManaCost = Partial<Record<ManaTile, number>>;
 
 export type TileEffect =
   | { type: 'damage'; amountPerTile: number }
@@ -53,6 +56,32 @@ export type EnemyProfile = {
   extraTurnScore: number;
 };
 
+export type SpellRule =
+  | {
+      id: 'sun_bloom';
+      name: string;
+      cost: ManaCost;
+      target: 'cell';
+      radius: number;
+      convertTo: TileKind;
+    }
+  | {
+      id: 'glass_ward';
+      name: string;
+      cost: ManaCost;
+      target: 'cell';
+      guard: number;
+      radius: number;
+      fromTile: TileKind;
+      convertTo: TileKind;
+    }
+  | {
+      id: 'crown_strike';
+      name: string;
+      cost: ManaCost;
+      target: 'row';
+    };
+
 export type DuelRules = {
   board: {
     width: number;
@@ -65,6 +94,7 @@ export type DuelRules = {
     maxCascades: number;
   };
   enemy: EnemyProfile;
+  spells: Record<SpellId, SpellRule>;
   openingLog: string[];
 };
 
@@ -82,6 +112,10 @@ export type DuelState = {
 
 export type DuelEvent =
   | { type: 'invalid_swap'; from: Cell; to: Cell }
+  | { type: 'invalid_spell'; spell: SpellId; reason: string }
+  | { type: 'spell_cast'; actor: ActorId; spell: SpellId; target: Cell }
+  | { type: 'tiles_converted'; actor: ActorId; from?: TileKind; to: TileKind; cells: Cell[] }
+  | { type: 'row_cleared'; actor: ActorId; row: number; cells: Cell[] }
   | { type: 'swap'; actor: ActorId; from: Cell; to: Cell }
   | { type: 'match'; actor: ActorId; tile: TileKind; cells: Cell[] }
   | { type: 'damage'; actor: ActorId; target: ActorId; amount: number }

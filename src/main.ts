@@ -1,7 +1,8 @@
 import './styles.css';
 import { findLegalMoves } from './engine/board';
-import { applySwap, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
-import type { Cell, DuelState, EnemyIntent, MovePreview, PreviewEffect, TileKind } from './engine/types';
+import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
+import { DEFAULT_DUEL_RULES } from './engine/rules';
+import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
 
 type GemKind = TileKind;
 
@@ -86,6 +87,7 @@ let view: 'play' | 'moodboard' = new URLSearchParams(window.location.search).get
 let duel: DuelState = createDuel(2007);
 let selectedCell: Cell | null = null;
 let hoverCell: Cell | null = null;
+let activeSpell: SpellId | null = null;
 let enemyThinking = false;
 
 function gemIcon(kind: GemKind): string {
@@ -182,11 +184,29 @@ function intentCellSet(intent: EnemyIntent | null): Set<string> {
   return cells;
 }
 
+function spellTargetCellSet(): Set<string> {
+  const cells = new Set<string>();
+  if (!activeSpell || !hoverCell) return cells;
+  const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
+  if (spell.target === 'row') {
+    for (let x = 0; x < duel.board.width; x++) cells.add(cellKey({ x, y: hoverCell.y }));
+    return cells;
+  }
+
+  for (let y = hoverCell.y - spell.radius; y <= hoverCell.y + spell.radius; y++) {
+    for (let x = hoverCell.x - spell.radius; x <= hoverCell.x + spell.radius; x++) {
+      if (x >= 0 && x < duel.board.width && y >= 0 && y < duel.board.height) cells.add(cellKey({ x, y }));
+    }
+  }
+  return cells;
+}
+
 function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | null): string {
   const previewCells = previewCellSet(preview);
   const intentCells = intentCellSet(intent);
+  const spellTargetCells = spellTargetCellSet();
   return `
-    <div class="play-board" aria-label="Playable match-3 board">
+    <div class="play-board ${activeSpell ? 'is-targeting' : ''}" aria-label="Playable match-3 board">
       ${duel.board.tiles
         .map((kind, index) => {
           const cell = cellFromIndex(index);
@@ -196,6 +216,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
             sameCell(hoverCell, cell) ? 'is-hovered' : '',
             previewCells.has(key) ? 'is-preview' : '',
             intentCells.has(key) ? 'is-threat' : '',
+            spellTargetCells.has(key) ? 'is-spell-target' : '',
           ].filter(Boolean);
           return renderGem(kind, index, classes);
         })
@@ -205,6 +226,17 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
 }
 
 function renderPreviewPanel(preview: MovePreview | null): string {
+  if (activeSpell) {
+    const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
+    return `
+      <div class="decision-panel is-extra">
+        <span>Spell target</span>
+        <strong>${spell.name}</strong>
+        <p>${spell.target === 'row' ? 'Choose any tile in the row to clear and collect it.' : 'Choose a tile on the board to shape the nearby cluster.'}</p>
+      </div>
+    `;
+  }
+
   if (!selectedCell) {
     return `
       <div class="decision-panel is-empty">
@@ -264,8 +296,9 @@ function renderEffectPill(effect: PreviewEffect): string {
 function renderPlayable(): string {
   const canMove = duel.current === 'player' && !duel.winner && !enemyThinking;
   const legalMoves = findLegalMoves(duel.board).length;
-  const preview = canMove ? activePreview() : null;
+  const preview = canMove && !activeSpell ? activePreview() : null;
   const intent = canMove ? getEnemyIntent(duel.board) : null;
+  const activeSpellName = activeSpell ? DEFAULT_DUEL_RULES.spells[activeSpell].name : null;
   return `
     <main class="aero-shell play-shell">
       ${renderTopNav()}
@@ -282,7 +315,19 @@ function renderPlayable(): string {
           <section class="board-zone ${canMove ? 'is-ready' : ''}">
             <div class="turn-banner">
               <span>${duel.winner ? `${duel.winner === 'player' ? 'Victory' : 'Defeat'}` : duel.current === 'player' ? 'Your move' : 'Enemy move'}</span>
-              <strong>${duel.winner ? 'Battle ended' : preview?.valid ? preview.summary : canMove ? 'Read the board, then swap' : enemyThinking ? 'Shade Knight thinking' : 'Resolving'}</strong>
+              <strong>${
+                duel.winner
+                  ? 'Battle ended'
+                  : activeSpellName
+                    ? `Choose target for ${activeSpellName}`
+                    : preview?.valid
+                      ? preview.summary
+                      : canMove
+                        ? 'Read the board, then swap'
+                        : enemyThinking
+                          ? 'Shade Knight thinking'
+                          : 'Resolving'
+              }</strong>
               <em>${legalMoves} legal moves</em>
             </div>
             ${renderPlayableBoard(preview, intent)}
@@ -291,11 +336,7 @@ function renderPlayable(): string {
         </div>
         <section class="play-bottom">
           ${renderPreviewPanel(preview)}
-          <div class="spell-row" aria-label="Spell placeholders">
-            <button class="spell-button spell-1" type="button" disabled><span>6 sun</span><strong>Sun Bloom</strong><em>next milestone</em></button>
-            <button class="spell-button spell-2" type="button" disabled><span>5 moon</span><strong>Glass Ward</strong><em>next milestone</em></button>
-            <button class="spell-button spell-3" type="button" disabled><span>6 crown</span><strong>Crown Strike</strong><em>next milestone</em></button>
-          </div>
+          ${renderSpellRow(canMove)}
           <ol class="combat-log">
             ${duel.log.map((entry) => `<li>${entry}</li>`).join('')}
           </ol>
@@ -303,6 +344,51 @@ function renderPlayable(): string {
       </section>
     </main>
   `;
+}
+
+function renderSpellRow(canMove: boolean): string {
+  const spellIds: SpellId[] = ['sun_bloom', 'glass_ward', 'crown_strike'];
+  return `
+    <div class="spell-row" aria-label="Spells">
+      ${spellIds
+        .map((spellId, index) => {
+          const spell = DEFAULT_DUEL_RULES.spells[spellId];
+          const canCast = canMove && canPayCost(duel.player, spell.cost);
+          return `
+            <button class="spell-button spell-${index + 1} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" ${canCast ? '' : 'disabled'}>
+              <span>${costLabel(spell.cost)}</span>
+              <strong>${spell.name}</strong>
+              <em>${canCast ? spellHint(spellId) : missingCostLabel(spell.cost)}</em>
+            </button>
+          `;
+        })
+        .join('')}
+    </div>
+  `;
+}
+
+function canPayCost(actor: DuelState['player'], cost: ManaCost): boolean {
+  return actor.sun >= (cost.sun ?? 0) && actor.moon >= (cost.moon ?? 0) && actor.crown >= (cost.crown ?? 0);
+}
+
+function costLabel(cost: ManaCost): string {
+  return [
+    cost.sun ? `${cost.sun} sun` : '',
+    cost.moon ? `${cost.moon} moon` : '',
+    cost.crown ? `${cost.crown} crown` : '',
+  ]
+    .filter(Boolean)
+    .join(' / ');
+}
+
+function missingCostLabel(cost: ManaCost): string {
+  return `need ${costLabel(cost)}`;
+}
+
+function spellHint(spellId: SpellId): string {
+  if (spellId === 'sun_bloom') return 'turn a glass cluster into sun';
+  if (spellId === 'glass_ward') return 'guard up, purify nearby shade';
+  return 'clear a row and collect it';
 }
 
 function renderTopNav(): string {
@@ -529,6 +615,7 @@ app.addEventListener('click', (event) => {
     view = nextView;
     selectedCell = null;
     hoverCell = null;
+    activeSpell = null;
     renderApp();
     return;
   }
@@ -538,7 +625,17 @@ app.addEventListener('click', (event) => {
     duel = createDuel(Date.now() % 100000);
     selectedCell = null;
     hoverCell = null;
+    activeSpell = null;
     enemyThinking = false;
+    renderApp();
+    return;
+  }
+
+  const spellValue = target.closest<HTMLElement>('[data-spell]')?.dataset.spell as SpellId | undefined;
+  if (spellValue && view === 'play' && duel.current === 'player' && !duel.winner && !enemyThinking) {
+    activeSpell = activeSpell === spellValue ? null : spellValue;
+    selectedCell = null;
+    hoverCell = null;
     renderApp();
     return;
   }
@@ -547,6 +644,17 @@ app.addEventListener('click', (event) => {
   if (cellValue === undefined || view !== 'play' || duel.current !== 'player' || duel.winner || enemyThinking) return;
 
   const cell = cellFromIndex(Number(cellValue));
+  if (activeSpell) {
+    const result = castSpell(duel, activeSpell, cell);
+    duel = result.state;
+    activeSpell = null;
+    selectedCell = null;
+    hoverCell = null;
+    renderApp();
+    maybeRunEnemy();
+    return;
+  }
+
   if (!selectedCell) {
     selectedCell = cell;
     hoverCell = null;

@@ -348,6 +348,20 @@ button {
     0 14px 26px rgba(143, 16, 104, 0.18);
 }
 
+.play-board.is-targeting .gem {
+  filter: saturate(0.92);
+}
+
+.play-board .gem.is-spell-target {
+  transform: translateY(-2px) scale(1.04);
+  filter: saturate(1.18);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.84),
+    inset 0 -10px 16px rgba(0, 74, 133, 0.10),
+    0 0 0 3px rgba(255, 226, 92, 0.72),
+    0 14px 26px rgba(255, 157, 61, 0.24);
+}
+
 .play-board .gem.is-selected {
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.82),
@@ -482,7 +496,15 @@ button {
 
 .spell-row .spell-button:disabled {
   cursor: not-allowed;
-  opacity: 0.74;
+  opacity: 0.68;
+}
+
+.spell-row .spell-button.is-active {
+  border-color: rgba(255, 226, 92, 0.90);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 3px rgba(255, 226, 92, 0.26),
+    0 14px 30px rgba(13, 96, 151, 0.20);
 }
 
 .combat-log {

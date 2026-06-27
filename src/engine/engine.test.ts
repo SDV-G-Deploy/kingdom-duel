@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
-import { areAdjacent, createBoard, findLegalMoves, findMatches, swapTiles } from './board';
-import { applySwap, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './duel';
+import { areAdjacent, createBoard, findLegalMoves, findMatches, setTile, swapTiles } from './board';
+import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './duel';
 import { DEFAULT_DUEL_RULES } from './rules';
 import type { DuelRules } from './types';
 
@@ -109,6 +109,36 @@ function testEnemyIntentUsesLegalPreview(): void {
   assert.equal(intent?.preview.valid, true);
 }
 
+function testSpellRejectsMissingMana(): void {
+  const state = createDuel(2007);
+  const result = castSpell(state, 'sun_bloom', { x: 3, y: 3 });
+  assert.equal(result.events[0]?.type, 'invalid_spell');
+  assert.equal(result.state.current, 'player');
+}
+
+function testSunBloomCastsAndConvertsTiles(): void {
+  const state = createDuel(2007);
+  const result = castSpell({ ...state, player: { ...state.player, sun: 6 } }, 'sun_bloom', { x: 3, y: 3 });
+  assert.ok(result.events.some((event) => event.type === 'spell_cast'));
+  assert.ok(result.events.some((event) => event.type === 'tiles_converted'));
+}
+
+function testGlassWardAddsGuardAndConvertsShade(): void {
+  const state = createDuel(2007);
+  const board = { ...state.board, tiles: [...state.board.tiles] };
+  setTile(board, { x: 3, y: 3 }, 'shade');
+  const result = castSpell({ ...state, board, player: { ...state.player, moon: 5 } }, 'glass_ward', { x: 3, y: 3 });
+  assert.ok(result.events.some((event) => event.type === 'guard'));
+  assert.ok(result.events.some((event) => event.type === 'tiles_converted'));
+}
+
+function testCrownStrikeClearsTargetRow(): void {
+  const state = createDuel(2007);
+  const result = castSpell({ ...state, player: { ...state.player, crown: 6 } }, 'crown_strike', { x: 2, y: 4 });
+  assert.ok(result.events.some((event) => event.type === 'spell_cast'));
+  assert.ok(result.events.some((event) => event.type === 'row_cleared'));
+}
+
 testBoardGeneration();
 testAdjacency();
 testInvalidSwapDoesNotChangeTurn();
@@ -120,5 +150,9 @@ testRulesCanConfigureActorsAndBoard();
 testPreviewRejectsBadSwap();
 testPreviewReportsLegalMoveEffects();
 testEnemyIntentUsesLegalPreview();
+testSpellRejectsMissingMana();
+testSunBloomCastsAndConvertsTiles();
+testGlassWardAddsGuardAndConvertsShade();
+testCrownStrikeClearsTargetRow();
 
 console.log('engine tests passed');
