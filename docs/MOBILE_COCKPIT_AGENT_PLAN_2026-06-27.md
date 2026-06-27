@@ -22,6 +22,17 @@ Current public build:
 
 - https://sdv-g-deploy.github.io/kingdom-duel/
 
+## Implementation Status
+
+Updated after Samsung S25 feedback on 2026-06-27:
+
+- Task 01 landed as the mobile cockpit shell.
+- Task 02 landed with drag/swipe input and tap-tap fallback.
+- Follow-up fit work added a stricter 390x700 QA target because real mobile browser chrome leaves less usable height than a clean 390x844 viewport.
+- Tap guidance now highlights all adjacent directions, not only match-producing targets, because highlighting only "best" targets looked like a movement restriction.
+- Enemy action feedback landed before Task 03 because the turn sequence was unclear without visible enemy cues.
+- Task 03 remains the next planned feature task: asset slots and fallbacks.
+
 Core constraints:
 
 - keep the standalone `kingdom-duel` repo clean;

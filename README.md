@@ -21,10 +21,12 @@ Core ingredients:
 The current app contains:
 
 - a playable `Match Duel` core;
+- a mobile-first duel cockpit with compact combat strip, board frame, action dock, and latest-event line;
+- mobile touch controls: drag/swipe gems as the primary input, with tap-tap as fallback;
 - move preview for selected swaps;
-- visible enemy intent on the shared board;
+- visible enemy turn feedback, including enemy action state, board highlights, and latest-event summary;
 - first playable board-changing spells;
-- a `Moodboard` view for the AeroCandy 2007 visual direction;
+- a `Style` view for the AeroCandy 2007 visual direction;
 - deterministic engine modules under `src/engine`;
 - gameplay design notes under `docs/`.
 

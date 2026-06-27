@@ -165,27 +165,6 @@ function statBar(label: string, value: number, max: number, tone: string): strin
   `;
 }
 
-function actorPanel(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
-  const intent = side === 'enemy' && duel.current === 'player' && !duel.winner ? getEnemyIntent(duel.board) : null;
-  return `
-    <article class="play-actor play-${side} ${duel.current === actor.id ? 'is-active' : ''}">
-      <span class="avatar-orb"></span>
-      <div>
-        <span class="actor-kicker">${actor.id === 'player' ? 'Player' : 'Enemy'}</span>
-        <strong>${actor.name}</strong>
-        ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
-        <div class="combat-stats">
-          <span>Guard <b>${actor.guard}</b></span>
-          <span>Sun <b>${actor.sun}</b></span>
-          <span>Moon <b>${actor.moon}</b></span>
-          <span>Crown <b>${actor.crown}</b></span>
-        </div>
-        ${intent ? renderEnemyIntent(intent) : ''}
-      </div>
-    </article>
-  `;
-}
-
 function activePreview(): MovePreview | null {
   if (!selectedCell || !hoverCell || sameCell(selectedCell, hoverCell)) return null;
   return previewSwap(duel.board, selectedCell, hoverCell);
@@ -309,16 +288,6 @@ function renderPreviewPanel(preview: MovePreview | null): string {
         ${preview.effects.map(renderEffectPill).join('')}
         ${preview.extraTurn ? '<em class="effect-pill tone-extra">extra turn</em>' : ''}
       </div>
-    </div>
-  `;
-}
-
-function renderEnemyIntent(intent: EnemyIntent): string {
-  return `
-    <div class="intent-card">
-      <span>Intent</span>
-      <strong>${intent.preview.summary}</strong>
-      <p>Best visible enemy move if the board stays open.</p>
     </div>
   `;
 }

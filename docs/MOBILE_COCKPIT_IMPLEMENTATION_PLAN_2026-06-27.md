@@ -7,6 +7,15 @@ Based on:
 - `docs/MOBILE_FIRST_UX_UI_RESEARCH_2026-06-27.md`
 - current public Pages build: https://sdv-g-deploy.github.io/kingdom-duel/
 
+## Implementation Corrections
+
+Updated after the first mobile implementation and Samsung S25 testing:
+
+- Keep 390x844 as a reference viewport, but include 390x700 QA because browser chrome can reduce usable height.
+- The play route should allow vertical page movement if the browser viewport is cramped; the board itself keeps `touch-action: none`.
+- First tap should show all adjacent movement directions. Do not style only match-producing neighbors as the only apparent legal targets.
+- Enemy action feedback is required before the asset pass: the player must see when the enemy turn happens and which board cells were involved.
+
 ## Position
 
 I agree with the direction: the next work should be UX/UI structure, not more gameplay rules.
