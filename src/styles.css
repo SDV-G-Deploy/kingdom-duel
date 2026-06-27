@@ -243,11 +243,23 @@ button {
     0 16px 34px rgba(143, 16, 104, 0.18);
 }
 
-.portrait-orb {
+.portrait-slot {
+  position: relative;
   display: block;
   width: 62px;
   aspect-ratio: 1;
+  overflow: hidden;
   border-radius: 34% 66% 48% 52% / 40% 38% 62% 60%;
+  background-image: var(--asset-url, none);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.portrait-fallback {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.98) 0 12%, transparent 13%),
     linear-gradient(145deg, #f8ffff, #25d7f2 44%, #9b83ff);
@@ -256,7 +268,11 @@ button {
     0 12px 22px rgba(36, 124, 255, 0.20);
 }
 
-.combatant-enemy .portrait-orb {
+.portrait-slot.has-asset .portrait-fallback {
+  opacity: 0.28;
+}
+
+.portrait-enemy .portrait-fallback {
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.84) 0 10%, transparent 11%),
     linear-gradient(145deg, #f8ffff, #9b83ff 42%, #ff74c8);
@@ -409,7 +425,7 @@ button {
 
 .board-frame .play-board {
   align-self: center;
-  width: min(100%, 620px);
+  width: min(100%, 620px, calc(100dvh - 500px));
   max-height: 100%;
 }
 
@@ -1174,23 +1190,8 @@ button {
   font-weight: 900;
 }
 
-.avatar-orb {
-  display: block;
+.fighter .portrait-slot {
   width: min(120px, 70%);
-  aspect-ratio: 1;
-  border-radius: 32% 68% 48% 52% / 40% 38% 62% 60%;
-  background:
-    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.98) 0 12%, transparent 13%),
-    linear-gradient(145deg, #f8ffff, #25d7f2 44%, #9b83ff);
-  box-shadow:
-    inset 0 2px 10px rgba(255, 255, 255, 0.86),
-    0 18px 34px rgba(36, 124, 255, 0.24);
-}
-
-.fighter-enemy .avatar-orb {
-  background:
-    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.84) 0 10%, transparent 11%),
-    linear-gradient(145deg, #f8ffff, #9b83ff 42%, #ff74c8);
 }
 
 .mana-row {
@@ -1276,6 +1277,36 @@ button {
   pointer-events: none;
 }
 
+.gem-sprite-slot {
+  position: absolute;
+  inset: 6%;
+  z-index: 2;
+  display: block;
+  background-image: var(--asset-url, none);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  pointer-events: none;
+}
+
+.gem:not(.has-sprite) .gem-sprite-slot {
+  display: none;
+}
+
+.gem.has-sprite::before,
+.gem.has-sprite .gem-fallback {
+  opacity: 0;
+}
+
+.gem-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
 .gem-shine {
   position: absolute;
   top: 9%;
@@ -1290,7 +1321,6 @@ button {
 
 .gem-symbol {
   position: relative;
-  z-index: 1;
   display: block;
   width: 42%;
   height: 42%;
@@ -1505,7 +1535,7 @@ button {
     min-height: 0;
   }
 
-  .avatar-orb {
+  .fighter .portrait-slot {
     width: 82px;
   }
 }
@@ -1636,7 +1666,7 @@ button {
     border-radius: 15px;
   }
 
-  .portrait-orb {
+  .portrait-slot {
     width: 42px;
   }
 

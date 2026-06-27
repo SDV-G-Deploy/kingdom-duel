@@ -26,6 +26,7 @@ The current app contains:
 - move preview for selected swaps;
 - visible enemy turn feedback, including enemy action state, board highlights, and latest-event summary;
 - first playable board-changing spells;
+- stable portrait and gem asset slots with CSS fallbacks;
 - a `Style` view for the AeroCandy 2007 visual direction;
 - deterministic engine modules under `src/engine`;
 - gameplay design notes under `docs/`.

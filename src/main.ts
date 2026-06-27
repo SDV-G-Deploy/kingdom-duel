@@ -5,6 +5,11 @@ import { DEFAULT_DUEL_RULES } from './engine/rules';
 import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
 
 type GemKind = TileKind;
+type CharacterSlot = 'hero' | 'enemy';
+type AssetSlot = {
+  path: string;
+  src: string | null;
+};
 
 const boardPattern: GemKind[] = [
   'sun',
@@ -74,6 +79,18 @@ const boardPattern: GemKind[] = [
 ];
 
 const gemKinds: GemKind[] = ['sword', 'shield', 'sun', 'moon', 'crown', 'shade'];
+const characterAssetSlots: Record<CharacterSlot, AssetSlot> = {
+  hero: { path: 'assets/characters/aurora-knight.webp', src: null },
+  enemy: { path: 'assets/characters/shade-knight.webp', src: null },
+};
+const gemAssetSlots: Record<GemKind, AssetSlot> = {
+  sword: { path: 'assets/gems/sword.webp', src: null },
+  shield: { path: 'assets/gems/shield.webp', src: null },
+  sun: { path: 'assets/gems/sun.webp', src: null },
+  moon: { path: 'assets/gems/moon.webp', src: null },
+  crown: { path: 'assets/gems/crown.webp', src: null },
+  shade: { path: 'assets/gems/shade.webp', src: null },
+};
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 
@@ -111,15 +128,32 @@ function gemLabel(kind: GemKind): string {
   return 'Shade';
 }
 
+function assetStyle(src: string | null): string {
+  return src ? ` style="--asset-url: url('${src}')"` : '';
+}
+
+function renderPortraitSlot(slot: CharacterSlot): string {
+  const asset = characterAssetSlots[slot];
+  return `
+    <span class="portrait-slot portrait-${slot} ${asset.src ? 'has-asset' : ''}" aria-hidden="true" data-asset-path="${asset.path}"${assetStyle(asset.src)}>
+      <span class="portrait-fallback"></span>
+    </span>
+  `;
+}
+
 function cellKey(cell: Cell): string {
   return `${cell.x},${cell.y}`;
 }
 
 function renderGem(kind: GemKind, index?: number, classes: string[] = []): string {
+  const asset = gemAssetSlots[kind];
   return `
-    <button class="gem gem-${kind} ${classes.join(' ')}" type="button" aria-label="${gemLabel(kind)} tile"${index === undefined ? '' : ` data-cell="${index}"`}>
-      <span class="gem-shine"></span>
-      <span class="gem-symbol gem-symbol-${kind}" aria-hidden="true">${gemIcon(kind)}</span>
+    <button class="gem gem-${kind} ${asset.src ? 'has-sprite' : ''} ${classes.join(' ')}" type="button" aria-label="${gemLabel(kind)} tile"${index === undefined ? '' : ` data-cell="${index}"`}>
+      <span class="gem-sprite-slot" aria-hidden="true" data-asset-path="${asset.path}"${assetStyle(asset.src)}></span>
+      <span class="gem-fallback" aria-hidden="true">
+        <span class="gem-shine"></span>
+        <span class="gem-symbol gem-symbol-${kind}">${gemIcon(kind)}</span>
+      </span>
     </button>
   `;
 }
@@ -320,7 +354,7 @@ function renderTopGameBar(canMove: boolean): string {
 function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
   return `
     <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''}">
-      <span class="portrait-orb" aria-hidden="true"></span>
+      ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
       <div class="combatant-body">
         <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
         <strong>${actor.name}</strong>
@@ -494,7 +528,7 @@ function renderBoard(): string {
       </div>
       <div class="duel-frame">
         <article class="fighter fighter-hero">
-          <span class="avatar-orb"></span>
+          ${renderPortraitSlot('hero')}
           <strong>Aurora Knight</strong>
           <em>HP 42 / Guard 8</em>
           <div class="mana-row">
@@ -507,7 +541,7 @@ function renderBoard(): string {
         ${boardPattern.map((kind, index) => renderGem(kind, index)).join('')}
         </div>
         <article class="fighter fighter-enemy">
-          <span class="avatar-orb"></span>
+          ${renderPortraitSlot('enemy')}
           <strong>Shade Knight</strong>
           <em>HP 38 / Intent: Shade</em>
           <div class="intent-pill">wants shade + swords</div>

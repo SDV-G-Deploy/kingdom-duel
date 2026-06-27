@@ -31,7 +31,8 @@ Updated after Samsung S25 feedback on 2026-06-27:
 - Follow-up fit work added a stricter 390x700 QA target because real mobile browser chrome leaves less usable height than a clean 390x844 viewport.
 - Tap guidance now highlights all adjacent directions, not only match-producing targets, because highlighting only "best" targets looked like a movement restriction.
 - Enemy action feedback landed before Task 03 because the turn sequence was unclear without visible enemy cues.
-- Task 03 remains the next planned feature task: asset slots and fallbacks.
+- Task 03 landed with stable portrait/gem slots, path conventions, and CSS fallbacks.
+- Task 04 is the next planned feature task: first-pass Aurora Knight and Shade Knight portraits.
 
 Core constraints:
 
