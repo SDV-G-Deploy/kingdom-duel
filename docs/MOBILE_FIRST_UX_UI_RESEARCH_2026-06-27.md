@@ -63,6 +63,10 @@ Sources checked:
 - Gems of War mobile store framing: heroes and match-3 combat as one loop: https://play.google.com/store/apps/details?id=air.com.and.games505.gemsofwar
 - MARVEL Puzzle Quest mobile framing: large character roster plus match-3 battle identity: https://apps.apple.com/us/app/marvel-puzzle-quest-hero-rpg/id618349779
 - Magic: Puzzle Quest mobile framing: spells, creatures, and match-3 battles: https://play.google.com/store/apps/details?id=com.d3p.olympic
+- Candy Crush official control description: tap and drag in the desired direction to swap: https://candycrush.zendesk.com/hc/en-us/articles/360000750278-Controls-how-to-switch-and-match-candies
+- MDN `touch-action`: game surfaces can disable browser gestures locally when implementing custom dragging: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/touch-action
+- Match-3 state-machine discussion: click/tap two adjacent tiles, evaluate, invalid swaps snap back: https://www.reddit.com/r/gamedesign/comments/18wq99z/match3_game_design/
+- Match-3 rule summary with both tap-adjacent and swipe-one-cell controls: https://quietpuzzle.com/en/match3
 
 ## Recommended Mobile Information Architecture
 
@@ -113,6 +117,106 @@ Use tabs/sheets for information that is useful but not required every second:
 - `Style` or `Moodboard` - keep as a dev/reference view, not the default play route.
 
 The player should not need to scroll through all panels during normal play.
+
+## Mobile Touch Control Model
+
+The current mobile interaction is ambiguous:
+
+- first tap selects a gem;
+- the gem highlights;
+- the page re-renders;
+- the user does not see clearly which second taps are valid;
+- non-adjacent taps feel like the game is doing something mysterious;
+- because the page is tall, board touches compete psychologically with scroll.
+
+This should become an explicit mobile board interaction model.
+
+### Recommended Control Priority
+
+Primary control:
+
+1. **Swipe / drag one gem toward an adjacent cell.**
+   - This is the mobile match-3 default.
+   - It feels direct and avoids "what now?" after first tap.
+   - A short drag threshold should choose direction.
+
+Fallback control:
+
+2. **Tap gem, then tap adjacent target.**
+   - Useful for accessibility, precision, and desktop parity.
+   - After first tap, the UI must show eligible adjacent targets.
+
+Do not rely only on tap-select. It is too quiet for a phone unless the valid target hints are obvious.
+
+### Tap-Tap Rules
+
+When the user taps a gem:
+
+- selected gem gets a strong ring;
+- legal adjacent swap targets get a bright "can move here" hint;
+- adjacent but invalid swaps get a softer "would snap back" hint only if needed;
+- non-adjacent gems should not look equally clickable.
+
+Second tap behavior:
+
+- if second tap is a legal adjacent swap: perform swap;
+- if adjacent but invalid: animate swap and snap back, then keep or clear selection;
+- if non-adjacent: move selection to the newly tapped gem, do not log an error;
+- if tapping selected gem again: clear selection.
+
+The player should never need to read a log to know whether a move was valid.
+
+### Swipe / Drag Rules
+
+Pointer flow:
+
+- `pointerdown` on gem stores origin cell and pointer position;
+- movement beyond threshold chooses direction;
+- direction maps to one adjacent cell;
+- release attempts that swap;
+- if the move is invalid, show a short bump/snap-back animation;
+- if valid, lock input while resolving.
+
+Threshold:
+
+- 18-24px on mobile;
+- ignore tiny accidental moves;
+- cancel drag if pointer leaves board too far.
+
+Browser behavior:
+
+- board gets `touch-action: none` only inside the playable board surface;
+- page/sheets outside the board retain normal scroll;
+- during `resolving` and `enemy-turn`, board input is disabled.
+
+### Preview Behavior On Touch
+
+Desktop hover preview does not exist on touch. Mobile needs a different preview contract:
+
+- on first tap: show best preview for the selected gem if only one legal adjacent move exists;
+- if multiple adjacent legal moves exist: show small directional hints on each legal neighbor;
+- on pressing/dragging toward a neighbor: preview that swap in the action dock before release when possible;
+- after selection, the action dock text should change from generic "Select a tile" to "Tap a highlighted neighbor or swipe".
+
+### Animation / Re-render Feel
+
+The current "screen updates every tap" feeling likely comes from full `renderApp()` replacement after selection/hover state changes.
+
+Fix:
+
+- keep state-driven rendering, but reduce perceived redraw:
+  - no layout position changes on selection;
+  - stable board dimensions;
+  - selection rings via classes only;
+  - avoid text block changes that resize the board area;
+  - animate selected/target rings, not the whole card.
+
+Acceptance:
+
+- first tap should not move the page or resize any card;
+- second tap should produce swap/snap feedback;
+- invalid move should feel like a board response, not a system error;
+- no vertical page scroll starts when swiping inside the board.
 
 ## Layout Proposal
 
@@ -345,6 +449,28 @@ Acceptance:
 
 - Latest event is visible without forcing scroll; full log remains accessible.
 
+### P1 - Touch Move Intent Is Ambiguous
+
+Evidence:
+
+- On mobile, tapping a gem highlights it but does not clearly answer "what can I do now?"
+
+Impact:
+
+- The user feels like the UI has selected something but has not entered a known game action.
+
+Fix:
+
+- Add swipe-to-swap primary control and tap-adjacent fallback.
+- Highlight legal adjacent targets immediately after selection.
+- Add snap-back feedback for invalid adjacent swaps.
+
+Acceptance:
+
+- On a phone, the user can make a valid swap with one directional swipe.
+- With tap-tap, the second tap target is visually obvious.
+- Non-adjacent taps change selection rather than creating confusing invalid feedback.
+
 ## Next Implementation Pass
 
 Recommended milestone: `Mobile Duel Cockpit + Art Slots`.
@@ -352,12 +478,13 @@ Recommended milestone: `Mobile Duel Cockpit + Art Slots`.
 Do in this order:
 
 1. Convert play route to mobile-first cockpit layout.
-2. Add `Duel / Hero / Enemy / Log` or sheet-based secondary panels.
-3. Replace actor cards with compact combat strip.
-4. Add stable portrait slots with temporary local generated images or refined placeholders.
-5. Add real gem asset slots and CSS fallback.
-6. Keep desktop working, but let mobile structure drive the component model.
-7. Capture and compare:
+2. Replace current tap-only ambiguity with swipe-to-swap plus tap-adjacent fallback.
+3. Add `Duel / Hero / Enemy / Log` or sheet-based secondary panels.
+4. Replace actor cards with compact combat strip.
+5. Add stable portrait slots with temporary local generated images or refined placeholders.
+6. Add real gem asset slots and CSS fallback.
+7. Keep desktop working, but let mobile structure drive the component model.
+8. Capture and compare:
    - 390x844 mobile,
    - 390x1200 mobile full-page,
    - 1440 desktop.
