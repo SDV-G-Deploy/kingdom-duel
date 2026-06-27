@@ -234,6 +234,15 @@ button {
     0 0 0 2px rgba(255, 226, 92, 0.20);
 }
 
+.combatant-enemy.is-cue {
+  animation: enemy-card-pulse 760ms ease both;
+  border-color: rgba(255, 116, 200, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 0 0 3px rgba(255, 116, 200, 0.20),
+    0 16px 34px rgba(143, 16, 104, 0.18);
+}
+
 .portrait-orb {
   display: block;
   width: 62px;
@@ -341,6 +350,14 @@ button {
   color: #04304a;
   font-size: 0.9rem;
   line-height: 1;
+}
+
+.combat-strip.has-enemy-cue .duel-pulse {
+  border-color: rgba(255, 116, 200, 0.60);
+  background:
+    radial-gradient(circle at 76% 14%, rgba(255, 255, 255, 0.90), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 116, 200, 0.20)),
+    rgba(255, 255, 255, 0.28);
 }
 
 .duel-pulse em,
@@ -793,6 +810,39 @@ button {
     inset 0 -10px 16px rgba(0, 74, 133, 0.10),
     0 0 0 3px rgba(255, 116, 200, 0.82),
     0 14px 26px rgba(143, 16, 104, 0.22);
+}
+
+.play-board .gem.is-enemy-action {
+  animation: enemy-tile-flash 860ms ease both;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -10px 16px rgba(0, 74, 133, 0.10),
+    0 0 0 3px rgba(255, 116, 200, 0.80),
+    0 0 26px rgba(255, 116, 200, 0.46);
+}
+
+@keyframes enemy-card-pulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  42% {
+    transform: translateY(-2px) scale(1.015);
+  }
+}
+
+@keyframes enemy-tile-flash {
+  0%,
+  100% {
+    filter: saturate(1);
+    transform: translateY(0) scale(1);
+  }
+
+  48% {
+    filter: saturate(1.24);
+    transform: translateY(-2px) scale(1.05);
+  }
 }
 
 @keyframes invalid-bump {

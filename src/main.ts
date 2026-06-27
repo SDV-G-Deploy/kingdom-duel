@@ -94,6 +94,8 @@ let bumpCell: Cell | null = null;
 let dragState: { pointerId: number; startCell: Cell; startX: number; startY: number } | null = null;
 let suppressNextCellClick = false;
 let bumpTimer: number | null = null;
+let enemyCue: { cells: Cell[]; summary: string } | null = null;
+let enemyCueTimer: number | null = null;
 
 function gemIcon(kind: GemKind): string {
   void kind;
@@ -233,6 +235,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
   const intentCells = intentCellSet(intent);
   const spellTargetCells = spellTargetCellSet();
   const neighborCells = activeSpell ? new Set<string>() : adjacentCellSet(selectedCell);
+  const enemyCueCells = new Set(enemyCue?.cells.map(cellKey) ?? []);
   return `
     <div class="play-board ${activeSpell ? 'is-targeting' : ''}" aria-label="Playable match-3 board">
       ${duel.board.tiles
@@ -244,6 +247,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
             sameCell(hoverCell, cell) ? 'is-hovered' : '',
             neighborCells.has(key) ? 'is-neighbor' : '',
             sameCell(bumpCell, cell) ? 'is-bumped' : '',
+            enemyCueCells.has(key) ? 'is-enemy-action' : '',
             previewCells.has(key) ? 'is-preview' : '',
             intentCells.has(key) ? 'is-threat' : '',
             spellTargetCells.has(key) ? 'is-spell-target' : '',
@@ -324,6 +328,7 @@ function renderEffectPill(effect: PreviewEffect): string {
 }
 
 function latestEvent(): string {
+  if (enemyCue) return `Shade Knight moved: ${enemyCue.summary}.`;
   return duel.log[0] ?? 'Battle ready. Select a tile to begin.';
 }
 
@@ -332,7 +337,7 @@ function renderTopGameBar(canMove: boolean): string {
     <nav class="game-bar" aria-label="Kingdom Duel cockpit">
       <div class="game-brand">
         <strong>Kingdom Duel</strong>
-        <span>${duel.winner ? (duel.winner === 'player' ? 'Victory' : 'Defeat') : canMove ? 'Your move' : enemyThinking ? 'Enemy thinking' : 'Resolving'}</span>
+        <span>${duel.winner ? (duel.winner === 'player' ? 'Victory' : 'Defeat') : enemyCue ? 'Enemy moved' : canMove ? 'Your move' : enemyThinking ? 'Enemy thinking' : 'Resolving'}</span>
       </div>
       <div class="game-actions">
         <button class="icon-action" data-action="restart" type="button" aria-label="Restart duel" title="Restart duel">↻</button>
@@ -345,7 +350,7 @@ function renderTopGameBar(canMove: boolean): string {
 
 function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
   return `
-    <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''}">
+    <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''}">
       <span class="portrait-orb" aria-hidden="true"></span>
       <div class="combatant-body">
         <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
@@ -364,11 +369,11 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
 
 function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): string {
   return `
-    <section class="combat-strip" aria-label="Combat state">
+    <section class="combat-strip ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
-        <span>${duel.winner ? 'Battle ended' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
-        <strong>${duel.winner ? (duel.winner === 'player' ? 'You win' : 'Shade wins') : duel.current === 'player' ? 'Your move' : 'Enemy move'}</strong>
+        <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Enemy action' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
+        <strong>${duel.winner ? (duel.winner === 'player' ? 'You win' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Your move' : 'Enemy move'}</strong>
         <em>${legalMoves} moves</em>
         ${intent ? `<p>Intent: ${intent.preview.summary}</p>` : ''}
       </div>
@@ -379,11 +384,13 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
 
 function renderBoardFrame(preview: MovePreview | null, intent: EnemyIntent | null, canMove: boolean, activeSpellName: string | null): string {
   return `
-    <section class="board-frame ${canMove ? 'is-ready' : ''}" aria-label="Battle board">
+    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Battle board">
       <div class="board-status">
-        <span>${activeSpellName ? 'Spell targeting' : preview?.valid ? 'Move preview' : canMove ? 'Board ready' : 'Board locked'}</span>
+        <span>${enemyCue ? 'Enemy moved' : activeSpellName ? 'Spell targeting' : preview?.valid ? 'Move preview' : canMove ? 'Board ready' : 'Board locked'}</span>
         <strong>${
-          activeSpellName
+          enemyCue
+            ? `Shade Knight: ${enemyCue.summary}`
+            : activeSpellName
             ? `Choose target for ${activeSpellName}`
             : preview?.valid
               ? preview.summary
@@ -702,14 +709,31 @@ function renderApp(): void {
 function maybeRunEnemy(): void {
   if (duel.current !== 'enemy' || duel.winner || enemyThinking) return;
   enemyThinking = true;
+  enemyCue = null;
   renderApp();
   window.setTimeout(() => {
+    const intent = getEnemyIntent(duel.board);
     const result = runEnemyTurn(duel);
     duel = result.state;
     enemyThinking = false;
+    enemyCue = intent ? { cells: [intent.from, intent.to], summary: intent.preview.summary } : { cells: [], summary: 'board shifts' };
     renderApp();
+    if (enemyCueTimer !== null) window.clearTimeout(enemyCueTimer);
+    enemyCueTimer = window.setTimeout(() => {
+      enemyCue = null;
+      enemyCueTimer = null;
+      renderApp();
+    }, 900);
     if (duel.current === 'enemy' && !duel.winner) maybeRunEnemy();
   }, 520);
+}
+
+function clearEnemyCue(): void {
+  enemyCue = null;
+  if (enemyCueTimer !== null) {
+    window.clearTimeout(enemyCueTimer);
+    enemyCueTimer = null;
+  }
 }
 
 function clearBumpLater(): void {
@@ -730,6 +754,7 @@ function bumpInvalidTarget(target: Cell): void {
 }
 
 function commitSwap(from: Cell, to: Cell): void {
+  clearEnemyCue();
   if (!areAdjacent(from, to)) {
     selectedCell = to;
     hoverCell = null;
@@ -755,6 +780,7 @@ function commitSwap(from: Cell, to: Cell): void {
 
 function handleBoardTap(cell: Cell): void {
   if (!canUseBoard()) return;
+  clearEnemyCue();
 
   if (activeSpell) {
     const result = castSpell(duel, activeSpell, cell);
@@ -822,6 +848,7 @@ app.addEventListener('click', (event) => {
     activeSpell = null;
     enemyThinking = false;
     logOpen = false;
+    clearEnemyCue();
     renderApp();
     return;
   }
@@ -834,6 +861,7 @@ app.addEventListener('click', (event) => {
 
   const spellValue = target.closest<HTMLElement>('[data-spell]')?.dataset.spell as SpellId | undefined;
   if (spellValue && view === 'play' && duel.current === 'player' && !duel.winner && !enemyThinking) {
+    clearEnemyCue();
     activeSpell = activeSpell === spellValue ? null : spellValue;
     selectedCell = null;
     hoverCell = null;
