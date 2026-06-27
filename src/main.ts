@@ -1,5 +1,5 @@
 import './styles.css';
-import { findLegalMoves } from './engine/board';
+import { areAdjacent, findLegalMoves } from './engine/board';
 import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
 import { DEFAULT_DUEL_RULES } from './engine/rules';
 import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
@@ -90,6 +90,10 @@ let hoverCell: Cell | null = null;
 let activeSpell: SpellId | null = null;
 let enemyThinking = false;
 let logOpen = false;
+let bumpCell: Cell | null = null;
+let dragState: { pointerId: number; startCell: Cell; startX: number; startY: number } | null = null;
+let suppressNextCellClick = false;
+let bumpTimer: number | null = null;
 
 function gemIcon(kind: GemKind): string {
   void kind;
@@ -124,6 +128,41 @@ function cellFromIndex(index: number): Cell {
 
 function sameCell(a: Cell | null, b: Cell): boolean {
   return !!a && a.x === b.x && a.y === b.y;
+}
+
+function canUseBoard(): boolean {
+  return view === 'play' && duel.current === 'player' && !duel.winner && !enemyThinking;
+}
+
+function adjacentCellSet(cell: Cell | null): Set<string> {
+  const cells = new Set<string>();
+  if (!cell) return cells;
+
+  for (const next of [
+    { x: cell.x + 1, y: cell.y },
+    { x: cell.x - 1, y: cell.y },
+    { x: cell.x, y: cell.y + 1 },
+    { x: cell.x, y: cell.y - 1 },
+  ]) {
+    if (next.x >= 0 && next.x < duel.board.width && next.y >= 0 && next.y < duel.board.height) {
+      cells.add(cellKey(next));
+    }
+  }
+
+  return cells;
+}
+
+function legalTargetSet(cell: Cell | null): Set<string> {
+  const cells = new Set<string>();
+  if (!cell) return cells;
+
+  for (const key of adjacentCellSet(cell)) {
+    const [x, y] = key.split(',').map(Number);
+    const next = { x, y };
+    if (previewSwap(duel.board, cell, next).valid) cells.add(key);
+  }
+
+  return cells;
 }
 
 function statBar(label: string, value: number, max: number, tone: string): string {
@@ -206,6 +245,8 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
   const previewCells = previewCellSet(preview);
   const intentCells = intentCellSet(intent);
   const spellTargetCells = spellTargetCellSet();
+  const neighborCells = activeSpell ? new Set<string>() : adjacentCellSet(selectedCell);
+  const legalTargets = activeSpell ? new Set<string>() : legalTargetSet(selectedCell);
   return `
     <div class="play-board ${activeSpell ? 'is-targeting' : ''}" aria-label="Playable match-3 board">
       ${duel.board.tiles
@@ -215,6 +256,9 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
           const classes = [
             sameCell(selectedCell, cell) ? 'is-selected' : '',
             sameCell(hoverCell, cell) ? 'is-hovered' : '',
+            neighborCells.has(key) ? 'is-neighbor' : '',
+            legalTargets.has(key) ? 'is-legal-target' : '',
+            sameCell(bumpCell, cell) ? 'is-bumped' : '',
             previewCells.has(key) ? 'is-preview' : '',
             intentCells.has(key) ? 'is-threat' : '',
             spellTargetCells.has(key) ? 'is-spell-target' : '',
@@ -260,10 +304,10 @@ function renderPreviewPanel(preview: MovePreview | null): string {
 
   if (!preview.valid) {
     return `
-      <div class="decision-panel is-risk">
+      <div class="decision-panel is-empty">
         <span>Decision preview</span>
-        <strong>Bad swap</strong>
-        <p>${preview.reason}</p>
+        <strong>Choose another</strong>
+        <p>Try a different adjacent tile to make a match.</p>
       </div>
     `;
   }
@@ -683,6 +727,94 @@ function maybeRunEnemy(): void {
   }, 520);
 }
 
+function clearBumpLater(): void {
+  if (bumpTimer !== null) window.clearTimeout(bumpTimer);
+  bumpTimer = window.setTimeout(() => {
+    bumpCell = null;
+    hoverCell = null;
+    bumpTimer = null;
+    renderApp();
+  }, 260);
+}
+
+function bumpInvalidTarget(target: Cell): void {
+  bumpCell = target;
+  hoverCell = target;
+  renderApp();
+  clearBumpLater();
+}
+
+function commitSwap(from: Cell, to: Cell): void {
+  if (!areAdjacent(from, to)) {
+    selectedCell = to;
+    hoverCell = null;
+    renderApp();
+    return;
+  }
+
+  const preview = previewSwap(duel.board, from, to);
+  if (!preview.valid) {
+    selectedCell = from;
+    bumpInvalidTarget(to);
+    return;
+  }
+
+  const result = applySwap(duel, from, to);
+  duel = result.state;
+  selectedCell = null;
+  hoverCell = null;
+  bumpCell = null;
+  renderApp();
+  maybeRunEnemy();
+}
+
+function handleBoardTap(cell: Cell): void {
+  if (!canUseBoard()) return;
+
+  if (activeSpell) {
+    const result = castSpell(duel, activeSpell, cell);
+    duel = result.state;
+    activeSpell = null;
+    selectedCell = null;
+    hoverCell = null;
+    bumpCell = null;
+    renderApp();
+    maybeRunEnemy();
+    return;
+  }
+
+  if (!selectedCell) {
+    selectedCell = cell;
+    hoverCell = null;
+    bumpCell = null;
+    renderApp();
+    return;
+  }
+
+  if (sameCell(selectedCell, cell)) {
+    selectedCell = null;
+    hoverCell = null;
+    bumpCell = null;
+    renderApp();
+    return;
+  }
+
+  commitSwap(selectedCell, cell);
+}
+
+function dragTargetCell(from: Cell, deltaX: number, deltaY: number): Cell | null {
+  const threshold = 22;
+  if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < threshold) return null;
+
+  const next =
+    Math.abs(deltaX) > Math.abs(deltaY)
+      ? { x: from.x + Math.sign(deltaX), y: from.y }
+      : { x: from.x, y: from.y + Math.sign(deltaY) };
+
+  if (next.x < 0 || next.x >= duel.board.width || next.y < 0 || next.y >= duel.board.height) return null;
+  return next;
+}
+
 app.addEventListener('click', (event) => {
   const target = event.target as HTMLElement | null;
   if (!target) return;
@@ -725,46 +857,71 @@ app.addEventListener('click', (event) => {
   }
 
   const cellValue = target.closest<HTMLElement>('[data-cell]')?.dataset.cell;
-  if (cellValue === undefined || view !== 'play' || duel.current !== 'player' || duel.winner || enemyThinking) return;
+  if (cellValue === undefined || !canUseBoard()) return;
+  if (suppressNextCellClick) {
+    suppressNextCellClick = false;
+    return;
+  }
 
   const cell = cellFromIndex(Number(cellValue));
-  if (activeSpell) {
-    const result = castSpell(duel, activeSpell, cell);
-    duel = result.state;
-    activeSpell = null;
-    selectedCell = null;
-    hoverCell = null;
-    renderApp();
-    maybeRunEnemy();
+  handleBoardTap(cell);
+});
+
+app.addEventListener('pointerdown', (event) => {
+  const target = event.target as HTMLElement | null;
+  const cellValue = target?.closest<HTMLElement>('[data-cell]')?.dataset.cell;
+  if (cellValue === undefined || !canUseBoard()) return;
+
+  event.preventDefault();
+  const startCell = cellFromIndex(Number(cellValue));
+  dragState = { pointerId: event.pointerId, startCell, startX: event.clientX, startY: event.clientY };
+  selectedCell = startCell;
+  hoverCell = null;
+  bumpCell = null;
+  renderApp();
+});
+
+app.addEventListener('pointermove', (event) => {
+  if (!dragState || dragState.pointerId !== event.pointerId || !canUseBoard()) return;
+  event.preventDefault();
+
+  const targetCell = dragTargetCell(dragState.startCell, event.clientX - dragState.startX, event.clientY - dragState.startY);
+  if (!targetCell || sameCell(hoverCell, targetCell)) return;
+  hoverCell = targetCell;
+  renderApp();
+});
+
+app.addEventListener('pointerup', (event) => {
+  if (!dragState || dragState.pointerId !== event.pointerId) return;
+  event.preventDefault();
+  suppressNextCellClick = true;
+  window.setTimeout(() => {
+    suppressNextCellClick = false;
+  }, 0);
+
+  const endedDrag = dragState;
+  dragState = null;
+  const targetCell = dragTargetCell(endedDrag.startCell, event.clientX - endedDrag.startX, event.clientY - endedDrag.startY);
+  if (targetCell) {
+    commitSwap(endedDrag.startCell, targetCell);
     return;
   }
 
-  if (!selectedCell) {
-    selectedCell = cell;
-    hoverCell = null;
-    renderApp();
-    return;
-  }
+  const cellValue = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-cell]')?.dataset.cell;
+  handleBoardTap(cellValue === undefined ? endedDrag.startCell : cellFromIndex(Number(cellValue)));
+});
 
-  if (sameCell(selectedCell, cell)) {
-    selectedCell = null;
-    hoverCell = null;
-    renderApp();
-    return;
-  }
-
-  const result = applySwap(duel, selectedCell, cell);
-  duel = result.state;
-  selectedCell = null;
+app.addEventListener('pointercancel', (event) => {
+  if (!dragState || dragState.pointerId !== event.pointerId) return;
+  dragState = null;
   hoverCell = null;
   renderApp();
-  maybeRunEnemy();
 });
 
 app.addEventListener('pointerover', (event) => {
   const target = event.target as HTMLElement | null;
   const cellValue = target?.closest<HTMLElement>('[data-cell]')?.dataset.cell;
-  if (cellValue === undefined || view !== 'play' || duel.current !== 'player' || duel.winner || enemyThinking) return;
+  if (dragState || cellValue === undefined || !canUseBoard()) return;
   const nextHover = cellFromIndex(Number(cellValue));
   if (sameCell(hoverCell, nextHover)) return;
   hoverCell = nextHover;
