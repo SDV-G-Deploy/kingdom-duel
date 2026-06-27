@@ -28,6 +28,46 @@ export type ActorState = {
   crown: number;
 };
 
+export type ActorTemplate = {
+  name: string;
+  hp: number;
+  guard: number;
+};
+
+export type ManaTile = 'sun' | 'moon' | 'crown';
+
+export type TileEffect =
+  | { type: 'damage'; amountPerTile: number }
+  | { type: 'guard'; amountPerTile: number }
+  | { type: 'mana'; mana: ManaTile; amountPerTile: number }
+  | { type: 'risky_damage'; amountPerTile: number; playerBacklashPerTile: number };
+
+export type TileRule = {
+  label: string;
+  effect: TileEffect;
+  enemyScorePerTile: number;
+};
+
+export type EnemyProfile = {
+  name: string;
+  extraTurnScore: number;
+};
+
+export type DuelRules = {
+  board: {
+    width: number;
+    height: number;
+  };
+  actors: Record<ActorId, ActorTemplate>;
+  tiles: Record<TileKind, TileRule>;
+  match: {
+    extraTurnLength: number;
+    maxCascades: number;
+  };
+  enemy: EnemyProfile;
+  openingLog: string[];
+};
+
 export type DuelState = {
   board: Board;
   player: ActorState;
@@ -58,4 +98,3 @@ export type SwapResult = {
   state: DuelState;
   events: DuelEvent[];
 };
-

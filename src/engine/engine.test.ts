@@ -1,6 +1,8 @@
 import { strict as assert } from 'node:assert';
 import { areAdjacent, createBoard, findLegalMoves, findMatches, swapTiles } from './board';
 import { applySwap, createDuel, runEnemyTurn } from './duel';
+import { DEFAULT_DUEL_RULES } from './rules';
+import type { DuelRules } from './types';
 
 function testBoardGeneration(): void {
   const { board } = createBoard(8, 8, 42);
@@ -65,6 +67,23 @@ function testResolvedBoardRemainsPlayable(): void {
   }
 }
 
+function testRulesCanConfigureActorsAndBoard(): void {
+  const rules: DuelRules = {
+    ...DEFAULT_DUEL_RULES,
+    board: { width: 6, height: 6 },
+    actors: {
+      player: { name: 'Test Hero', hp: 12, guard: 1 },
+      enemy: { name: 'Test Enemy', hp: 9, guard: 0 },
+    },
+  };
+  const state = createDuel(44, rules);
+  assert.equal(state.board.width, 6);
+  assert.equal(state.board.height, 6);
+  assert.equal(state.player.name, 'Test Hero');
+  assert.equal(state.player.hp, 12);
+  assert.equal(state.enemy.hp, 9);
+}
+
 testBoardGeneration();
 testAdjacency();
 testInvalidSwapDoesNotChangeTurn();
@@ -72,5 +91,6 @@ testLegalMoveResolves();
 testManualMatchDetection();
 testEnemyTurn();
 testResolvedBoardRemainsPlayable();
+testRulesCanConfigureActorsAndBoard();
 
 console.log('engine tests passed');

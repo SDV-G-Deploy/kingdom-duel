@@ -1,25 +1,28 @@
 import { areAdjacent, cloneBoard, createBoard, findLegalMoves, findMatches, removeAndDrop, swapTiles } from './board';
-import type { ActorId, ActorState, Board, Cell, DuelEvent, DuelState, MatchGroup, SwapResult, TileKind } from './types';
+import { DEFAULT_DUEL_RULES } from './rules';
+import type { ActorId, ActorState, Board, Cell, DuelEvent, DuelRules, DuelState, MatchGroup, SwapResult } from './types';
 
-export function createDuel(seed = 2007): DuelState {
-  const created = createBoard(8, 8, seed);
+export function createDuel(seed = 2007, rules: DuelRules = DEFAULT_DUEL_RULES): DuelState {
+  const created = createBoard(rules.board.width, rules.board.height, seed);
   return {
     board: created.board,
-    player: createActor('player', 'Aurora Knight', 42),
-    enemy: createActor('enemy', 'Shade Knight', 38),
+    player: createActor('player', rules),
+    enemy: createActor('enemy', rules),
     current: 'player',
     turn: 1,
     seed: created.seed,
     selected: null,
     winner: null,
-    log: [
-      'Aurora Knight enters the glass board.',
-      'Match 4+ for an extra turn. Do not leave shade chains for the enemy.',
-    ],
+    log: rules.openingLog,
   };
 }
 
-export function applySwap(state: DuelState, from: Cell, to: Cell): SwapResult {
+export function applySwap(
+  state: DuelState,
+  from: Cell,
+  to: Cell,
+  rules: DuelRules = DEFAULT_DUEL_RULES,
+): SwapResult {
   if (state.winner) return { state, events: [] };
   if (!areAdjacent(from, to)) {
     return withLog(state, [{ type: 'invalid_swap', from, to }], 'Invalid swap: tiles must touch.');
@@ -32,48 +35,58 @@ export function applySwap(state: DuelState, from: Cell, to: Cell): SwapResult {
   }
 
   const events: DuelEvent[] = [{ type: 'swap', actor: state.current, from, to }];
-  const resolved = resolveBoard({ ...state, board }, state.current, events);
+  const resolved = resolveBoard({ ...state, board }, state.current, events, rules);
   return {
     state: appendLog(resolved.state, eventSummary(resolved.events, state.current)),
     events: resolved.events,
   };
 }
 
-export function runEnemyTurn(state: DuelState): SwapResult {
+export function runEnemyTurn(state: DuelState, rules: DuelRules = DEFAULT_DUEL_RULES): SwapResult {
   if (state.current !== 'enemy' || state.winner) return { state, events: [] };
-  const move = chooseEnemyMove(state.board);
+  const move = chooseEnemyMove(state.board, rules);
   if (!move) {
     return withLog({ ...state, current: 'player' }, [{ type: 'board_refilled' }], 'Enemy found no move. Board breathes.');
   }
 
-  const intent = scoreMove(state.board, move.from, move.to);
-  const intentEvent: DuelEvent = { type: 'enemy_intent', text: `Shade Knight takes ${intent.label}.` };
-  const swapped = applySwap(state, move.from, move.to);
+  const intent = scoreMove(state.board, move.from, move.to, rules);
+  const intentEvent: DuelEvent = { type: 'enemy_intent', text: `${rules.enemy.name} takes ${intent.label}.` };
+  const swapped = applySwap(state, move.from, move.to, rules);
   return {
     state: swapped.state,
     events: [intentEvent, ...swapped.events],
   };
 }
 
-function createActor(id: ActorId, name: string, hp: number): ActorState {
-  return { id, name, hp, maxHp: hp, guard: id === 'player' ? 4 : 2, sun: 0, moon: 0, crown: 0 };
+function createActor(id: ActorId, rules: DuelRules): ActorState {
+  const template = rules.actors[id];
+  return {
+    id,
+    name: template.name,
+    hp: template.hp,
+    maxHp: template.hp,
+    guard: template.guard,
+    sun: 0,
+    moon: 0,
+    crown: 0,
+  };
 }
 
-function resolveBoard(initial: DuelState, actor: ActorId, events: DuelEvent[]): SwapResult {
+function resolveBoard(initial: DuelState, actor: ActorId, events: DuelEvent[], rules: DuelRules): SwapResult {
   let state = initial;
   let board = state.board;
   let seed = state.seed;
   let extraTurn = false;
 
-  for (let cascade = 0; cascade < 16; cascade++) {
+  for (let cascade = 0; cascade < rules.match.maxCascades; cascade++) {
     const matches = findMatches(board);
     if (!matches.length) break;
 
     events.push({ type: 'cascade', count: cascade + 1 });
-    const effects = applyMatchEffects(state, actor, matches);
+    const effects = applyMatchEffects(state, actor, matches, rules);
     state = effects.state;
     events.push(...effects.events);
-    if (matches.some((match) => match.cells.length >= 4)) extraTurn = true;
+    if (matches.some((match) => match.cells.length >= rules.match.extraTurnLength)) extraTurn = true;
     const dropped = removeAndDrop(board, matches, seed);
     board = dropped.board;
     seed = dropped.seed;
@@ -82,7 +95,7 @@ function resolveBoard(initial: DuelState, actor: ActorId, events: DuelEvent[]): 
   state = { ...state, board, seed };
 
   if (findLegalMoves(state.board).length === 0) {
-    const refilled = createBoard(state.board.width, state.board.height, state.seed);
+    const refilled = createBoard(rules.board.width, rules.board.height, state.seed);
     state = { ...state, board: refilled.board, seed: refilled.seed };
     events.push({ type: 'board_refilled' });
   }
@@ -103,7 +116,7 @@ function resolveBoard(initial: DuelState, actor: ActorId, events: DuelEvent[]): 
   return { state: { ...state, current: nextActor, turn: nextTurn }, events };
 }
 
-function applyMatchEffects(state: DuelState, actor: ActorId, matches: MatchGroup[]): SwapResult {
+function applyMatchEffects(state: DuelState, actor: ActorId, matches: MatchGroup[], rules: DuelRules): SwapResult {
   let next = state;
   const events: DuelEvent[] = [];
 
@@ -111,20 +124,22 @@ function applyMatchEffects(state: DuelState, actor: ActorId, matches: MatchGroup
     const amount = match.cells.length;
     events.push({ type: 'match', actor, tile: match.tile, cells: match.cells });
 
-    if (match.tile === 'sword') {
-      next = damage(next, actor, amount, events);
-    } else if (match.tile === 'shield') {
-      next = updateActor(next, actor, (unit) => ({ ...unit, guard: unit.guard + amount }));
-      events.push({ type: 'guard', actor, amount });
-    } else if (match.tile === 'sun' || match.tile === 'moon' || match.tile === 'crown') {
-      const tile = match.tile;
-      next = updateActor(next, actor, (unit) => ({ ...unit, [tile]: unit[tile] + amount }));
-      events.push({ type: 'mana', actor, tile, amount });
+    const effect = rules.tiles[match.tile].effect;
+    const scaled = amount * effect.amountPerTile;
+    if (effect.type === 'damage') {
+      next = damage(next, actor, scaled, events);
+    } else if (effect.type === 'guard') {
+      next = updateActor(next, actor, (unit) => ({ ...unit, guard: unit.guard + scaled }));
+      events.push({ type: 'guard', actor, amount: scaled });
+    } else if (effect.type === 'mana') {
+      next = updateActor(next, actor, (unit) => ({ ...unit, [effect.mana]: unit[effect.mana] + scaled }));
+      events.push({ type: 'mana', actor, tile: effect.mana, amount: scaled });
     } else {
-      next = damage(next, actor, amount * 2, events);
-      if (actor === 'player') {
-        next = updateActor(next, actor, (unit) => ({ ...unit, hp: Math.max(0, unit.hp - amount) }));
-        events.push({ type: 'backlash', actor, amount });
+      next = damage(next, actor, scaled, events);
+      if (actor === 'player' && effect.playerBacklashPerTile > 0) {
+        const backlash = amount * effect.playerBacklashPerTile;
+        next = updateActor(next, actor, (unit) => ({ ...unit, hp: Math.max(0, unit.hp - backlash) }));
+        events.push({ type: 'backlash', actor, amount: backlash });
       }
     }
   }
@@ -150,15 +165,15 @@ function updateActor(state: DuelState, actor: ActorId, update: (actor: ActorStat
   return actor === 'player' ? { ...state, player: update(state.player) } : { ...state, enemy: update(state.enemy) };
 }
 
-function chooseEnemyMove(board: Board): { from: Cell; to: Cell } | null {
+function chooseEnemyMove(board: Board, rules: DuelRules): { from: Cell; to: Cell } | null {
   const moves = findLegalMoves(board);
   if (!moves.length) return null;
   return moves
-    .map((move) => ({ move, score: scoreMove(board, move.from, move.to).score }))
+    .map((move) => ({ move, score: scoreMove(board, move.from, move.to, rules).score }))
     .sort((a, b) => b.score - a.score)[0].move;
 }
 
-function scoreMove(board: Board, from: Cell, to: Cell): { score: number; label: string } {
+function scoreMove(board: Board, from: Cell, to: Cell, rules: DuelRules): { score: number; label: string } {
   const test = cloneBoard(board);
   swapTiles(test, from, to);
   const matches = findMatches(test);
@@ -167,24 +182,10 @@ function scoreMove(board: Board, from: Cell, to: Cell): { score: number; label: 
 
   for (const match of matches) {
     const value = match.cells.length;
-    score += value;
-    if (match.tile === 'shade') {
-      score += value * 12;
-      labels.push('shade damage');
-    } else if (match.tile === 'sword') {
-      score += value * 8;
-      labels.push('swords');
-    } else if (match.tile === 'shield') {
-      score += value * 3;
-      labels.push('guard');
-    } else if (match.tile === 'crown') {
-      score += value * 5;
-      labels.push('crown charge');
-    } else {
-      score += value * 4;
-      labels.push(`${match.tile} mana`);
-    }
-    if (match.cells.length >= 4) score += 18;
+    const tileRule = rules.tiles[match.tile];
+    score += value + value * tileRule.enemyScorePerTile;
+    labels.push(tileRule.label);
+    if (match.cells.length >= rules.match.extraTurnLength) score += rules.enemy.extraTurnScore;
   }
 
   return { score, label: labels[0] ?? 'a safe move' };
