@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { areAdjacent, createBoard, findLegalMoves, findMatches, swapTiles } from './board';
-import { applySwap, createDuel, runEnemyTurn } from './duel';
+import { applySwap, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './duel';
 import { DEFAULT_DUEL_RULES } from './rules';
 import type { DuelRules } from './types';
 
@@ -84,6 +84,31 @@ function testRulesCanConfigureActorsAndBoard(): void {
   assert.equal(state.enemy.hp, 9);
 }
 
+function testPreviewRejectsBadSwap(): void {
+  const state = createDuel(2007);
+  const preview = previewSwap(state.board, { x: 0, y: 0 }, { x: 7, y: 7 });
+  assert.equal(preview.valid, false);
+}
+
+function testPreviewReportsLegalMoveEffects(): void {
+  const state = createDuel(2007);
+  const move = findLegalMoves(state.board)[0];
+  const preview = previewSwap(state.board, move.from, move.to);
+  assert.equal(preview.valid, true);
+  if (preview.valid) {
+    assert.ok(preview.matches.length > 0);
+    assert.ok(preview.summary.length > 0);
+    assert.ok(preview.score > 0);
+  }
+}
+
+function testEnemyIntentUsesLegalPreview(): void {
+  const state = createDuel(2007);
+  const intent = getEnemyIntent(state.board);
+  assert.ok(intent, 'enemy intent should exist on a playable board');
+  assert.equal(intent?.preview.valid, true);
+}
+
 testBoardGeneration();
 testAdjacency();
 testInvalidSwapDoesNotChangeTurn();
@@ -92,5 +117,8 @@ testManualMatchDetection();
 testEnemyTurn();
 testResolvedBoardRemainsPlayable();
 testRulesCanConfigureActorsAndBoard();
+testPreviewRejectsBadSwap();
+testPreviewReportsLegalMoveEffects();
+testEnemyIntentUsesLegalPreview();
 
 console.log('engine tests passed');

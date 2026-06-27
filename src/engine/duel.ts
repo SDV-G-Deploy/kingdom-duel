@@ -1,6 +1,19 @@
 import { areAdjacent, cloneBoard, createBoard, findLegalMoves, findMatches, removeAndDrop, swapTiles } from './board';
 import { DEFAULT_DUEL_RULES } from './rules';
-import type { ActorId, ActorState, Board, Cell, DuelEvent, DuelRules, DuelState, MatchGroup, SwapResult } from './types';
+import type {
+  ActorId,
+  ActorState,
+  Board,
+  Cell,
+  DuelEvent,
+  DuelRules,
+  DuelState,
+  EnemyIntent,
+  MatchGroup,
+  MovePreview,
+  PreviewEffect,
+  SwapResult,
+} from './types';
 
 export function createDuel(seed = 2007, rules: DuelRules = DEFAULT_DUEL_RULES): DuelState {
   const created = createBoard(rules.board.width, rules.board.height, seed);
@@ -56,6 +69,49 @@ export function runEnemyTurn(state: DuelState, rules: DuelRules = DEFAULT_DUEL_R
     state: swapped.state,
     events: [intentEvent, ...swapped.events],
   };
+}
+
+export function previewSwap(board: Board, from: Cell, to: Cell, rules: DuelRules = DEFAULT_DUEL_RULES): MovePreview {
+  if (!areAdjacent(from, to)) {
+    return { valid: false, from, to, reason: 'tiles must touch' };
+  }
+
+  const test = cloneBoard(board);
+  swapTiles(test, from, to);
+  const matches = findMatches(test);
+  if (!matches.length) {
+    return { valid: false, from, to, reason: 'no match created' };
+  }
+
+  const effects = previewEffects(matches, rules);
+  const extraTurn = matches.some((match) => match.cells.length >= rules.match.extraTurnLength);
+  const score = scorePreview(matches, rules);
+  return {
+    valid: true,
+    from,
+    to,
+    matches,
+    effects,
+    extraTurn,
+    summary: previewSummary(effects, extraTurn),
+    score,
+  };
+}
+
+export function getEnemyIntent(board: Board, rules: DuelRules = DEFAULT_DUEL_RULES): EnemyIntent | null {
+  const moves = findLegalMoves(board);
+  if (!moves.length) return null;
+
+  const ranked = moves
+    .map((move) => {
+      const preview = previewSwap(board, move.from, move.to, rules);
+      return preview.valid ? { ...move, preview } : null;
+    })
+    .filter((move): move is { from: Cell; to: Cell; preview: Extract<MovePreview, { valid: true }> } => !!move)
+    .sort((a, b) => b.preview.score - a.preview.score);
+
+  const best = ranked[0];
+  return best ? { from: best.from, to: best.to, preview: best.preview } : null;
 }
 
 function createActor(id: ActorId, rules: DuelRules): ActorState {
@@ -177,18 +233,60 @@ function scoreMove(board: Board, from: Cell, to: Cell, rules: DuelRules): { scor
   const test = cloneBoard(board);
   swapTiles(test, from, to);
   const matches = findMatches(test);
-  let score = 0;
+  const score = scorePreview(matches, rules);
   const labels: string[] = [];
 
+  for (const match of matches) {
+    const tileRule = rules.tiles[match.tile];
+    labels.push(tileRule.label);
+  }
+
+  return { score, label: labels[0] ?? 'a safe move' };
+}
+
+function scorePreview(matches: MatchGroup[], rules: DuelRules): number {
+  let score = 0;
   for (const match of matches) {
     const value = match.cells.length;
     const tileRule = rules.tiles[match.tile];
     score += value + value * tileRule.enemyScorePerTile;
-    labels.push(tileRule.label);
     if (match.cells.length >= rules.match.extraTurnLength) score += rules.enemy.extraTurnScore;
   }
+  return score;
+}
 
-  return { score, label: labels[0] ?? 'a safe move' };
+function previewEffects(matches: MatchGroup[], rules: DuelRules): PreviewEffect[] {
+  const effects = new Map<string, PreviewEffect>();
+
+  for (const match of matches) {
+    const amount = match.cells.length;
+    const effect = rules.tiles[match.tile].effect;
+    if (effect.type === 'damage') {
+      addPreviewEffect(effects, 'damage', amount * effect.amountPerTile, 'damage');
+    } else if (effect.type === 'guard') {
+      addPreviewEffect(effects, 'guard', amount * effect.amountPerTile, 'guard');
+    } else if (effect.type === 'mana') {
+      addPreviewEffect(effects, effect.mana, amount * effect.amountPerTile, 'mana');
+    } else {
+      addPreviewEffect(effects, 'shade damage', amount * effect.amountPerTile, 'damage');
+      if (effect.playerBacklashPerTile > 0) {
+        addPreviewEffect(effects, 'backlash', amount * effect.playerBacklashPerTile, 'risk');
+      }
+    }
+  }
+
+  return [...effects.values()];
+}
+
+function addPreviewEffect(effects: Map<string, PreviewEffect>, label: string, value: number, tone: PreviewEffect['tone']): void {
+  const current = effects.get(label);
+  effects.set(label, { label, value: (current?.value ?? 0) + value, tone });
+}
+
+function previewSummary(effects: PreviewEffect[], extraTurn: boolean): string {
+  const parts = effects.map((effect) => `${effect.tone === 'risk' ? '-' : '+'}${effect.value} ${effect.label}`);
+  if (extraTurn) parts.push('extra turn');
+  return parts.join(', ');
 }
 
 function eventSummary(events: DuelEvent[], actor: ActorId): string {

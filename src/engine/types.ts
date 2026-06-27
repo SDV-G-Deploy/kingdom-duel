@@ -98,3 +98,33 @@ export type SwapResult = {
   state: DuelState;
   events: DuelEvent[];
 };
+
+export type PreviewEffect = {
+  label: string;
+  value: number;
+  tone: 'damage' | 'guard' | 'mana' | 'risk';
+};
+
+export type MovePreview =
+  | {
+      valid: false;
+      from: Cell;
+      to: Cell;
+      reason: string;
+    }
+  | {
+      valid: true;
+      from: Cell;
+      to: Cell;
+      matches: MatchGroup[];
+      effects: PreviewEffect[];
+      extraTurn: boolean;
+      summary: string;
+      score: number;
+    };
+
+export type EnemyIntent = {
+  from: Cell;
+  to: Cell;
+  preview: Extract<MovePreview, { valid: true }>;
+};

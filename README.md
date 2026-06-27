@@ -21,6 +21,8 @@ Core ingredients:
 The current app contains:
 
 - a playable `Match Duel` core;
+- move preview for selected swaps;
+- visible enemy intent on the shared board;
 - a `Moodboard` view for the AeroCandy 2007 visual direction;
 - deterministic engine modules under `src/engine`;
 - gameplay design notes under `docs/`.
