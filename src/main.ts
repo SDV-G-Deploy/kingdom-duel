@@ -84,12 +84,12 @@ const characterAssetSlots: Record<CharacterSlot, AssetSlot> = {
   enemy: { path: 'assets/characters/shade-knight.webp', src: 'assets/characters/shade-knight.webp' },
 };
 const gemAssetSlots: Record<GemKind, AssetSlot> = {
-  sword: { path: 'assets/gems/sword.webp', src: null },
-  shield: { path: 'assets/gems/shield.webp', src: null },
-  sun: { path: 'assets/gems/sun.webp', src: null },
-  moon: { path: 'assets/gems/moon.webp', src: null },
-  crown: { path: 'assets/gems/crown.webp', src: null },
-  shade: { path: 'assets/gems/shade.webp', src: null },
+  sword: { path: 'assets/gems/sword.webp', src: 'assets/gems/sword.webp' },
+  shield: { path: 'assets/gems/shield.webp', src: 'assets/gems/shield.webp' },
+  sun: { path: 'assets/gems/sun.webp', src: 'assets/gems/sun.webp' },
+  moon: { path: 'assets/gems/moon.webp', src: 'assets/gems/moon.webp' },
+  crown: { path: 'assets/gems/crown.webp', src: 'assets/gems/crown.webp' },
+  shade: { path: 'assets/gems/shade.webp', src: 'assets/gems/shade.webp' },
 };
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');

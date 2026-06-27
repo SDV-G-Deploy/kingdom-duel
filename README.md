@@ -28,6 +28,7 @@ The current app contains:
 - first playable board-changing spells;
 - stable portrait and gem asset slots with CSS fallbacks;
 - first-pass Aurora Knight and Shade Knight portrait assets;
+- first-pass readable gem sprite assets;
 - a `Style` view for the AeroCandy 2007 visual direction;
 - deterministic engine modules under `src/engine`;
 - gameplay design notes under `docs/`.

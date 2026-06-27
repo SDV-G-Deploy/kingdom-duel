@@ -33,7 +33,8 @@ Updated after Samsung S25 feedback on 2026-06-27:
 - Enemy action feedback landed before Task 03 because the turn sequence was unclear without visible enemy cues.
 - Task 03 landed with stable portrait/gem slots, path conventions, and CSS fallbacks.
 - Task 04 landed with first-pass Aurora Knight and Shade Knight WebP portraits.
-- Task 05 is the next planned feature task: first-pass gem sprites.
+- Task 05 landed with first-pass WebP gem sprites.
+- Task 06 is the next planned task: mobile QA and deploy review.
 
 Core constraints:
 
