@@ -765,14 +765,6 @@ button {
     0 12px 22px rgba(13, 96, 151, 0.18);
 }
 
-.play-board .gem.is-legal-target {
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.84),
-    inset 0 -10px 16px rgba(0, 74, 133, 0.10),
-    0 0 0 3px rgba(123, 242, 141, 0.78),
-    0 14px 26px rgba(13, 96, 151, 0.24);
-}
-
 .play-board .gem.is-threat {
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.78),

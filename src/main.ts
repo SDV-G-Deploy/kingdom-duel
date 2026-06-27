@@ -719,12 +719,13 @@ function maybeRunEnemy(): void {
     enemyCue = intent ? { cells: [intent.from, intent.to], summary: intent.preview.summary } : { cells: [], summary: 'board shifts' };
     renderApp();
     if (enemyCueTimer !== null) window.clearTimeout(enemyCueTimer);
+    const enemyKeepsTurn = duel.current === 'enemy' && !duel.winner;
     enemyCueTimer = window.setTimeout(() => {
       enemyCue = null;
       enemyCueTimer = null;
       renderApp();
-    }, 900);
-    if (duel.current === 'enemy' && !duel.winner) maybeRunEnemy();
+      if (enemyKeepsTurn) maybeRunEnemy();
+    }, enemyKeepsTurn ? 760 : 900);
   }, 520);
 }
 
