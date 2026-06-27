@@ -1846,7 +1846,9 @@ button {
   }
 
   .board-frame .play-board {
-    width: min(100%, clamp(286px, calc(100dvh - 506px), 350px));
+    align-self: start;
+    width: min(100%, clamp(276px, calc(100dvh - 506px), 318px));
+    margin: 0 auto;
   }
 
   .action-dock {
@@ -1867,10 +1869,15 @@ button {
   }
 
   .action-dock .decision-panel strong {
-    font-size: 0.86rem;
+    font-size: 0.78rem;
+    line-height: 1.05;
   }
 
   .action-dock .decision-panel p {
+    display: none;
+  }
+
+  .action-dock .effect-row {
     display: none;
   }
 
