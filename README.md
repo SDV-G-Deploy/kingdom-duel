@@ -18,7 +18,12 @@ Core ingredients:
 
 ## Current Artifact
 
-The current app is a style reference panel / moodboard, not the game engine yet.
+The current app contains:
+
+- a playable `Match Duel` core;
+- a `Moodboard` view for the AeroCandy 2007 visual direction;
+- deterministic engine modules under `src/engine`;
+- gameplay design notes under `docs/`.
 
 Run:
 
@@ -27,3 +32,9 @@ npm install
 npm run dev
 ```
 
+Checks:
+
+```bash
+npm test
+npm run build
+```
