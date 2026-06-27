@@ -80,8 +80,8 @@ const boardPattern: GemKind[] = [
 
 const gemKinds: GemKind[] = ['sword', 'shield', 'sun', 'moon', 'crown', 'shade'];
 const characterAssetSlots: Record<CharacterSlot, AssetSlot> = {
-  hero: { path: 'assets/characters/aurora-knight.webp', src: null },
-  enemy: { path: 'assets/characters/shade-knight.webp', src: null },
+  hero: { path: 'assets/characters/aurora-knight.webp', src: 'assets/characters/aurora-knight.webp' },
+  enemy: { path: 'assets/characters/shade-knight.webp', src: 'assets/characters/shade-knight.webp' },
 };
 const gemAssetSlots: Record<GemKind, AssetSlot> = {
   sword: { path: 'assets/gems/sword.webp', src: null },

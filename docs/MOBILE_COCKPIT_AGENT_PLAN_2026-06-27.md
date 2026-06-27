@@ -32,7 +32,8 @@ Updated after Samsung S25 feedback on 2026-06-27:
 - Tap guidance now highlights all adjacent directions, not only match-producing targets, because highlighting only "best" targets looked like a movement restriction.
 - Enemy action feedback landed before Task 03 because the turn sequence was unclear without visible enemy cues.
 - Task 03 landed with stable portrait/gem slots, path conventions, and CSS fallbacks.
-- Task 04 is the next planned feature task: first-pass Aurora Knight and Shade Knight portraits.
+- Task 04 landed with first-pass Aurora Knight and Shade Knight WebP portraits.
+- Task 05 is the next planned feature task: first-pass gem sprites.
 
 Core constraints:
 

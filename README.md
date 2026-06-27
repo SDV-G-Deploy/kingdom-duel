@@ -27,6 +27,7 @@ The current app contains:
 - visible enemy turn feedback, including enemy action state, board highlights, and latest-event summary;
 - first playable board-changing spells;
 - stable portrait and gem asset slots with CSS fallbacks;
+- first-pass Aurora Knight and Shade Knight portrait assets;
 - a `Style` view for the AeroCandy 2007 visual direction;
 - deterministic engine modules under `src/engine`;
 - gameplay design notes under `docs/`.

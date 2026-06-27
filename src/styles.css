@@ -256,6 +256,11 @@ button {
   background-size: contain;
 }
 
+.portrait-slot.has-asset {
+  background-position: center 30%;
+  background-size: 178%;
+}
+
 .portrait-fallback {
   position: absolute;
   inset: 0;
@@ -269,7 +274,7 @@ button {
 }
 
 .portrait-slot.has-asset .portrait-fallback {
-  opacity: 0.28;
+  opacity: 0.12;
 }
 
 .portrait-enemy .portrait-fallback {
