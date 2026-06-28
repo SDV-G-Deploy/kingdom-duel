@@ -330,7 +330,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
       const confirmHint = confirmedSpellTarget ? ' Tap same target again to cast.' : '';
       return `
         <div class="decision-panel ${spellPreview.extraTurn ? 'is-extra' : ''} ${spellPreview.fatal ? 'is-risk' : ''}">
-          <span>${confirmedSpellTarget ? 'Target confirmed' : spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
+          <span>${confirmedSpellTarget ? 'Spell armed' : spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
           <strong>${spellPreview.title}</strong>
           <p>${spellPreview.hint}${confirmHint}</p>
           <div class="effect-row">
@@ -352,7 +352,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (snapBackCue) {
     return `
       <div class="decision-panel is-risk">
-        <span>Preview</span>
+        <span>Strike preview</span>
         <strong>Snapped back</strong>
         <p>${snapBackCue}</p>
       </div>
@@ -382,7 +382,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview.valid) {
     return `
       <div class="decision-panel is-risk">
-        <span>Preview</span>
+        <span>Strike preview</span>
         <strong>${swapTruthLabel(preview.from, preview.to)}: no match</strong>
         <p>The engine sees different tile types here. Pick an aqua target to commit.</p>
       </div>
@@ -393,7 +393,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
-      <span>Preview · ${swapTruthLabel(preview.from, preview.to)}</span>
+      <span>Strike preview · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
       ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
       <div class="effect-row">
@@ -514,11 +514,13 @@ function renderTopGameBar(canMove: boolean): string {
 }
 
 function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
+  const isWinner = duel.winner === actor.id;
+  const isDefeated = !!duel.winner && duel.winner !== actor.id;
   return `
-    <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''}">
+    <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
       ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
       <div class="combatant-body">
-        <span>${actor.id === 'player' ? 'Aurora glass' : 'Shade glass'}</span>
+        <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
         <strong>${actor.name}</strong>
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="mini-stats" aria-label="${actor.name} resources">
@@ -535,7 +537,7 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
     <section class="combat-strip ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
-        <span>${duel.winner ? 'Ended' : enemyCue ? 'Shade' : duel.current === 'player' ? 'Move' : 'Enemy'}</span>
+        <span>${duel.winner ? 'Duel' : enemyCue ? 'Shade' : duel.current === 'player' ? 'Move' : 'Enemy'}</span>
         <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? 'Strike' : duel.current === 'player' ? 'Aurora' : 'Shade'}</strong>
         <em>${legalMoves} moves</em>
         ${intent ? `<p>Shade prepares: ${intentReason(intent)}</p>` : ''}
@@ -567,9 +569,9 @@ function renderBoardFrame(
             : spellPreview && confirmedSpellTarget
             ? 'Spell armed'
             : spellPreview
-            ? 'Spell preview'
+            ? 'Spell aim'
             : activeSpellName
-            ? 'Spell targeting'
+            ? 'Aim spell'
             : fatalBacklash
               ? 'Fatal backlash'
             : backlash
@@ -577,10 +579,10 @@ function renderBoardFrame(
             : snapBackCue || invalidPreview
               ? 'Snap-back'
             : preview?.valid
-                ? 'Preview'
+                ? 'Strike preview'
                 : canMove
                   ? "Aurora's move"
-                  : 'Board locked'
+                  : 'Arena locked'
         }</span>
         <strong>${
           enemyCue
@@ -590,7 +592,7 @@ function renderBoardFrame(
             : spellPreview
             ? spellPreview.title
             : activeSpellName
-            ? `Choose target for ${activeSpellName}`
+            ? `Aim ${activeSpellName}`
             : fatalBacklash
               ? `Will KO Aurora: costs ${backlash} HP`
             : backlash
