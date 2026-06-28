@@ -112,6 +112,8 @@ let bumpCell: Cell | null = null;
 let dragState: { pointerId: number; startCell: Cell; startX: number; startY: number } | null = null;
 let suppressNextCellClick = false;
 let bumpTimer: number | null = null;
+let invalidCue: string | null = null;
+let invalidCueTimer: number | null = null;
 let enemyCue: { cells: Cell[]; summary: string } | null = null;
 let enemyCueTimer: number | null = null;
 
@@ -288,7 +290,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
   `;
 }
 
-function renderPreviewPanel(preview: MovePreview | null): string {
+function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | null): string {
   if (activeSpell) {
     const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
     return `
@@ -296,6 +298,16 @@ function renderPreviewPanel(preview: MovePreview | null): string {
         <span>Spell target</span>
         <strong>${spell.name}</strong>
         <p>${spell.target === 'row' ? 'Choose any tile in the row to clear and collect it.' : 'Choose a tile on the board to shape the nearby cluster.'}</p>
+      </div>
+    `;
+  }
+
+  if (snapBackCue) {
+    return `
+      <div class="decision-panel is-risk">
+        <span>Decision preview</span>
+        <strong>Snapped back</strong>
+        <p>${snapBackCue}</p>
       </div>
     `;
   }
@@ -322,10 +334,10 @@ function renderPreviewPanel(preview: MovePreview | null): string {
 
   if (!preview.valid) {
     return `
-      <div class="decision-panel is-empty">
+      <div class="decision-panel is-risk">
         <span>Decision preview</span>
-        <strong>Choose another</strong>
-        <p>Try a different adjacent tile to make a match.</p>
+        <strong>No match</strong>
+        <p>That target snaps back. Pick an aqua target to commit.</p>
       </div>
     `;
   }
@@ -348,6 +360,7 @@ function renderEffectPill(effect: PreviewEffect): string {
 
 function latestEvent(): string {
   if (enemyCue) return `Shade Knight moved: ${enemyCue.summary}.`;
+  if (invalidCue) return invalidCue;
   return duel.log[0] ?? 'Battle ready. Select a tile to begin.';
 }
 
@@ -401,23 +414,46 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
   `;
 }
 
-function renderBoardFrame(preview: MovePreview | null, intent: EnemyIntent | null, canMove: boolean, activeSpellName: string | null): string {
+function renderBoardFrame(
+  preview: MovePreview | null,
+  intent: EnemyIntent | null,
+  canMove: boolean,
+  activeSpellName: string | null,
+  snapBackCue: string | null,
+): string {
+  const invalidPreview = !!preview && !preview.valid;
   return `
     <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Battle board">
       <div class="board-status">
-        <span>${enemyCue ? 'Enemy moved' : activeSpellName ? 'Spell targeting' : preview?.valid ? 'Move preview' : canMove ? 'Board ready' : 'Board locked'}</span>
+        <span>${
+          enemyCue
+            ? 'Enemy moved'
+            : activeSpellName
+            ? 'Spell targeting'
+            : snapBackCue || invalidPreview
+              ? 'Snap-back'
+              : preview?.valid
+                ? 'Move preview'
+                : canMove
+                  ? 'Board ready'
+                  : 'Board locked'
+        }</span>
         <strong>${
           enemyCue
             ? `Shade Knight: ${enemyCue.summary}`
             : activeSpellName
             ? `Choose target for ${activeSpellName}`
-            : preview?.valid
-              ? preview.summary
-              : canMove
-                ? 'Swap adjacent tiles'
-                : enemyThinking
-                  ? 'Shade Knight is choosing'
-                  : 'Resolving cascades'
+            : snapBackCue
+              ? 'No match: target returned'
+              : invalidPreview
+                ? 'No match on this target'
+                : preview?.valid
+                  ? preview.summary
+                  : canMove
+                    ? 'Swap adjacent tiles'
+                    : enemyThinking
+                      ? 'Shade Knight is choosing'
+                      : 'Resolving cascades'
         }</strong>
       </div>
       ${renderPlayableBoard(preview, intent)}
@@ -428,7 +464,7 @@ function renderBoardFrame(preview: MovePreview | null, intent: EnemyIntent | nul
 function renderActionDock(preview: MovePreview | null, canMove: boolean): string {
   return `
     <section class="action-dock" aria-label="Actions">
-      ${renderPreviewPanel(preview)}
+      ${renderPreviewPanel(preview, invalidCue)}
       ${renderSpellRow(canMove)}
     </section>
   `;
@@ -469,7 +505,7 @@ function renderPlayable(): string {
       <section class="play-stage cockpit-stage">
         ${renderTopGameBar(canMove)}
         ${renderCombatStrip(intent, legalMoves)}
-        ${renderBoardFrame(preview, intent, canMove, activeSpellName)}
+        ${renderBoardFrame(preview, intent, canMove, activeSpellName, invalidCue)}
         ${renderActionDock(preview, canMove)}
         ${renderLatestEvent()}
         ${renderLogSheet()}
@@ -756,6 +792,24 @@ function clearEnemyCue(): void {
   }
 }
 
+function clearInvalidCue(): void {
+  invalidCue = null;
+  if (invalidCueTimer !== null) {
+    window.clearTimeout(invalidCueTimer);
+    invalidCueTimer = null;
+  }
+}
+
+function showInvalidCue(message: string): void {
+  invalidCue = message;
+  if (invalidCueTimer !== null) window.clearTimeout(invalidCueTimer);
+  invalidCueTimer = window.setTimeout(() => {
+    invalidCue = null;
+    invalidCueTimer = null;
+    renderApp();
+  }, 900);
+}
+
 function clearBumpLater(): void {
   if (bumpTimer !== null) window.clearTimeout(bumpTimer);
   bumpTimer = window.setTimeout(() => {
@@ -763,18 +817,20 @@ function clearBumpLater(): void {
     hoverCell = null;
     bumpTimer = null;
     renderApp();
-  }, 260);
+  }, 420);
 }
 
-function bumpInvalidTarget(target: Cell): void {
+function bumpInvalidTarget(target: Cell, message: string): void {
   bumpCell = target;
   hoverCell = target;
+  showInvalidCue(message);
   renderApp();
   clearBumpLater();
 }
 
 function commitSwap(from: Cell, to: Cell): void {
   clearEnemyCue();
+  clearInvalidCue();
   if (!areAdjacent(from, to)) {
     selectedCell = to;
     hoverCell = null;
@@ -785,7 +841,7 @@ function commitSwap(from: Cell, to: Cell): void {
   const preview = previewSwap(duel.board, from, to);
   if (!preview.valid) {
     selectedCell = from;
-    bumpInvalidTarget(to);
+    bumpInvalidTarget(to, 'No match: the target tile snapped back.');
     return;
   }
 
@@ -794,6 +850,7 @@ function commitSwap(from: Cell, to: Cell): void {
   selectedCell = null;
   hoverCell = null;
   bumpCell = null;
+  clearInvalidCue();
   renderApp();
   maybeRunEnemy();
 }
@@ -801,6 +858,7 @@ function commitSwap(from: Cell, to: Cell): void {
 function handleBoardTap(cell: Cell): void {
   if (!canUseBoard()) return;
   clearEnemyCue();
+  clearInvalidCue();
 
   if (activeSpell) {
     const result = castSpell(duel, activeSpell, cell);
@@ -809,6 +867,7 @@ function handleBoardTap(cell: Cell): void {
     selectedCell = null;
     hoverCell = null;
     bumpCell = null;
+    clearInvalidCue();
     renderApp();
     maybeRunEnemy();
     return;
@@ -818,6 +877,7 @@ function handleBoardTap(cell: Cell): void {
     selectedCell = cell;
     hoverCell = null;
     bumpCell = null;
+    clearInvalidCue();
     renderApp();
     return;
   }
@@ -826,6 +886,7 @@ function handleBoardTap(cell: Cell): void {
     selectedCell = null;
     hoverCell = null;
     bumpCell = null;
+    clearInvalidCue();
     renderApp();
     return;
   }
@@ -861,6 +922,7 @@ app.addEventListener('click', (event) => {
     selectedCell = null;
     hoverCell = null;
     activeSpell = null;
+    clearInvalidCue();
     renderApp();
     return;
   }
@@ -874,6 +936,7 @@ app.addEventListener('click', (event) => {
     enemyThinking = false;
     logOpen = false;
     clearEnemyCue();
+    clearInvalidCue();
     renderApp();
     return;
   }
@@ -890,6 +953,7 @@ app.addEventListener('click', (event) => {
     activeSpell = activeSpell === spellValue ? null : spellValue;
     selectedCell = null;
     hoverCell = null;
+    clearInvalidCue();
     renderApp();
     return;
   }
@@ -930,6 +994,7 @@ window.addEventListener('pointermove', (event) => {
   selectedCell = dragState.startCell;
   hoverCell = targetCell;
   bumpCell = null;
+  clearInvalidCue();
   renderApp();
 });
 
@@ -962,6 +1027,7 @@ window.addEventListener('pointercancel', (event) => {
   if (!dragState || dragState.pointerId !== event.pointerId) return;
   dragState = null;
   hoverCell = null;
+  clearInvalidCue();
   renderApp();
 });
 
@@ -972,6 +1038,7 @@ app.addEventListener('pointerover', (event) => {
   const nextHover = cellFromIndex(Number(cellValue));
   if (sameCell(hoverCell, nextHover)) return;
   hoverCell = nextHover;
+  clearInvalidCue();
   renderApp();
 });
 
