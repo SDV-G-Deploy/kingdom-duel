@@ -419,8 +419,11 @@ button {
 
 .combatant .stat-bar {
   margin-top: 5px;
-  padding: 5px 6px 7px;
-  border-radius: 8px;
+  padding: 5px 6px 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 255, 255, 0.40)),
+    rgba(255, 255, 255, 0.32);
 }
 
 .combatant .stat-bar span,
@@ -431,7 +434,8 @@ button {
 }
 
 .combatant .stat-bar i {
-  height: 5px;
+  height: 7px;
+  border-radius: 999px;
 }
 
 .mini-stats {
@@ -484,17 +488,20 @@ button {
 
 .duel-pulse span {
   color: #007092;
-  font-size: 0.6rem;
+  font-size: 0.56rem;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .duel-pulse strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 3px;
+  overflow: hidden;
   color: #04304a;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .combat-strip.has-enemy-cue .duel-pulse {
@@ -507,9 +514,9 @@ button {
 
 .duel-pulse em,
 .duel-pulse p {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: rgba(4, 48, 74, 0.70);
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-style: normal;
   font-weight: 900;
   line-height: 1.12;
@@ -668,11 +675,12 @@ button {
 
 .action-dock .spell-button {
   min-height: 0;
-  padding: 7px 6px;
+  padding: 7px 6px 7px 7px;
   border-radius: 12px;
 }
 
 .action-dock .spell-button span {
+  padding-right: 22px;
   font-size: 0.58rem;
 }
 
@@ -1193,7 +1201,8 @@ button {
 
 .spell-row .spell-button:disabled {
   cursor: not-allowed;
-  opacity: 0.68;
+  filter: saturate(0.72);
+  opacity: 0.78;
 }
 
 .spell-row .spell-button.is-active {
@@ -1202,6 +1211,56 @@ button {
     inset 0 1px 0 rgba(255, 255, 255, 0.92),
     0 0 0 3px rgba(255, 226, 92, 0.26),
     0 14px 30px rgba(13, 96, 151, 0.20);
+}
+
+.spell-button {
+  position: relative;
+}
+
+.spell-gem {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  border-radius: 50%;
+  color: #04304a;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -6px 8px rgba(0, 74, 133, 0.10),
+    0 4px 8px rgba(13, 96, 151, 0.16);
+}
+
+.spell-gem-sun {
+  background: linear-gradient(145deg, #fff9bf, #ffe25c 52%, #ff9d3d);
+}
+
+.spell-gem-moon {
+  background: linear-gradient(145deg, #f8ffff, #9b83ff 48%, #247cff);
+}
+
+.spell-gem-crown {
+  border-radius: 28% 28% 42% 42%;
+  background: linear-gradient(145deg, #ffffff, #ffe25c 44%, #ff9d3d);
+}
+
+.spell-button.is-ready {
+  transform: translateY(-1px);
+}
+
+.spell-button.is-ready .spell-gem {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -6px 8px rgba(0, 74, 133, 0.10),
+    0 0 0 2px rgba(255, 255, 255, 0.36),
+    0 5px 10px rgba(13, 96, 151, 0.18);
 }
 
 .combat-log {
@@ -1893,6 +1952,7 @@ button {
 }
 
 .spell-button span {
+  padding-right: 28px;
   color: #007092;
   font-size: 0.72rem;
   font-weight: 900;
@@ -2291,6 +2351,14 @@ button {
 
   .action-dock .spell-button span {
     font-size: 0.48rem;
+  }
+
+  .action-dock .spell-gem {
+    right: 5px;
+    top: 5px;
+    width: 18px;
+    height: 18px;
+    font-size: 0.52rem;
   }
 
   .action-dock .spell-button strong {

@@ -523,7 +523,7 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="mini-stats" aria-label="${actor.name} resources">
           <b>Guard ${actor.guard}</b>
-          <b>Mana ${actor.sun}/${actor.moon}/${actor.crown}</b>
+          <b>S${actor.sun} M${actor.moon} C${actor.crown}</b>
         </div>
       </div>
     </article>
@@ -535,9 +535,9 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
     <section class="combat-strip ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
-        <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Shade struck' : duel.current === 'player' ? 'Aurora move' : 'Shade turn'}</span>
-        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Aurora turn' : 'Shade acts'}</strong>
-        <em>${legalMoves} moves left</em>
+        <span>${duel.winner ? 'Ended' : enemyCue ? 'Shade' : duel.current === 'player' ? 'Move' : 'Enemy'}</span>
+        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? 'Strike' : duel.current === 'player' ? 'Aurora' : 'Shade'}</strong>
+        <em>${legalMoves} moves</em>
         ${intent ? `<p>Shade prepares: ${intentReason(intent)}</p>` : ''}
       </div>
       ${renderActorMeters(duel.enemy, 'enemy')}
@@ -866,7 +866,8 @@ function renderSpellRow(canMove: boolean): string {
           const spell = DEFAULT_DUEL_RULES.spells[spellId];
           const canCast = canMove && canPayCost(duel.player, spell.cost);
           return `
-            <button class="spell-button spell-${index + 1} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" ${canCast ? '' : 'disabled'}>
+            <button class="spell-button spell-${index + 1} spell-${spellPrimaryGem(spellId)} ${canCast ? 'is-ready' : 'is-locked'} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" ${canCast ? '' : 'disabled'}>
+              <i class="spell-gem spell-gem-${spellPrimaryGem(spellId)}" aria-hidden="true">${spellGemShort(spellId)}</i>
               <span>${costLabel(spell.cost)}</span>
               <strong>${spell.name}</strong>
               <b>${spellActionLabel(spellId)}</b>
@@ -885,12 +886,24 @@ function canPayCost(actor: DuelState['player'], cost: ManaCost): boolean {
 
 function costLabel(cost: ManaCost): string {
   return [
-    cost.sun ? `${cost.sun} sun` : '',
-    cost.moon ? `${cost.moon} moon` : '',
-    cost.crown ? `${cost.crown} crown` : '',
+    cost.sun ? `${cost.sun} Sun` : '',
+    cost.moon ? `${cost.moon} Moon` : '',
+    cost.crown ? `${cost.crown} Crown` : '',
   ]
     .filter(Boolean)
     .join(' / ');
+}
+
+function spellPrimaryGem(spellId: SpellId): 'sun' | 'moon' | 'crown' {
+  if (spellId === 'sun_bloom') return 'sun';
+  if (spellId === 'glass_ward') return 'moon';
+  return 'crown';
+}
+
+function spellGemShort(spellId: SpellId): string {
+  if (spellId === 'sun_bloom') return 'S';
+  if (spellId === 'glass_ward') return 'M';
+  return 'C';
 }
 
 function missingCostLabel(cost: ManaCost): string {
