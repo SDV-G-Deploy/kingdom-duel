@@ -342,10 +342,12 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
     `;
   }
 
+  const backlash = previewBacklash(preview);
   return `
-    <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''}">
+    <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
       <span>Decision preview</span>
-      <strong>${preview.summary}</strong>
+      <strong>${backlash ? `Backlash risk: -${backlash} HP` : preview.summary}</strong>
+      ${backlash ? `<p>Shade strikes hard, but Aurora pays ${backlash} HP after the hit.</p>` : ''}
       <div class="effect-row">
         ${preview.effects.map(renderEffectPill).join('')}
         ${preview.extraTurn ? '<em class="effect-pill tone-extra">extra turn</em>' : ''}
@@ -365,6 +367,11 @@ function intentReason(intent: EnemyIntent): string {
 
   if (intent.preview.extraTurn) parts.push('extra turn');
   return parts.length ? parts.join(', ') : intent.preview.summary;
+}
+
+function previewBacklash(preview: MovePreview | null): number {
+  if (!preview?.valid) return 0;
+  return preview.effects.find((effect) => effect.label === 'backlash')?.value ?? 0;
 }
 
 function latestEvent(): string {
@@ -431,14 +438,17 @@ function renderBoardFrame(
   snapBackCue: string | null,
 ): string {
   const invalidPreview = !!preview && !preview.valid;
+  const backlash = previewBacklash(preview);
   return `
-    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Battle board">
+    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''}" aria-label="Battle board">
       <div class="board-status">
         <span>${
           enemyCue
             ? 'Enemy moved'
             : activeSpellName
             ? 'Spell targeting'
+            : backlash
+              ? 'Backlash risk'
             : snapBackCue || invalidPreview
               ? 'Snap-back'
               : preview?.valid
@@ -452,6 +462,8 @@ function renderBoardFrame(
             ? `Shade Knight: ${enemyCue.summary}`
             : activeSpellName
             ? `Choose target for ${activeSpellName}`
+            : backlash
+              ? `Shade hits hard, costs ${backlash} HP`
             : snapBackCue
               ? 'No match: target returned'
               : invalidPreview

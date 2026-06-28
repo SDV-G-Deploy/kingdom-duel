@@ -127,6 +127,28 @@ function testOverMatchBonusAppliesToPreviewAndSwap(): void {
   assert.equal(result.state.player.sun, 5);
 }
 
+function testShadePreviewShowsBacklashBeforeSwap(): void {
+  const tiles: TileKind[] = Array.from({ length: 64 }, (_, index) => {
+    const x = index % 8;
+    const y = Math.floor(index / 8);
+    return ['sun', 'shield', 'sword', 'moon', 'crown', 'shade'][(x + y) % 6] as TileKind;
+  });
+  const board: Board = { width: 8, height: 8, tiles };
+  setTile(board, { x: 0, y: 0 }, 'shade');
+  setTile(board, { x: 1, y: 0 }, 'shade');
+  setTile(board, { x: 2, y: 0 }, 'sun');
+  setTile(board, { x: 3, y: 0 }, 'shade');
+  setTile(board, { x: 2, y: 1 }, 'shade');
+
+  const preview = previewSwap(board, { x: 2, y: 1 }, { x: 2, y: 0 });
+  assert.equal(preview.valid, true);
+  if (preview.valid) {
+    assert.equal(preview.effects.find((effect) => effect.label === 'shade damage')?.value, 10);
+    assert.equal(preview.effects.find((effect) => effect.label === 'backlash')?.value, 5);
+    assert.match(preview.summary, /-5 backlash/);
+  }
+}
+
 function testEnemyIntentUsesLegalPreview(): void {
   const state = createDuel(2007);
   const intent = getEnemyIntent(state.board);
@@ -175,6 +197,7 @@ testRulesCanConfigureActorsAndBoard();
 testPreviewRejectsBadSwap();
 testPreviewReportsLegalMoveEffects();
 testOverMatchBonusAppliesToPreviewAndSwap();
+testShadePreviewShowsBacklashBeforeSwap();
 testEnemyIntentUsesLegalPreview();
 testSpellRejectsMissingMana();
 testSunBloomCastsAndConvertsTiles();
