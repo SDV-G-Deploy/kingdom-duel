@@ -23,15 +23,17 @@ The current app contains:
 - a playable `Match Duel` core;
 - a mobile-first duel cockpit with compact combat strip, board frame, action dock, and latest-event line;
 - mobile touch controls: drag/swipe gems as the primary input, with tap-tap as fallback;
-- move preview for selected swaps;
-- visible enemy turn feedback, including enemy action state, board highlights, and latest-event summary;
+- move preview for selected swaps, including damage, guard, mana, backlash, and keeps-turn language;
+- visible enemy intent and enemy turn feedback, including Shade plan copy, board highlights, and latest-event summary;
 - first playable board-changing spells;
 - stable portrait and gem asset slots with CSS fallbacks;
 - first-pass Aurora Knight and Shade Knight portrait assets;
 - first-pass readable gem sprite assets;
+- side-specific Aurora/Shade cockpit identity and refreshed playable screenshots;
 - a `Style` view for the AeroCandy 2007 visual direction;
 - deterministic engine modules under `src/engine`;
 - gameplay design notes under `docs/`.
+- current roadmap: `docs/ROADMAP_2026-06-28.md`.
 
 Run:
 
