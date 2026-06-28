@@ -3,6 +3,7 @@ import { areAdjacent, findLegalMoves } from './engine/board';
 import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
 import { DEFAULT_DUEL_RULES } from './engine/rules';
 import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
+import { chooseDragCommitCell } from './input';
 
 type GemKind = TileKind;
 type CharacterSlot = 'hero' | 'enemy';
@@ -944,24 +945,17 @@ window.addEventListener('pointerup', (event) => {
   dragState = null;
   const targetCell = dragTargetCell(endedDrag.startCell, event.clientX - endedDrag.startX, event.clientY - endedDrag.startY);
   const releaseCell = cellAtPoint(event.clientX, event.clientY);
-  const releaseIsValidSwap = releaseCell ? previewSwap(duel.board, endedDrag.startCell, releaseCell).valid : false;
+  const commitCell = chooseDragCommitCell(endedDrag.startCell, targetCell, releaseCell, {
+    isAdjacent: areAdjacent,
+    isValidSwap: (from, to) => previewSwap(duel.board, from, to).valid,
+  });
 
-  if (releaseCell && areAdjacent(endedDrag.startCell, releaseCell) && (releaseIsValidSwap || !targetCell)) {
-    commitSwap(endedDrag.startCell, releaseCell);
+  if (targetCell || releaseCell) {
+    commitSwap(endedDrag.startCell, commitCell);
     return;
   }
 
-  if (targetCell) {
-    const targetIsValidSwap = previewSwap(duel.board, endedDrag.startCell, targetCell).valid;
-    if (!targetIsValidSwap && releaseCell && areAdjacent(endedDrag.startCell, releaseCell)) {
-      commitSwap(endedDrag.startCell, releaseCell);
-      return;
-    }
-    commitSwap(endedDrag.startCell, targetCell);
-    return;
-  }
-
-  handleBoardTap(releaseCell ?? endedDrag.startCell);
+  handleBoardTap(commitCell);
 });
 
 window.addEventListener('pointercancel', (event) => {
