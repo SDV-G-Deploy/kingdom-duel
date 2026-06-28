@@ -352,7 +352,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (snapBackCue) {
     return `
       <div class="decision-panel is-risk">
-        <span>Decision preview</span>
+        <span>Move outcome</span>
         <strong>Snapped back</strong>
         <p>${snapBackCue}</p>
       </div>
@@ -362,9 +362,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!selectedCell) {
     return `
       <div class="decision-panel is-empty">
-        <span>Decision preview</span>
+        <span>Next action</span>
         <strong>Select a tile</strong>
-        <p>Then hover or tap an adjacent tile to read the move before committing.</p>
+        <p>Pick a tile, then choose a neighbor to preview damage, mana, and risk.</p>
       </div>
     `;
   }
@@ -372,9 +372,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview) {
     return `
       <div class="decision-panel is-empty">
-        <span>Decision preview</span>
+        <span>Next action</span>
         <strong>Choose a neighbor</strong>
-        <p>Bright aqua targets will make a match. Soft white targets are adjacent but may snap back.</p>
+        <p>Aqua targets commit a match. Pale targets preview but may snap back.</p>
       </div>
     `;
   }
@@ -382,7 +382,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview.valid) {
     return `
       <div class="decision-panel is-risk">
-        <span>Decision preview</span>
+        <span>Move outcome</span>
         <strong>${swapTruthLabel(preview.from, preview.to)}: no match</strong>
         <p>The engine sees different tile types here. Pick an aqua target to commit.</p>
       </div>
@@ -393,7 +393,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const fatalBacklash = backlash >= duel.player.hp;
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
-      <span>Decision preview · ${swapTruthLabel(preview.from, preview.to)}</span>
+      <span>Move outcome · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
       ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
       <div class="effect-row">
@@ -523,9 +523,7 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="mini-stats" aria-label="${actor.name} resources">
           <b>Guard ${actor.guard}</b>
-          <b>Sun ${actor.sun}</b>
-          <b>Moon ${actor.moon}</b>
-          <b>Crown ${actor.crown}</b>
+          <b>Mana ${actor.sun}/${actor.moon}/${actor.crown}</b>
         </div>
       </div>
     </article>
@@ -538,8 +536,8 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
         <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Enemy action' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
-        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Aurora move' : 'Shade action'}</strong>
-        <em>${legalMoves} moves</em>
+        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Aurora turn' : 'Shade acts'}</strong>
+        <em>${legalMoves} swaps</em>
         ${intent ? `<p>Shade plan: ${intentReason(intent)}</p>` : ''}
       </div>
       ${renderActorMeters(duel.enemy, 'enemy')}
@@ -871,7 +869,7 @@ function renderSpellRow(canMove: boolean): string {
             <button class="spell-button spell-${index + 1} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" ${canCast ? '' : 'disabled'}>
               <span>${costLabel(spell.cost)}</span>
               <strong>${spell.name}</strong>
-              <b>${spellTargetLabel(spellId)}</b>
+              <b>${spellActionLabel(spellId)}</b>
               <em>${canCast ? spellHint(spellId) : missingCostLabel(spell.cost)}</em>
             </button>
           `;
@@ -911,10 +909,10 @@ function spellHint(spellId: SpellId): string {
   return 'collects a row; can include backlash';
 }
 
-function spellTargetLabel(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return '3x3 cell target';
-  if (spellId === 'glass_ward') return 'purify cell target';
-  return 'row target';
+function spellActionLabel(spellId: SpellId): string {
+  if (spellId === 'sun_bloom') return 'Create sun';
+  if (spellId === 'glass_ward') return '+4 Guard';
+  return 'Clear row';
 }
 
 function spellTargetHint(spellId: SpellId): string {
