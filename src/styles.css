@@ -2014,6 +2014,7 @@ button {
     --shell-pad: 0px;
     height: auto;
     min-height: 620px;
+    padding: 0;
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -2038,7 +2039,7 @@ button {
   }
 
   .game-bar {
-    min-height: 34px;
+    min-height: 40px;
     padding: 3px 5px 3px 10px;
   }
 
@@ -2051,8 +2052,8 @@ button {
   }
 
   .icon-action {
-    min-width: 31px;
-    min-height: 29px;
+    min-width: 36px;
+    min-height: 36px;
     padding: 0 7px;
     font-size: 0.64rem;
   }
@@ -2120,6 +2121,11 @@ button {
   .board-status {
     min-height: 24px;
     padding: 2px 6px;
+    border-width: 0 0 2px;
+    border-color: rgba(4, 48, 74, 0.20);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .board-status strong {
@@ -2128,8 +2134,18 @@ button {
 
   .board-frame .play-board {
     align-self: start;
-    width: min(100%, clamp(270px, calc(100dvh - 510px), 308px));
+    width: min(calc(100vw - 24px), clamp(304px, calc(100dvh - 380px), 348px));
     margin: 0 auto;
+  }
+
+  .intent-strip {
+    min-height: 22px;
+    padding: 2px 6px;
+    border-width: 0 0 2px;
+    border-color: rgba(143, 16, 104, 0.26);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .play-board {
@@ -2218,8 +2234,18 @@ button {
   }
 
   .latest-event {
-    min-height: 28px;
+    min-height: 36px;
     padding: 3px 5px 3px 8px;
+  }
+
+  .latest-event button,
+  .log-sheet-head button {
+    min-height: 36px;
+    padding: 0 11px;
+  }
+
+  .log-actions button {
+    min-height: 38px;
   }
 
   .latest-event span {
