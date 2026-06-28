@@ -59,7 +59,7 @@ Latest full verification passed:
 - `git diff --check`
 - Public URL returned `HTTP 200`
 - Public hashed JS/CSS assets returned `HTTP 200`
-- Latest Pages run for `41ca278` succeeded: https://github.com/SDV-G-Deploy/kingdom-duel/actions/runs/28313392305
+- Latest Pages run for `7010354` succeeded: https://github.com/SDV-G-Deploy/kingdom-duel/actions/runs/28313909191
 
 ## Unresolved Risks
 
