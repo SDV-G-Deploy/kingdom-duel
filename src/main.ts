@@ -1,5 +1,5 @@
 import './styles.css';
-import { areAdjacent, findLegalMoves } from './engine/board';
+import { areAdjacent, findLegalMoves, getTile } from './engine/board';
 import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
 import { DEFAULT_DUEL_RULES } from './engine/rules';
 import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
@@ -148,6 +148,14 @@ function renderPortraitSlot(slot: CharacterSlot): string {
 
 function cellKey(cell: Cell): string {
   return `${cell.x},${cell.y}`;
+}
+
+function tileAtLabel(cell: Cell): string {
+  return gemLabel(getTile(duel.board, cell));
+}
+
+function swapTruthLabel(from: Cell, to: Cell): string {
+  return `${tileAtLabel(from)} -> ${tileAtLabel(to)}`;
 }
 
 function renderGem(kind: GemKind, index?: number, classes: string[] = []): string {
@@ -338,8 +346,8 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
     return `
       <div class="decision-panel is-risk">
         <span>Decision preview</span>
-        <strong>No match</strong>
-        <p>That target snaps back. Pick an aqua target to commit.</p>
+        <strong>${swapTruthLabel(preview.from, preview.to)}: no match</strong>
+        <p>The engine sees different tile types here. Pick an aqua target to commit.</p>
       </div>
     `;
   }
@@ -347,7 +355,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const backlash = previewBacklash(preview);
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
-      <span>Decision preview</span>
+      <span>Decision preview · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? `Backlash risk: -${backlash} HP` : preview.summary}</strong>
       ${backlash ? `<p>Shade strikes hard, but Aurora pays ${backlash} HP after the hit.</p>` : ''}
       <div class="effect-row">
@@ -475,9 +483,13 @@ function renderBoardFrame(
             : backlash
               ? `Shade hits hard, costs ${backlash} HP`
             : snapBackCue
-              ? 'No match: target returned'
+              ? preview
+                ? `${swapTruthLabel(preview.from, preview.to)}: no match`
+                : 'No match: target returned'
               : invalidPreview
-                ? 'No match on this target'
+                ? preview
+                  ? `${swapTruthLabel(preview.from, preview.to)}: no match`
+                  : 'No match on this target'
                 : preview?.valid
                   ? preview.summary
                   : canMove
