@@ -352,8 +352,8 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (snapBackCue) {
     return `
       <div class="decision-panel is-risk">
-        <span>Strike preview</span>
-        <strong>Snapped back</strong>
+        <span>Strike failed</span>
+        <strong>No match. Gem snaps back.</strong>
         <p>${snapBackCue}</p>
       </div>
     `;
@@ -362,9 +362,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!selectedCell) {
     return `
       <div class="decision-panel is-empty">
-        <span>Command</span>
-        <strong>Choose a tile</strong>
-        <p>Pick a tile, then choose a highlighted gem to preview strike, mana, and risk.</p>
+        <span>Command deck</span>
+        <strong>Pick a strike gem</strong>
+        <p>Select one gem. Bright sockets are safe swaps; pink notches show Shade pressure.</p>
       </div>
     `;
   }
@@ -372,9 +372,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview) {
     return `
       <div class="decision-panel is-empty">
-        <span>Command</span>
-        <strong>Choose a highlighted gem</strong>
-        <p>Aqua targets commit a match. Pale targets preview but may snap back.</p>
+        <span>Command deck</span>
+        <strong>Choose a lit socket</strong>
+        <p>Aqua sockets can strike. Pale sockets are only a test and may snap back.</p>
       </div>
     `;
   }
@@ -382,9 +382,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview.valid) {
     return `
       <div class="decision-panel is-risk">
-        <span>Strike preview</span>
+        <span>Strike failed</span>
         <strong>${swapTruthLabel(preview.from, preview.to)}: no match</strong>
-        <p>The engine sees different tile types here. Pick an aqua target to commit.</p>
+        <p>No chain forms here. Shift to a bright socket before Shade gets tempo.</p>
       </div>
     `;
   }
@@ -393,7 +393,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
-      <span>Strike preview · ${swapTruthLabel(preview.from, preview.to)}</span>
+      <span>${backlash ? 'Risk strike' : preview.extraTurn ? 'Tempo strike' : 'Strike locked'} · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
       ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
       <div class="effect-row">
@@ -476,9 +476,9 @@ function spellPreviewTitle(spellId: SpellId, damage: number, guard: number, back
 
 function spellPreviewHint(spellId: SpellId, target: Cell, converted: number, fatal: boolean): string {
   const fatalCopy = fatal ? ' This will drop Aurora to 0.' : '';
-  if (spellId === 'crown_strike') return `Row ${target.y + 1} resolves now, then cascades.${fatalCopy}`;
-  if (spellId === 'glass_ward') return `Gain guard and convert ${converted} nearby shade to shield.${fatalCopy}`;
-  return `Convert ${converted} tiles to sun, then resolve cascades.${fatalCopy}`;
+  if (spellId === 'crown_strike') return `Row ${target.y + 1} fires now, then cascades.${fatalCopy}`;
+  if (spellId === 'glass_ward') return `Raise guard and seal ${converted} nearby shade into shields.${fatalCopy}`;
+  return `Bloom ${converted} tiles into sun, then let the board chain.${fatalCopy}`;
 }
 
 function backlashPreviewTitle(backlash: number, fatal: boolean): string {
@@ -488,7 +488,7 @@ function backlashPreviewTitle(backlash: number, fatal: boolean): string {
 function backlashPreviewHint(backlash: number, fatal: boolean): string {
   return fatal
     ? `Aurora has ${duel.player.hp} HP. This shade hit will drop her to 0; Guard does not block backlash.`
-    : `Shade strikes hard, but Aurora pays ${backlash} HP after the hit. Guard does not block backlash.`;
+    : `Shade will bite through the chain. Aurora pays ${backlash} HP after the hit.`;
 }
 
 function latestEvent(): string {
@@ -516,16 +516,23 @@ function renderTopGameBar(canMove: boolean): string {
 function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
   const isWinner = duel.winner === actor.id;
   const isDefeated = !!duel.winner && duel.winner !== actor.id;
+  const hpPct = actor.hp / actor.maxHp;
+  const pressureClass = hpPct <= 0 ? 'is-ko' : hpPct <= 0.28 ? 'is-critical' : actor.guard >= 4 ? 'is-braced' : '';
+  const status = hpPct <= 0 ? 'KO' : hpPct <= 0.28 ? 'Critical' : actor.guard >= 4 ? 'Braced' : actor.id === duel.current ? 'Acting' : 'Ready';
   return `
-    <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
+    <article class="combatant combatant-${side} ${pressureClass} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
       ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
       <div class="combatant-body">
         <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
         <strong>${actor.name}</strong>
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
-        <div class="mini-stats" aria-label="${actor.name} resources">
-          <b>Guard ${actor.guard}</b>
-          <b>S${actor.sun} M${actor.moon} C${actor.crown}</b>
+        <div class="combat-readout" aria-label="${actor.name} combat resources">
+          <b class="guard-chip" title="${status}, Guard ${actor.guard}">Guard ${actor.guard}</b>
+          <b class="mana-bank">
+            <i class="mana-sun">S${actor.sun}</i>
+            <i class="mana-moon">M${actor.moon}</i>
+            <i class="mana-crown">C${actor.crown}</i>
+          </b>
         </div>
       </div>
     </article>
@@ -579,9 +586,11 @@ function renderBoardFrame(
             : snapBackCue || invalidPreview
               ? 'Snap-back'
             : preview?.valid
-                ? 'Strike preview'
+                ? preview.extraTurn
+                  ? 'Tempo strike'
+                  : 'Strike lock'
                 : canMove
-                  ? "Aurora's move"
+                  ? 'Aurora turn'
                   : 'Arena locked'
         }</span>
         <strong>${
@@ -608,7 +617,7 @@ function renderBoardFrame(
                 : preview?.valid
                   ? preview.summary
                 : canMove
-                    ? 'Swap gems to strike'
+                    ? 'Pick a strike lane'
                     : enemyThinking
                       ? 'Shade Knight is choosing'
                       : 'Resolving cascades'
@@ -815,11 +824,17 @@ function battleRecap(): BattleRecap | null {
 function renderBattleRecap(): string {
   const recap = battleRecap();
   if (!recap) return '';
+  const winnerName = duel.winner === 'player' ? 'Aurora Knight' : 'Shade Knight';
+  const resultTitle = duel.winner === 'player' ? 'Aurora seals the duel' : 'Shade breaks Aurora';
 
   return `
     <section class="battle-recap ${duel.winner === 'player' ? 'is-victory' : 'is-defeat'}" aria-label="Battle recap">
-      <div>
-        <span>${recap.outcome} recap</span>
+      <div class="recap-seal">
+        <span>${recap.outcome}</span>
+        <strong>${winnerName}</strong>
+      </div>
+      <div class="recap-main">
+        <span>${resultTitle}</span>
         <strong>${recap.cause}</strong>
       </div>
       <p>${recap.turningPoint}</p>
@@ -915,27 +930,27 @@ function missingCostLabel(cost: ManaCost): string {
 }
 
 function spellRoleLabel(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'Setup engine';
-  if (spellId === 'glass_ward') return 'Emergency defense';
-  return 'Controlled row clear';
+  if (spellId === 'sun_bloom') return 'Sun engine';
+  if (spellId === 'glass_ward') return 'Guard seal';
+  return 'Row finisher';
 }
 
 function spellHint(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'sun cascades; can trigger shade';
-  if (spellId === 'glass_ward') return '+4 guard; converts nearby shade';
-  return 'collects a row; can include backlash';
+  if (spellId === 'sun_bloom') return 'chains sun; watch shade';
+  if (spellId === 'glass_ward') return '+4 guard; seals shade';
+  return 'fires a row; risk included';
 }
 
 function spellActionLabel(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'Create sun';
-  if (spellId === 'glass_ward') return '+4 Guard';
-  return 'Clear row';
+  if (spellId === 'sun_bloom') return 'Bloom field';
+  if (spellId === 'glass_ward') return 'Raise guard';
+  return 'Fire row';
 }
 
 function spellTargetHint(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'Choose the center tile. Makes a sun cluster for setup and extra-turn chains, but cascades can still trigger shade.';
-  if (spellId === 'glass_ward') return 'Choose the center tile. Use when exposed: gain guard and turn nearby shade into shields.';
-  return 'Choose any tile in a row. The whole row clears and pays every tile effect, including possible backlash.';
+  if (spellId === 'sun_bloom') return 'Choose a center tile. Bloom a sun cluster for chains, but shade can still bite.';
+  if (spellId === 'glass_ward') return 'Choose a center tile. Gain guard and seal nearby shade into shields.';
+  return 'Choose a row. It fires immediately and pays every tile effect, including backlash.';
 }
 
 function renderTopNav(): string {

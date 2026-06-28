@@ -563,33 +563,92 @@ button {
   border-radius: 999px;
 }
 
-.mini-stats {
+.combat-readout {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 3px;
   margin-top: 4px;
 }
 
-.mini-stats b {
+.combat-readout b {
   min-width: 0;
-  padding: 3px 2px;
+  min-height: 19px;
+  padding: 3px 4px;
   border: 1px solid rgba(255, 255, 255, 0.54);
-  border-radius: 8px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.30);
   color: rgba(4, 48, 74, 0.78);
-  font-size: 0.58rem;
+  font-size: 0.55rem;
   line-height: 1;
   text-align: center;
 }
 
-.combatant-hero .mini-stats b {
+.guard-chip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mana-bank {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px;
+}
+
+.mana-bank i {
+  display: grid;
+  min-width: 0;
+  min-height: 15px;
+  place-items: center;
+  border-radius: 999px;
+  color: rgba(4, 48, 74, 0.76);
+  font-size: 0.48rem;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    inset 0 -4px 5px rgba(0, 74, 133, 0.07);
+}
+
+.mana-sun {
+  background: linear-gradient(145deg, rgba(255, 249, 191, 0.92), rgba(255, 226, 92, 0.46));
+}
+
+.mana-moon {
+  background: linear-gradient(145deg, rgba(248, 255, 255, 0.88), rgba(155, 131, 255, 0.36));
+}
+
+.mana-crown {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(255, 157, 61, 0.40));
+}
+
+.combatant-hero .combat-readout b {
   background: rgba(248, 255, 255, 0.42);
   color: #006985;
 }
 
-.combatant-enemy .mini-stats b {
+.combatant-enemy .combat-readout b {
   background: rgba(255, 116, 200, 0.14);
   color: #7c155f;
+}
+
+.combatant.is-critical .stat-bar {
+  border-color: rgba(255, 116, 200, 0.62);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 116, 200, 0.18)),
+    rgba(255, 255, 255, 0.28);
+}
+
+.combatant.is-critical .guard-chip {
+  border-color: rgba(255, 116, 200, 0.54);
+  background: rgba(255, 116, 200, 0.20);
+  color: #8f1068;
+}
+
+.combatant.is-ko {
+  filter: saturate(0.58);
 }
 
 .duel-pulse {
@@ -808,8 +867,8 @@ button {
 
 .action-dock .spell-button {
   min-height: 0;
-  padding: 7px 6px 7px 7px;
-  border-radius: 12px;
+  padding: 8px 6px 7px 8px;
+  border-radius: 10px 14px 13px 10px;
 }
 
 .action-dock .spell-button span {
@@ -837,7 +896,7 @@ button {
 
 .battle-recap {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 0.78fr) minmax(0, 1fr);
+  grid-template-columns: minmax(84px, 0.72fr) minmax(0, 1.22fr) minmax(0, 0.95fr) minmax(0, 0.78fr) minmax(0, 1fr);
   gap: 6px;
   align-items: center;
   min-height: 112px;
@@ -852,6 +911,29 @@ button {
   margin: 0;
 }
 
+.recap-seal {
+  display: grid;
+  min-height: 82px;
+  place-items: center;
+  padding: 7px;
+  border: 2px solid rgba(255, 226, 92, 0.72);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.96), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 226, 92, 0.34) 62%, rgba(255, 157, 61, 0.16)),
+    rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -12px 16px rgba(255, 157, 61, 0.12),
+    0 10px 20px rgba(255, 157, 61, 0.16);
+  text-align: center;
+}
+
+.recap-main {
+  padding: 7px 8px;
+  border-left: 3px solid rgba(255, 226, 92, 0.70);
+}
+
 .battle-recap span {
   display: block;
   color: #8f1068;
@@ -864,8 +946,12 @@ button {
   display: block;
   margin-top: 4px;
   color: #04304a;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   line-height: 1.08;
+}
+
+.recap-seal strong {
+  font-size: 0.72rem;
 }
 
 .battle-recap p,
@@ -881,12 +967,22 @@ button {
 }
 
 .battle-recap.is-victory {
+  border-color: rgba(255, 226, 92, 0.54);
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.94), transparent 20%),
+    linear-gradient(90deg, rgba(255, 226, 92, 0.22), rgba(255, 255, 255, 0.70) 44%, rgba(37, 215, 242, 0.18)),
+    rgba(255, 255, 255, 0.44);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.92),
     0 16px 38px rgba(13, 151, 96, 0.16);
 }
 
 .battle-recap.is-defeat {
+  border-color: rgba(255, 116, 200, 0.46);
+  background:
+    radial-gradient(circle at 86% 16%, rgba(255, 255, 255, 0.84), transparent 22%),
+    linear-gradient(90deg, rgba(255, 116, 200, 0.18), rgba(255, 255, 255, 0.66) 46%, rgba(155, 131, 255, 0.18)),
+    rgba(255, 255, 255, 0.38);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.92),
     0 16px 38px rgba(143, 16, 104, 0.18);
@@ -1362,6 +1458,39 @@ button {
 
 .spell-button {
   position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.62);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.90), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(125, 223, 255, 0.22) 58%, rgba(123, 242, 141, 0.14)),
+    rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -10px 14px rgba(0, 74, 133, 0.08),
+    0 7px 14px rgba(13, 96, 151, 0.14);
+  text-align: left;
+}
+
+.spell-button::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(37, 215, 242, 0.54));
+  content: "";
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.spell-sun::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 226, 92, 0.72), rgba(255, 157, 61, 0.36));
+}
+
+.spell-moon::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(155, 131, 255, 0.66), rgba(36, 124, 255, 0.30));
+}
+
+.spell-crown::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 226, 92, 0.62), rgba(255, 157, 61, 0.44));
 }
 
 .spell-gem {
@@ -1400,6 +1529,8 @@ button {
 
 .spell-button.is-ready {
   transform: translateY(-1px);
+  border-color: rgba(37, 215, 242, 0.52);
+  filter: saturate(1.08);
 }
 
 .spell-button.is-locked {
