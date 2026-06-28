@@ -162,6 +162,28 @@ function testShadePreviewShowsBacklashBeforeSwap(): void {
   }
 }
 
+function testBacklashSelfKoUsesActualWinnerInSummary(): void {
+  const tiles: TileKind[] = Array.from({ length: 64 }, (_, index) => {
+    const x = index % 8;
+    const y = Math.floor(index / 8);
+    return ['sun', 'shield', 'sword', 'moon', 'crown', 'shade'][(x + y) % 6] as TileKind;
+  });
+  const board: Board = { width: 8, height: 8, tiles };
+  setTile(board, { x: 0, y: 0 }, 'shade');
+  setTile(board, { x: 1, y: 0 }, 'shade');
+  setTile(board, { x: 2, y: 0 }, 'sun');
+  setTile(board, { x: 3, y: 0 }, 'shade');
+  setTile(board, { x: 2, y: 1 }, 'shade');
+
+  const base = createDuel(2007);
+  const state = { ...base, board, player: { ...base.player, hp: 3, guard: 0 }, seed: 99 };
+  const result = applySwap(state, { x: 2, y: 1 }, { x: 2, y: 0 });
+  assert.equal(result.state.winner, 'enemy');
+  assert.match(result.state.history[0]?.summary ?? '', /Shade Knight wins the duel\./);
+  assert.match(result.state.history[0]?.detail ?? '', /Shade Knight wins because Aurora Knight reached 0 HP\./);
+  assert.ok(result.state.history[0]?.events.some((event) => event.includes('paid 5 HP backlash')));
+}
+
 function testEnemyIntentUsesLegalPreview(): void {
   const state = createDuel(2007);
   const intent = getEnemyIntent(state.board);
@@ -212,6 +234,7 @@ testPreviewRejectsBadSwap();
 testPreviewReportsLegalMoveEffects();
 testOverMatchBonusAppliesToPreviewAndSwap();
 testShadePreviewShowsBacklashBeforeSwap();
+testBacklashSelfKoUsesActualWinnerInSummary();
 testEnemyIntentUsesLegalPreview();
 testSpellRejectsMissingMana();
 testSunBloomCastsAndConvertsTiles();

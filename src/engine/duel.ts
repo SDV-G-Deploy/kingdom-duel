@@ -433,7 +433,7 @@ function eventSummary(events: DuelEvent[], actor: ActorId): string {
   const matches = events.filter((event) => event.type === 'match');
   const extra = events.some((event) => event.type === 'extra_turn');
   const ended = events.find((event) => event.type === 'battle_ended');
-  if (ended?.type === 'battle_ended') return `${label(actor)} wins the duel.`;
+  if (ended?.type === 'battle_ended') return `${label(ended.winner)} wins the duel.`;
   if (spell?.type === 'spell_cast') return `${label(actor)} casts ${DEFAULT_DUEL_RULES.spells[spell.spell].name}${extra ? ' and keeps the turn' : ''}.`;
   if (!matches.length) return `${label(actor)} takes a board action.`;
   const first = matches[0];

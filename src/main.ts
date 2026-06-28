@@ -305,7 +305,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
     const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
     return `
       <div class="decision-panel is-extra">
-        <span>${spellTargetLabel(activeSpell)}</span>
+        <span>${spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
         <strong>${spell.name}</strong>
         <p>${spellTargetHint(activeSpell)}</p>
       </div>
@@ -353,11 +353,12 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   }
 
   const backlash = previewBacklash(preview);
+  const fatalBacklash = backlash >= duel.player.hp;
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
       <span>Decision preview · ${swapTruthLabel(preview.from, preview.to)}</span>
-      <strong>${backlash ? `Backlash risk: -${backlash} HP` : preview.summary}</strong>
-      ${backlash ? `<p>Shade strikes hard, but Aurora pays ${backlash} HP after the hit.</p>` : ''}
+      <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
+      ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
       <div class="effect-row">
         ${preview.effects.map(renderEffectPill).join('')}
         ${preview.extraTurn ? '<em class="effect-pill tone-extra">extra turn</em>' : ''}
@@ -390,6 +391,16 @@ function intentReason(intent: EnemyIntent): string {
 function previewBacklash(preview: MovePreview | null): number {
   if (!preview?.valid) return 0;
   return preview.effects.find((effect) => effect.label === 'backlash')?.value ?? 0;
+}
+
+function backlashPreviewTitle(backlash: number, fatal: boolean): string {
+  return fatal ? `Fatal backlash: -${backlash} HP` : `Backlash risk: -${backlash} HP`;
+}
+
+function backlashPreviewHint(backlash: number, fatal: boolean): string {
+  return fatal
+    ? `Aurora has ${duel.player.hp} HP. This shade hit will drop her to 0; Guard does not block backlash.`
+    : `Shade strikes hard, but Aurora pays ${backlash} HP after the hit. Guard does not block backlash.`;
 }
 
 function latestEvent(): string {
@@ -457,6 +468,7 @@ function renderBoardFrame(
 ): string {
   const invalidPreview = !!preview && !preview.valid;
   const backlash = previewBacklash(preview);
+  const fatalBacklash = backlash >= duel.player.hp;
   return `
     <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''}" aria-label="Battle board">
       <div class="board-status">
@@ -465,6 +477,8 @@ function renderBoardFrame(
             ? 'Enemy moved'
             : activeSpellName
             ? 'Spell targeting'
+            : fatalBacklash
+              ? 'Fatal backlash'
             : backlash
               ? 'Backlash risk'
             : snapBackCue || invalidPreview
@@ -480,6 +494,8 @@ function renderBoardFrame(
             ? `Shade Knight action: ${enemyCue.summary}`
             : activeSpellName
             ? `Choose target for ${activeSpellName}`
+            : fatalBacklash
+              ? `Will KO Aurora: costs ${backlash} HP`
             : backlash
               ? `Shade hits hard, costs ${backlash} HP`
             : snapBackCue
@@ -569,16 +585,17 @@ function readableBattleLog(): string {
     .map((entry) => {
       const actor = entry.actor === 'system' ? 'Setup' : entry.actor === 'player' ? 'Aurora' : 'Shade';
       const events = entry.events.length ? `\n  events: ${entry.events.join('; ')}` : '';
-      return `Turn ${entry.turn} / ${actor}: ${entry.summary}\n  ${entry.detail}${events}`;
+      return `--- Turn ${entry.turn} / ${actor} ---\n${entry.summary}\n${entry.detail}${events}`;
     })
     .join('\n\n');
 }
 
 function compactBattleReport(): string {
   const history = [...duel.history].reverse();
+  const terminalEntry = history[history.length - 1];
   const playerHpLost = history.reduce((sum, entry) => sum + Math.max(0, entry.before.player.hp - entry.after.player.hp), 0);
   const enemyHpLost = history.reduce((sum, entry) => sum + Math.max(0, entry.before.enemy.hp - entry.after.enemy.hp), 0);
-  const playerBacklash = history.reduce((sum, entry) => sum + sumNumbers(entry.events, /paid (\\d+) HP backlash/), 0);
+  const playerBacklash = history.reduce((sum, entry) => sum + sumNumbers(entry.events, /paid (\d+) HP backlash/), 0);
   const playerExtraTurns = history.filter((entry) => entry.actor === 'player' && entry.events.some((event) => event.includes('kept the turn'))).length;
   const enemyExtraTurns = history.filter((entry) => entry.actor === 'enemy' && entry.events.some((event) => event.includes('kept the turn'))).length;
   const spells = history.flatMap((entry) => entry.events.filter((event) => event.startsWith('cast ')));
@@ -588,7 +605,12 @@ function compactBattleReport(): string {
     .map((entry) => `T${entry.turn} ${entry.actor === 'player' ? 'Aurora' : 'Shade'}: ${entry.summary} (${entry.detail})`);
   const unspentMana = duel.player.sun + duel.player.moon + duel.player.crown;
   const reason =
-    duel.winner === 'enemy' && unspentMana >= 10
+    duel.winner === 'enemy' &&
+    terminalEntry.actor === 'player' &&
+    terminalEntry.events.some((event) => event.includes('HP backlash')) &&
+    terminalEntry.after.player.hp === 0
+      ? `Likely loss reason: Aurora paid ${sumNumbers(terminalEntry.events, /paid (\d+) HP backlash/)} backlash at ${terminalEntry.before.player.hp} HP.`
+      : duel.winner === 'enemy' && unspentMana >= 10
       ? `Likely loss reason: Aurora died with ${unspentMana} unspent mana; spend spells earlier.`
       : duel.winner === 'enemy'
         ? 'Likely loss reason: Aurora HP reached 0 before enough damage/spell pressure.'
@@ -599,7 +621,7 @@ function compactBattleReport(): string {
   return [
     'Kingdom Duel compact battle report',
     `Seed: ${duel.seed}`,
-    `Winner: ${duel.winner ?? 'none'} on turn ${duel.turn}`,
+    `Winner: ${duel.winner ? (duel.winner === 'player' ? 'Aurora Knight' : 'Shade Knight') : 'none'} on turn ${duel.turn}`,
     `Final: Aurora ${duel.player.hp}/${duel.player.maxHp} HP, Guard ${duel.player.guard}, mana S${duel.player.sun}/M${duel.player.moon}/C${duel.player.crown}`,
     `Final: Shade ${duel.enemy.hp}/${duel.enemy.maxHp} HP, Guard ${duel.enemy.guard}, mana S${duel.enemy.sun}/M${duel.enemy.moon}/C${duel.enemy.crown}`,
     `HP lost: Aurora ${playerHpLost}, Shade ${enemyHpLost}`,
@@ -705,10 +727,16 @@ function missingCostLabel(cost: ManaCost): string {
   return `need ${costLabel(cost)}`;
 }
 
+function spellRoleLabel(spellId: SpellId): string {
+  if (spellId === 'sun_bloom') return 'Setup engine';
+  if (spellId === 'glass_ward') return 'Emergency defense';
+  return 'Controlled row clear';
+}
+
 function spellHint(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'convert a 3x3 cluster into sun';
-  if (spellId === 'glass_ward') return '+4 guard, shade nearby becomes shield';
-  return 'clear one row and collect every tile';
+  if (spellId === 'sun_bloom') return 'sun cascades; can trigger shade';
+  if (spellId === 'glass_ward') return '+4 guard; converts nearby shade';
+  return 'collects a row; can include backlash';
 }
 
 function spellTargetLabel(spellId: SpellId): string {
@@ -718,9 +746,9 @@ function spellTargetLabel(spellId: SpellId): string {
 }
 
 function spellTargetHint(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'Choose the center tile. Its 3x3 cluster becomes sun for mana and setup.';
-  if (spellId === 'glass_ward') return 'Choose the center tile. Gain guard and turn nearby shade into shields.';
-  return 'Choose any tile in a row. The whole row clears and pays its tile effects.';
+  if (spellId === 'sun_bloom') return 'Choose the center tile. Makes a sun cluster for setup and extra-turn chains, but cascades can still trigger shade.';
+  if (spellId === 'glass_ward') return 'Choose the center tile. Use when exposed: gain guard and turn nearby shade into shields.';
+  return 'Choose any tile in a row. The whole row clears and pays every tile effect, including possible backlash.';
 }
 
 function renderTopNav(): string {
