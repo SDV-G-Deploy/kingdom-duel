@@ -140,6 +140,7 @@ button {
 .combat-strip,
 .board-frame,
 .action-dock,
+.battle-recap,
 .latest-event,
 .log-sheet {
   border: 1px solid rgba(255, 255, 255, 0.72);
@@ -625,6 +626,63 @@ button {
   margin-top: 5px;
   font-size: 0.62rem;
   line-height: 1.12;
+}
+
+.battle-recap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 0.78fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 132px;
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.battle-recap div,
+.battle-recap p,
+.battle-recap em {
+  min-width: 0;
+  margin: 0;
+}
+
+.battle-recap span {
+  display: block;
+  color: #8f1068;
+  font-size: 0.62rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.battle-recap strong {
+  display: block;
+  margin-top: 7px;
+  color: #04304a;
+  font-size: 0.92rem;
+  line-height: 1.08;
+}
+
+.battle-recap p,
+.battle-recap em {
+  color: rgba(4, 48, 74, 0.78);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1.18;
+}
+
+.battle-recap em {
+  font-style: normal;
+}
+
+.battle-recap.is-victory {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 16px 38px rgba(13, 151, 96, 0.16);
+}
+
+.battle-recap.is-defeat {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 16px 38px rgba(143, 16, 104, 0.18);
 }
 
 .latest-event {
@@ -2118,6 +2176,30 @@ button {
 
   .action-dock .spell-button em {
     display: none;
+  }
+
+  .battle-recap {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    gap: 7px;
+    min-height: 96px;
+    padding: 8px;
+    border-radius: 19px;
+  }
+
+  .battle-recap span {
+    font-size: 0.54rem;
+  }
+
+  .battle-recap strong {
+    margin-top: 5px;
+    font-size: 0.74rem;
+    line-height: 1.06;
+  }
+
+  .battle-recap p,
+  .battle-recap em {
+    font-size: 0.58rem;
+    line-height: 1.12;
   }
 
   .latest-event {

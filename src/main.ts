@@ -19,6 +19,13 @@ type SpellTargetPreview = {
   extraTurn: boolean;
   fatal: boolean;
 };
+type BattleRecap = {
+  outcome: string;
+  cause: string;
+  turningPoint: string;
+  pressure: string;
+  lesson: string;
+};
 
 const boardPattern: GemKind[] = [
   'sun',
@@ -684,6 +691,7 @@ function readableBattleLog(): string {
 
 function compactBattleReport(): string {
   const history = [...duel.history].reverse();
+  const recap = battleRecap();
   const terminalEntry = history[history.length - 1];
   const playerHpLost = history.reduce((sum, entry) => sum + Math.max(0, entry.before.player.hp - entry.after.player.hp), 0);
   const enemyHpLost = history.reduce((sum, entry) => sum + Math.max(0, entry.before.enemy.hp - entry.after.enemy.hp), 0);
@@ -720,6 +728,7 @@ function compactBattleReport(): string {
     `Backlash paid by Aurora: ${playerBacklash}`,
     `Extra turns: Aurora ${playerExtraTurns}, Shade ${enemyExtraTurns}`,
     `Spells cast: ${spells.length ? spells.join('; ') : 'none'}`,
+    recap ? `Recap: ${recap.cause} ${recap.lesson}` : 'Recap: battle still unresolved.',
     reason,
     'Last key actions:',
     ...keyTail,
@@ -749,6 +758,77 @@ function debugBattleTrace(): string {
   );
 }
 
+function battleRecap(): BattleRecap | null {
+  if (!duel.winner) return null;
+
+  const history = [...duel.history].reverse();
+  const combatHistory = history.filter((entry) => entry.actor !== 'system');
+  const terminalEntry = combatHistory[combatHistory.length - 1];
+  const playerBacklash = history.reduce((sum, entry) => sum + sumNumbers(entry.events, /paid (\d+) HP backlash/), 0);
+  const playerExtraTurns = history.filter((entry) => entry.actor === 'player' && entry.events.some((event) => event.includes('kept the turn'))).length;
+  const enemyExtraTurns = history.filter((entry) => entry.actor === 'enemy' && entry.events.some((event) => event.includes('kept the turn'))).length;
+  const spells = history.flatMap((entry) => entry.events.filter((event) => event.startsWith('cast ')));
+  const unspentMana = duel.player.sun + duel.player.moon + duel.player.crown;
+  const selfKo =
+    duel.winner === 'enemy' &&
+    terminalEntry?.actor === 'player' &&
+    terminalEntry.events.some((event) => event.includes('HP backlash')) &&
+    terminalEntry.after.player.hp === 0;
+  const turningEntry =
+    [...combatHistory]
+      .reverse()
+      .find(
+        (entry) =>
+          entry.events.some((event) => event.startsWith('cast ') || event.includes('kept the turn') || event.includes('HP backlash')) ||
+          entry.after.enemy.hp <= Math.max(0, entry.before.enemy.hp - 6) ||
+          entry.after.player.hp <= Math.max(0, entry.before.player.hp - 6),
+      ) ?? terminalEntry;
+
+  const cause = selfKo
+    ? `Aurora self-KO'd on ${sumNumbers(terminalEntry.events, /paid (\d+) HP backlash/)} shade backlash.`
+    : duel.winner === 'enemy' && unspentMana >= 10
+      ? `Aurora fell with ${unspentMana} unspent mana.`
+      : duel.winner === 'enemy'
+        ? 'Shade ended the duel by pushing Aurora to 0 HP.'
+        : spells.length
+          ? 'Aurora converted stored mana into lethal spell pressure.'
+          : 'Aurora ended the duel through board pressure.';
+  const lesson = selfKo
+    ? 'Lesson: below 5 HP, treat shade cascades as lethal unless preview says safe.'
+    : duel.winner === 'enemy' && unspentMana >= 10
+      ? 'Lesson: spend mana earlier; unused spells do not protect Aurora.'
+      : duel.winner === 'enemy'
+        ? 'Lesson: guard and preview shade risk before giving Shade a chain.'
+        : spells.length
+          ? 'Lesson: previewed spells are the strongest way to convert mana into tempo.'
+          : 'Lesson: forcing sword pressure and extra turns can win without spells.';
+
+  return {
+    outcome: duel.winner === 'player' ? 'Victory' : 'Defeat',
+    cause,
+    turningPoint: turningEntry ? `T${turningEntry.turn} ${turningEntry.actor === 'player' ? 'Aurora' : 'Shade'}: ${turningEntry.summary}` : 'No combat action recorded.',
+    pressure: `Backlash ${playerBacklash} HP · Spells ${spells.length} · Chains A${playerExtraTurns}/S${enemyExtraTurns}`,
+    lesson,
+  };
+}
+
+function renderBattleRecap(): string {
+  const recap = battleRecap();
+  if (!recap) return '';
+
+  return `
+    <section class="battle-recap ${duel.winner === 'player' ? 'is-victory' : 'is-defeat'}" aria-label="Battle recap">
+      <div>
+        <span>${recap.outcome} recap</span>
+        <strong>${recap.cause}</strong>
+      </div>
+      <p>${recap.turningPoint}</p>
+      <p>${recap.pressure}</p>
+      <em>${recap.lesson}</em>
+    </section>
+  `;
+}
+
 async function copyToClipboard(text: string, label: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text);
@@ -771,7 +851,7 @@ function renderPlayable(): string {
         ${renderTopGameBar(canMove)}
         ${renderCombatStrip(intent, legalMoves)}
         ${renderBoardFrame(preview, intent, canMove, activeSpellName, invalidCue)}
-        ${renderActionDock(preview, canMove)}
+        ${duel.winner ? renderBattleRecap() : renderActionDock(preview, canMove)}
         ${renderLatestEvent()}
         ${renderLogSheet()}
       </section>
