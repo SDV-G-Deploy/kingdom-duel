@@ -48,3 +48,9 @@ Checks:
 npm test
 npm run build
 ```
+
+Balance probe:
+
+```bash
+npm run sim:balance -- --seeds=500
+```
