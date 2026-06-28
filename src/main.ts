@@ -849,9 +849,11 @@ function renderPlayable(): string {
     <main class="aero-shell play-shell">
       <section class="play-stage cockpit-stage">
         ${renderTopGameBar(canMove)}
-        ${renderCombatStrip(intent, legalMoves)}
-        ${renderBoardFrame(preview, intent, canMove, activeSpellName, invalidCue)}
-        ${duel.winner ? renderBattleRecap() : renderActionDock(preview, canMove)}
+        <section class="battle-console" aria-label="Glass battle console">
+          ${renderCombatStrip(intent, legalMoves)}
+          ${renderBoardFrame(preview, intent, canMove, activeSpellName, invalidCue)}
+          ${duel.winner ? renderBattleRecap() : renderActionDock(preview, canMove)}
+        </section>
         ${renderLatestEvent()}
         ${renderLogSheet()}
       </section>
