@@ -1,4 +1,39 @@
 :root {
+  --aqua-500: #25d7f2;
+  --sky-300: #7ddfff;
+  --pearl-50: #f8ffff;
+  --lime-400: #9bff4f;
+  --mint-400: #7bf28d;
+  --chrome-200: #c7dbe8;
+  --sun-400: #ffe25c;
+  --mango-500: #ff9d3d;
+  --magenta-400: #ff74c8;
+  --violet-500: #9b83ff;
+  --ocean-600: #247cff;
+  --ink-900: #04304a;
+  --ink-700: rgba(4, 48, 74, 0.78);
+  --rim-white: rgba(255, 255, 255, 0.92);
+  --rim-chrome: rgba(199, 219, 232, 0.72);
+  --shadow-blue: rgba(13, 96, 151, 0.22);
+  --shadow-violet: rgba(143, 16, 104, 0.20);
+  --material-pearl:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(199, 248, 255, 0.58) 52%, rgba(125, 223, 255, 0.28)),
+    rgba(255, 255, 255, 0.62);
+  --material-aqua-glass:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.96), transparent 18%),
+    linear-gradient(160deg, rgba(248, 255, 255, 0.88), rgba(37, 215, 242, 0.36) 55%, rgba(36, 124, 255, 0.18)),
+    rgba(255, 255, 255, 0.42);
+  --material-violet-glass:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.88), transparent 18%),
+    linear-gradient(160deg, rgba(248, 255, 255, 0.76), rgba(155, 131, 255, 0.30) 48%, rgba(255, 116, 200, 0.30)),
+    rgba(255, 255, 255, 0.36);
+  --object-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -16px 24px rgba(0, 74, 133, 0.10),
+    0 14px 26px var(--shadow-blue);
+  --toy-rim:
+    0 0 0 1px rgba(255, 255, 255, 0.82),
+    0 0 0 3px rgba(37, 215, 242, 0.16);
   color: #04304a;
   background: #7ddfff;
   font-family:
@@ -33,10 +68,10 @@ button {
   padding: 28px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.82), transparent 22%),
-    radial-gradient(circle at 84% 8%, rgba(255, 226, 92, 0.50), transparent 18%),
-    radial-gradient(circle at 82% 72%, rgba(123, 242, 141, 0.58), transparent 24%),
-    linear-gradient(150deg, #5ed8ff 0%, #c7f8ff 42%, #7bf28d 100%);
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.88), transparent 14%),
+    radial-gradient(circle at 86% 10%, rgba(255, 226, 92, 0.32), transparent 13%),
+    radial-gradient(circle at 78% 78%, rgba(155, 255, 79, 0.30), transparent 18%),
+    linear-gradient(180deg, #e9ffff 0%, #a9eff7 42%, #8df0ca 100%);
 }
 
 .aero-shell::before {
@@ -44,10 +79,13 @@ button {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(120deg, transparent 0 18%, rgba(255, 255, 255, 0.30) 19%, transparent 20% 100%),
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 92px);
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.38) 0 2px, transparent 3px 100%),
+    radial-gradient(circle at 82% 28%, rgba(255, 255, 255, 0.28) 0 1px, transparent 3px 100%),
+    linear-gradient(118deg, transparent 0 16%, rgba(255, 255, 255, 0.34) 17%, transparent 18% 100%),
+    repeating-linear-gradient(110deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 78px),
+    repeating-radial-gradient(ellipse at 34% 28%, rgba(255, 255, 255, 0.16) 0 1px, transparent 2px 28px);
   content: "";
-  opacity: 0.52;
+  opacity: 0.64;
 }
 
 .hero-band,
@@ -143,14 +181,14 @@ button {
 .battle-recap,
 .latest-event,
 .log-sheet {
-  border: 2px solid rgba(4, 48, 74, 0.24);
+  border: 2px solid var(--rim-chrome);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(163, 241, 255, 0.34)),
-    rgba(255, 255, 255, 0.30);
+    var(--material-pearl);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    0 8px 18px rgba(13, 96, 151, 0.12);
-  backdrop-filter: blur(16px) saturate(1.32);
+    inset 0 2px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -16px 24px rgba(0, 74, 133, 0.08),
+    0 10px 22px rgba(13, 96, 151, 0.16);
+  backdrop-filter: blur(10px) saturate(1.22);
 }
 
 .game-bar {
@@ -190,19 +228,20 @@ button {
 }
 
 .icon-action {
-  min-width: 36px;
+  min-width: 34px;
   min-height: 34px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: 999px;
   color: #04304a;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(37, 215, 242, 0.38)),
-    rgba(255, 255, 255, 0.42);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(199, 248, 255, 0.66) 50%, rgba(37, 215, 242, 0.30)),
+    rgba(255, 255, 255, 0.64);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.94),
-    0 7px 14px rgba(13, 96, 151, 0.14);
-  font-size: 0.74rem;
+    inset 0 -6px 9px rgba(0, 74, 133, 0.07),
+    0 6px 12px rgba(13, 96, 151, 0.14);
+  font-size: 0.86rem;
   font-weight: 900;
   cursor: pointer;
 }
@@ -214,6 +253,9 @@ button {
   min-height: 86px;
   padding: 6px;
   border-radius: 14px;
+  background:
+    linear-gradient(90deg, rgba(37, 215, 242, 0.20), rgba(255, 255, 255, 0.72) 42%, rgba(255, 116, 200, 0.18)),
+    var(--material-pearl);
 }
 
 .combatant {
@@ -224,9 +266,13 @@ button {
   align-items: center;
   min-width: 0;
   padding: 5px;
-  border: 2px solid rgba(4, 48, 74, 0.14);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.30);
+  border: 2px solid rgba(255, 255, 255, 0.70);
+  border-radius: 14px;
+  background: var(--material-pearl);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -10px 16px rgba(0, 74, 133, 0.08),
+    0 8px 16px rgba(13, 96, 151, 0.12);
 }
 
 .combatant::after {
@@ -244,11 +290,8 @@ button {
 }
 
 .combatant-hero {
-  border-color: rgba(37, 215, 242, 0.42);
-  background:
-    radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.78), transparent 24%),
-    linear-gradient(135deg, rgba(248, 255, 255, 0.58), rgba(37, 215, 242, 0.20) 54%, rgba(255, 226, 92, 0.14)),
-    rgba(255, 255, 255, 0.28);
+  border-color: rgba(37, 215, 242, 0.70);
+  background: var(--material-aqua-glass);
 }
 
 .combatant-hero::after {
@@ -259,11 +302,8 @@ button {
 }
 
 .combatant-enemy {
-  border-color: rgba(255, 116, 200, 0.46);
-  background:
-    radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.70), transparent 22%),
-    linear-gradient(135deg, rgba(248, 255, 255, 0.50), rgba(155, 131, 255, 0.18) 48%, rgba(255, 116, 200, 0.20)),
-    rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 116, 200, 0.72);
+  background: var(--material-violet-glass);
 }
 
 .combatant-enemy::after {
@@ -278,7 +318,9 @@ button {
   border-color: rgba(255, 226, 92, 0.94);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
-    0 0 0 2px rgba(255, 226, 92, 0.20);
+    inset 0 -10px 16px rgba(255, 157, 61, 0.09),
+    0 0 0 2px rgba(255, 226, 92, 0.32),
+    0 10px 20px rgba(255, 157, 61, 0.16);
 }
 
 .combatant-enemy.is-cue {
@@ -427,12 +469,16 @@ button {
   justify-content: center;
   min-width: 0;
   padding: 6px;
-  border: 2px solid rgba(4, 48, 74, 0.16);
-  border-radius: 12px;
+  border: 2px solid rgba(255, 226, 92, 0.72);
+  border-radius: 999px;
   background:
-    radial-gradient(circle at 76% 14%, rgba(255, 255, 255, 0.90), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 226, 92, 0.18)),
-    rgba(255, 255, 255, 0.24);
+    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, 0.98), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 226, 92, 0.38) 58%, rgba(255, 157, 61, 0.16)),
+    rgba(255, 255, 255, 0.46);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -10px 16px rgba(255, 157, 61, 0.14),
+    0 9px 18px rgba(255, 157, 61, 0.16);
   text-align: center;
 }
 
@@ -474,8 +520,17 @@ button {
   grid-template-rows: auto auto minmax(0, 1fr);
   gap: 6px;
   min-height: 0;
-  padding: 7px;
-  border-radius: 16px;
+  padding: 8px;
+  border-color: rgba(255, 255, 255, 0.78);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.90), transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(37, 215, 242, 0.28) 52%, rgba(155, 255, 79, 0.16)),
+    rgba(255, 255, 255, 0.44);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -22px 30px rgba(0, 74, 133, 0.10),
+    0 16px 32px rgba(13, 96, 151, 0.20);
 }
 
 .board-status {
@@ -485,9 +540,14 @@ button {
   align-items: center;
   min-height: 28px;
   padding: 4px 8px;
-  border: 2px solid rgba(4, 48, 74, 0.16);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.30);
+  border: 2px solid rgba(255, 255, 255, 0.64);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(199, 248, 255, 0.48)),
+    rgba(255, 255, 255, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -7px 10px rgba(0, 74, 133, 0.06);
 }
 
 .board-status span {
@@ -527,11 +587,12 @@ button {
   align-items: center;
   min-height: 24px;
   padding: 3px 7px;
-  border: 2px solid rgba(143, 16, 104, 0.24);
-  border-radius: 9px;
+  border: 2px solid rgba(255, 116, 200, 0.42);
+  border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 116, 200, 0.14)),
-    rgba(255, 255, 255, 0.24);
+    radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.82), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.70), rgba(255, 116, 200, 0.20)),
+    rgba(255, 255, 255, 0.34);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.76),
     0 8px 18px rgba(143, 16, 104, 0.10);
@@ -565,14 +626,18 @@ button {
   gap: 6px;
   min-height: 104px;
   padding: 7px;
-  border-radius: 14px;
+  border-color: rgba(255, 255, 255, 0.74);
+  border-radius: 18px 18px 12px 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(199, 248, 255, 0.52) 58%, rgba(123, 242, 141, 0.20)),
+    rgba(255, 255, 255, 0.46);
 }
 
 .action-dock .decision-panel {
   min-height: 0;
   padding: 9px;
-  border-radius: 10px;
-  border-color: rgba(4, 48, 74, 0.28);
+  border-radius: 14px;
+  border-color: rgba(37, 215, 242, 0.46);
 }
 
 .action-dock .decision-panel strong {
@@ -604,7 +669,7 @@ button {
 .action-dock .spell-button {
   min-height: 0;
   padding: 7px 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .action-dock .spell-button span {
@@ -802,21 +867,29 @@ button {
   width: min(620px, 100%);
   margin: auto;
   padding: clamp(10px, 1.5vw, 16px);
-  border: 1px solid rgba(255, 255, 255, 0.76);
-  border-radius: 26px;
+  border: 3px solid rgba(255, 255, 255, 0.86);
+  border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(110, 228, 255, 0.26)),
-    rgba(255, 255, 255, 0.28);
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.86), transparent 18%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 46px),
+    linear-gradient(180deg, rgba(248, 255, 255, 0.82), rgba(37, 215, 242, 0.30) 54%, rgba(36, 124, 255, 0.14)),
+    rgba(255, 255, 255, 0.32);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    inset 0 -30px 44px rgba(36, 124, 255, 0.08),
-    0 22px 56px rgba(13, 96, 151, 0.20);
+    inset 0 3px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -28px 36px rgba(0, 74, 133, 0.14),
+    0 0 0 4px rgba(37, 215, 242, 0.12),
+    0 18px 36px rgba(13, 96, 151, 0.24);
   touch-action: none;
   user-select: none;
 }
 
 .play-board .gem {
   touch-action: none;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.84),
+    inset 0 -12px 16px rgba(0, 74, 133, 0.16),
+    0 2px 0 rgba(255, 255, 255, 0.44),
+    0 8px 14px rgba(13, 96, 151, 0.18);
   transition:
     transform 150ms ease,
     box-shadow 150ms ease,
@@ -1008,15 +1081,16 @@ button {
   justify-content: center;
   min-height: 136px;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 20px;
+  border: 2px solid rgba(37, 215, 242, 0.36);
+  border-radius: 18px;
   background:
-    radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.90), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(37, 215, 242, 0.26)),
-    rgba(255, 255, 255, 0.34);
+    radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.92), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(37, 215, 242, 0.28) 60%, rgba(36, 124, 255, 0.10)),
+    rgba(255, 255, 255, 0.48);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 14px 28px rgba(13, 96, 151, 0.14);
+    inset 0 2px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -12px 18px rgba(0, 74, 133, 0.08),
+    0 12px 22px rgba(13, 96, 151, 0.16);
 }
 
 .decision-panel.is-extra {
@@ -1796,16 +1870,17 @@ button {
 .spell-button {
   min-height: 136px;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.76);
-  border-radius: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.76);
+  border-radius: 18px;
   color: #04304a;
   background:
-    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.94), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(37, 215, 242, 0.36)),
-    rgba(255, 255, 255, 0.34);
+    radial-gradient(circle at 24% 12%, rgba(255, 255, 255, 0.96), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(37, 215, 242, 0.38) 56%, rgba(36, 124, 255, 0.12)),
+    rgba(255, 255, 255, 0.48);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.90),
-    0 14px 28px rgba(13, 96, 151, 0.18);
+    inset 0 2px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -12px 16px rgba(0, 74, 133, 0.10),
+    0 10px 20px rgba(13, 96, 151, 0.18);
   text-align: left;
   cursor: pointer;
 }
@@ -1849,16 +1924,16 @@ button {
 
 .spell-2 {
   background:
-    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.94), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(155, 131, 255, 0.32)),
-    rgba(255, 255, 255, 0.34);
+    radial-gradient(circle at 24% 12%, rgba(255, 255, 255, 0.96), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(123, 242, 141, 0.34) 54%, rgba(37, 215, 242, 0.16)),
+    rgba(255, 255, 255, 0.48);
 }
 
 .spell-3 {
   background:
-    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.94), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 226, 92, 0.38)),
-    rgba(255, 255, 255, 0.34);
+    radial-gradient(circle at 24% 12%, rgba(255, 255, 255, 0.96), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 226, 92, 0.44) 56%, rgba(255, 157, 61, 0.18)),
+    rgba(255, 255, 255, 0.48);
 }
 
 .guardrail-list {
@@ -2021,7 +2096,7 @@ button {
   }
 
   .cockpit-stage {
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto auto auto auto;
     gap: 0;
     height: auto;
     min-height: 100dvh;
@@ -2029,14 +2104,18 @@ button {
 
   .game-bar,
   .combat-strip,
-  .board-frame,
-  .action-dock,
   .battle-recap,
   .latest-event {
     border-width: 0 0 2px;
     border-color: rgba(4, 48, 74, 0.28);
     border-radius: 0;
     box-shadow: none;
+  }
+
+  .board-frame,
+  .action-dock {
+    border-width: 2px 0;
+    border-radius: 0;
   }
 
   .game-bar {
@@ -2103,7 +2182,7 @@ button {
 
   .duel-pulse {
     padding: 4px 2px;
-    border-radius: 8px;
+    border-radius: 999px;
   }
 
   .duel-pulse strong {
@@ -2116,17 +2195,15 @@ button {
 
   .board-frame {
     gap: 3px;
-    padding: 4px;
+    padding: 4px 6px 5px;
   }
 
   .board-status {
     min-height: 24px;
     padding: 2px 6px;
-    border-width: 0 0 2px;
-    border-color: rgba(4, 48, 74, 0.20);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.62);
+    border-radius: 999px;
   }
 
   .board-status strong {
@@ -2142,31 +2219,29 @@ button {
   .intent-strip {
     min-height: 22px;
     padding: 2px 6px;
-    border-width: 0 0 2px;
-    border-color: rgba(143, 16, 104, 0.26);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    border-width: 1px;
+    border-color: rgba(255, 116, 200, 0.40);
+    border-radius: 999px;
   }
 
   .play-board {
     gap: 4px;
     padding: 8px;
-    border-width: 2px;
-    border-radius: 14px;
+    border-width: 3px;
+    border-radius: 18px;
   }
 
   .action-dock {
     grid-template-columns: minmax(0, 1fr);
     gap: 3px;
     min-height: 96px;
-    padding: 3px;
+    padding: 4px 5px;
   }
 
   .action-dock .decision-panel {
     min-height: 0;
     padding: 5px 7px;
-    border-radius: 7px;
+    border-radius: 12px;
   }
 
   .action-dock .decision-panel span {
@@ -2211,7 +2286,7 @@ button {
   .action-dock .spell-button {
     min-height: 44px;
     padding: 4px 3px;
-    border-radius: 7px;
+    border-radius: 11px;
   }
 
   .action-dock .spell-button span {

@@ -352,7 +352,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (snapBackCue) {
     return `
       <div class="decision-panel is-risk">
-        <span>Move outcome</span>
+        <span>Preview</span>
         <strong>Snapped back</strong>
         <p>${snapBackCue}</p>
       </div>
@@ -362,9 +362,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!selectedCell) {
     return `
       <div class="decision-panel is-empty">
-        <span>Next action</span>
-        <strong>Select a tile</strong>
-        <p>Pick a tile, then choose a neighbor to preview damage, mana, and risk.</p>
+        <span>Command</span>
+        <strong>Choose a tile</strong>
+        <p>Pick a tile, then choose a highlighted gem to preview strike, mana, and risk.</p>
       </div>
     `;
   }
@@ -372,8 +372,8 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview) {
     return `
       <div class="decision-panel is-empty">
-        <span>Next action</span>
-        <strong>Choose a neighbor</strong>
+        <span>Command</span>
+        <strong>Choose a highlighted gem</strong>
         <p>Aqua targets commit a match. Pale targets preview but may snap back.</p>
       </div>
     `;
@@ -382,7 +382,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   if (!preview.valid) {
     return `
       <div class="decision-panel is-risk">
-        <span>Move outcome</span>
+        <span>Preview</span>
         <strong>${swapTruthLabel(preview.from, preview.to)}: no match</strong>
         <p>The engine sees different tile types here. Pick an aqua target to commit.</p>
       </div>
@@ -393,7 +393,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const fatalBacklash = backlash >= duel.player.hp;
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
-      <span>Move outcome · ${swapTruthLabel(preview.from, preview.to)}</span>
+      <span>Preview · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
       ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
       <div class="effect-row">
@@ -506,8 +506,8 @@ function renderTopGameBar(canMove: boolean): string {
       </div>
       <div class="game-actions">
         <button class="icon-action" data-action="restart" type="button" aria-label="Restart duel" title="Restart duel">↻</button>
-        <button class="icon-action" data-action="toggle-log" type="button" aria-expanded="${logOpen}" aria-label="Open combat log" title="Combat log">Log</button>
-        <button class="icon-action" data-view="moodboard" type="button" aria-label="Open moodboard" title="Moodboard">Style</button>
+        <button class="icon-action" data-action="toggle-log" type="button" aria-expanded="${logOpen}" aria-label="Open combat log" title="Combat log">≡</button>
+        <button class="icon-action" data-view="moodboard" type="button" aria-label="Open AeroCandy moodboard" title="AeroCandy moodboard">✦</button>
       </div>
     </nav>
   `;
@@ -518,7 +518,7 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
     <article class="combatant combatant-${side} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''}">
       ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
       <div class="combatant-body">
-        <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
+        <span>${actor.id === 'player' ? 'Aurora glass' : 'Shade glass'}</span>
         <strong>${actor.name}</strong>
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="mini-stats" aria-label="${actor.name} resources">
@@ -535,10 +535,10 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
     <section class="combat-strip ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
-        <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Enemy action' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
+        <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Shade struck' : duel.current === 'player' ? 'Aurora move' : 'Shade turn'}</span>
         <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Aurora turn' : 'Shade acts'}</strong>
-        <em>${legalMoves} swaps</em>
-        ${intent ? `<p>Shade plan: ${intentReason(intent)}</p>` : ''}
+        <em>${legalMoves} moves left</em>
+        ${intent ? `<p>Shade prepares: ${intentReason(intent)}</p>` : ''}
       </div>
       ${renderActorMeters(duel.enemy, 'enemy')}
     </section>
@@ -576,10 +576,10 @@ function renderBoardFrame(
               ? 'Backlash risk'
             : snapBackCue || invalidPreview
               ? 'Snap-back'
-              : preview?.valid
-                ? 'Move preview'
+            : preview?.valid
+                ? 'Preview'
                 : canMove
-                  ? 'Board ready'
+                  ? "Aurora's move"
                   : 'Board locked'
         }</span>
         <strong>${
@@ -605,8 +605,8 @@ function renderBoardFrame(
                   : 'No match on this target'
                 : preview?.valid
                   ? preview.summary
-                  : canMove
-                    ? 'Swap adjacent tiles'
+                : canMove
+                    ? 'Swap gems to strike'
                     : enemyThinking
                       ? 'Shade Knight is choosing'
                       : 'Resolving cascades'
@@ -616,7 +616,7 @@ function renderBoardFrame(
         intent && canMove && !enemyCue && !activeSpellName
           ? `
             <div class="intent-strip" aria-label="Enemy intent">
-              <span>Shade plan</span>
+              <span>Shade prepares</span>
               <strong>${intentReason(intent)}</strong>
             </div>
           `
