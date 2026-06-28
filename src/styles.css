@@ -756,7 +756,9 @@ button {
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.82),
     inset 0 -10px 16px rgba(0, 74, 133, 0.10),
-    0 0 0 3px rgba(37, 215, 242, 0.58),
+    0 0 0 2px rgba(248, 255, 255, 0.92),
+    0 0 0 4px rgba(37, 215, 242, 0.64),
+    0 0 20px rgba(37, 215, 242, 0.34),
     0 14px 26px rgba(13, 96, 151, 0.24);
 }
 
@@ -783,8 +785,10 @@ button {
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.78),
     inset 0 -10px 16px rgba(0, 74, 133, 0.10),
-    0 0 0 3px rgba(255, 116, 200, 0.42),
-    0 14px 26px rgba(143, 16, 104, 0.18);
+    0 0 0 2px rgba(255, 255, 255, 0.80),
+    0 0 0 4px rgba(255, 116, 200, 0.58),
+    0 0 20px rgba(255, 116, 200, 0.30),
+    0 14px 26px rgba(143, 16, 104, 0.22);
 }
 
 .play-board.is-targeting .gem {
@@ -827,6 +831,48 @@ button {
     inset 0 -10px 16px rgba(0, 74, 133, 0.10),
     0 0 0 3px rgba(255, 116, 200, 0.80),
     0 0 26px rgba(255, 116, 200, 0.46);
+}
+
+.play-board .gem.is-threat::after {
+  right: 10%;
+  top: 10%;
+  width: 18%;
+  aspect-ratio: 1;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 42% 58% 45% 55%;
+  background: linear-gradient(145deg, #ff74c8, #4b1aa3);
+  opacity: 1;
+  box-shadow:
+    0 0 0 2px rgba(255, 116, 200, 0.42),
+    0 0 12px rgba(143, 16, 104, 0.48);
+  transform: rotate(25deg);
+}
+
+.play-board .gem.is-threat.is-selected::after {
+  inset: 16%;
+  width: auto;
+  border: 2px solid rgba(255, 247, 184, 0.96);
+  border-radius: 22%;
+  background: transparent;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 176, 45, 0.52),
+    0 0 10px rgba(255, 226, 92, 0.68);
+  transform: none;
+}
+
+.play-board .gem.is-threat.is-valid-swap::after {
+  left: 50%;
+  top: 50%;
+  width: 34%;
+  border: 2px solid rgba(248, 255, 255, 0.96);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(37, 215, 242, 0.96) 0 36%, transparent 38%),
+    rgba(37, 215, 242, 0.24);
+  box-shadow:
+    0 0 0 2px rgba(37, 215, 242, 0.50),
+    0 0 12px rgba(37, 215, 242, 0.78);
+  transform: translate(-50%, -50%);
 }
 
 @keyframes enemy-card-pulse {
@@ -1473,6 +1519,9 @@ button {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.70))
+    drop-shadow(0 4px 5px rgba(4, 48, 74, 0.18));
   pointer-events: none;
 }
 
@@ -1480,9 +1529,13 @@ button {
   display: none;
 }
 
-.gem.has-sprite::before,
 .gem.has-sprite .gem-fallback {
   opacity: 0;
+}
+
+.gem.has-sprite::before {
+  inset: 7%;
+  opacity: 0.42;
 }
 
 .gem-fallback {
