@@ -295,9 +295,9 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
     const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
     return `
       <div class="decision-panel is-extra">
-        <span>Spell target</span>
+        <span>${spellTargetLabel(activeSpell)}</span>
         <strong>${spell.name}</strong>
-        <p>${spell.target === 'row' ? 'Choose any tile in the row to clear and collect it.' : 'Choose a tile on the board to shape the nearby cluster.'}</p>
+        <p>${spellTargetHint(activeSpell)}</p>
       </div>
     `;
   }
@@ -545,6 +545,7 @@ function renderSpellRow(canMove: boolean): string {
             <button class="spell-button spell-${index + 1} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" ${canCast ? '' : 'disabled'}>
               <span>${costLabel(spell.cost)}</span>
               <strong>${spell.name}</strong>
+              <b>${spellTargetLabel(spellId)}</b>
               <em>${canCast ? spellHint(spellId) : missingCostLabel(spell.cost)}</em>
             </button>
           `;
@@ -573,9 +574,21 @@ function missingCostLabel(cost: ManaCost): string {
 }
 
 function spellHint(spellId: SpellId): string {
-  if (spellId === 'sun_bloom') return 'turn a glass cluster into sun';
-  if (spellId === 'glass_ward') return 'guard up, purify nearby shade';
-  return 'clear a row and collect it';
+  if (spellId === 'sun_bloom') return 'convert a 3x3 cluster into sun';
+  if (spellId === 'glass_ward') return '+4 guard, shade nearby becomes shield';
+  return 'clear one row and collect every tile';
+}
+
+function spellTargetLabel(spellId: SpellId): string {
+  if (spellId === 'sun_bloom') return '3x3 cell target';
+  if (spellId === 'glass_ward') return 'purify cell target';
+  return 'row target';
+}
+
+function spellTargetHint(spellId: SpellId): string {
+  if (spellId === 'sun_bloom') return 'Choose the center tile. Its 3x3 cluster becomes sun for mana and setup.';
+  if (spellId === 'glass_ward') return 'Choose the center tile. Gain guard and turn nearby shade into shields.';
+  return 'Choose any tile in a row. The whole row clears and pays its tile effects.';
 }
 
 function renderTopNav(): string {
