@@ -120,11 +120,14 @@ function testOverMatchBonusAppliesToPreviewAndSwap(): void {
   if (preview.valid) {
     assert.equal(preview.effects.find((effect) => effect.label === 'sun')?.value, 5);
     assert.equal(preview.extraTurn, true);
+    assert.match(preview.summary, /\+5 sun mana/);
+    assert.match(preview.summary, /keeps turn/);
   }
 
   const state = { ...createDuel(2007), board, seed: 99 };
   const result = applySwap(state, { x: 2, y: 1 }, { x: 2, y: 0 });
   assert.equal(result.state.player.sun, 5);
+  assert.match(result.state.log[0], /Aurora Knight matches sun for mana and keeps the turn\./);
 }
 
 function testShadePreviewShowsBacklashBeforeSwap(): void {
@@ -145,7 +148,7 @@ function testShadePreviewShowsBacklashBeforeSwap(): void {
   if (preview.valid) {
     assert.equal(preview.effects.find((effect) => effect.label === 'shade damage')?.value, 10);
     assert.equal(preview.effects.find((effect) => effect.label === 'backlash')?.value, 5);
-    assert.match(preview.summary, /-5 backlash/);
+    assert.match(preview.summary, /-5 Aurora HP backlash/);
   }
 }
 

@@ -406,9 +406,15 @@ function addPreviewEffect(effects: Map<string, PreviewEffect>, label: string, va
 }
 
 function previewSummary(effects: PreviewEffect[], extraTurn: boolean): string {
-  const parts = effects.map((effect) => `${effect.tone === 'risk' ? '-' : '+'}${effect.value} ${effect.label}`);
-  if (extraTurn) parts.push('extra turn');
+  const parts = effects.map((effect) => `${effect.tone === 'risk' ? '-' : '+'}${effect.value} ${summaryEffectLabel(effect)}`);
+  if (extraTurn) parts.push('keeps turn');
   return parts.join(', ');
+}
+
+function summaryEffectLabel(effect: PreviewEffect): string {
+  if (effect.label === 'sun' || effect.label === 'moon' || effect.label === 'crown') return `${effect.label} mana`;
+  if (effect.label === 'backlash') return 'Aurora HP backlash';
+  return effect.label;
 }
 
 function eventSummary(events: DuelEvent[], actor: ActorId): string {
@@ -417,15 +423,22 @@ function eventSummary(events: DuelEvent[], actor: ActorId): string {
   const extra = events.some((event) => event.type === 'extra_turn');
   const ended = events.find((event) => event.type === 'battle_ended');
   if (ended?.type === 'battle_ended') return `${label(actor)} wins the duel.`;
-  if (spell?.type === 'spell_cast') return `${label(actor)} cast ${DEFAULT_DUEL_RULES.spells[spell.spell].name}${extra ? ' and keeps the turn' : ''}.`;
-  if (!matches.length) return `${label(actor)} shifts the board.`;
+  if (spell?.type === 'spell_cast') return `${label(actor)} casts ${DEFAULT_DUEL_RULES.spells[spell.spell].name}${extra ? ' and keeps the turn' : ''}.`;
+  if (!matches.length) return `${label(actor)} takes a board action.`;
   const first = matches[0];
-  if (first.type !== 'match') return `${label(actor)} moves.`;
-  return `${label(actor)} matched ${first.tile}${extra ? ' and keeps the turn' : ''}.`;
+  if (first.type !== 'match') return `${label(actor)} takes a turn.`;
+  return `${label(actor)} matches ${tileCombatLabel(first.tile)}${extra ? ' and keeps the turn' : ''}.`;
 }
 
 function label(actor: ActorId): string {
   return actor === 'player' ? 'Aurora Knight' : 'Shade Knight';
+}
+
+function tileCombatLabel(tile: TileKind): string {
+  if (tile === 'sword') return 'swords for damage';
+  if (tile === 'shield') return 'shields for guard';
+  if (tile === 'shade') return 'shade for damage';
+  return `${tile} for mana`;
 }
 
 function appendLog(state: DuelState, message: string): DuelState {

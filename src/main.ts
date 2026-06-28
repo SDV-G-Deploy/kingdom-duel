@@ -357,15 +357,23 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
 }
 
 function renderEffectPill(effect: PreviewEffect): string {
-  return `<em class="effect-pill tone-${effect.tone}">${effect.tone === 'risk' ? '-' : '+'}${effect.value} ${effect.label}</em>`;
+  const sign = effect.tone === 'risk' ? '-' : '+';
+  return `<em class="effect-pill tone-${effect.tone}">${sign}${effect.value} ${combatEffectLabel(effect)}</em>`;
+}
+
+function combatEffectLabel(effect: PreviewEffect): string {
+  if (effect.label === 'sun' || effect.label === 'moon' || effect.label === 'crown') return `${effect.label} mana`;
+  if (effect.label === 'shade damage') return 'shade damage';
+  if (effect.label === 'backlash') return 'Aurora HP';
+  return effect.label;
 }
 
 function intentReason(intent: EnemyIntent): string {
   const parts = intent.preview.effects
     .filter((effect) => effect.label !== 'backlash')
-    .map((effect) => `+${effect.value} ${effect.label}`);
+    .map((effect) => `+${effect.value} ${combatEffectLabel(effect)}`);
 
-  if (intent.preview.extraTurn) parts.push('extra turn');
+  if (intent.preview.extraTurn) parts.push('keeps turn');
   return parts.length ? parts.join(', ') : intent.preview.summary;
 }
 
@@ -375,7 +383,7 @@ function previewBacklash(preview: MovePreview | null): number {
 }
 
 function latestEvent(): string {
-  if (enemyCue) return `Shade Knight moved: ${enemyCue.summary}.`;
+  if (enemyCue) return `Shade Knight action: ${enemyCue.summary}.`;
   if (invalidCue) return invalidCue;
   return duel.log[0] ?? 'Battle ready. Select a tile to begin.';
 }
@@ -405,10 +413,10 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
         <strong>${actor.name}</strong>
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="mini-stats" aria-label="${actor.name} resources">
-          <b>G ${actor.guard}</b>
-          <b>S ${actor.sun}</b>
-          <b>M ${actor.moon}</b>
-          <b>C ${actor.crown}</b>
+          <b>Guard ${actor.guard}</b>
+          <b>Sun ${actor.sun}</b>
+          <b>Moon ${actor.moon}</b>
+          <b>Crown ${actor.crown}</b>
         </div>
       </div>
     </article>
@@ -421,7 +429,7 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
         <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Enemy action' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
-        <strong>${duel.winner ? (duel.winner === 'player' ? 'You win' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Your move' : 'Enemy move'}</strong>
+        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Aurora move' : 'Shade action'}</strong>
         <em>${legalMoves} moves</em>
         ${intent ? `<p>Shade plan: ${intentReason(intent)}</p>` : ''}
       </div>
@@ -459,7 +467,7 @@ function renderBoardFrame(
         }</span>
         <strong>${
           enemyCue
-            ? `Shade Knight: ${enemyCue.summary}`
+            ? `Shade Knight action: ${enemyCue.summary}`
             : activeSpellName
             ? `Choose target for ${activeSpellName}`
             : backlash
