@@ -121,7 +121,7 @@ button {
 }
 
 .play-shell {
-  --shell-pad: 16px;
+  --shell-pad: 10px;
   height: 100dvh;
   min-height: 700px;
   padding: var(--shell-pad);
@@ -130,10 +130,10 @@ button {
 .cockpit-stage {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-  gap: 10px;
+  gap: 6px;
   width: min(1180px, 100%);
   height: calc(100dvh - (var(--shell-pad) * 2));
-  min-height: 668px;
+  min-height: 680px;
 }
 
 .game-bar,
@@ -143,13 +143,13 @@ button {
 .battle-recap,
 .latest-event,
 .log-sheet {
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 2px solid rgba(4, 48, 74, 0.24);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(163, 241, 255, 0.34)),
     rgba(255, 255, 255, 0.30);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 16px 38px rgba(13, 96, 151, 0.16);
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 8px 18px rgba(13, 96, 151, 0.12);
   backdrop-filter: blur(16px) saturate(1.32);
 }
 
@@ -158,9 +158,9 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  min-height: 46px;
-  padding: 6px 7px 6px 14px;
-  border-radius: 18px;
+  min-height: 40px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 14px;
 }
 
 .game-brand strong,
@@ -210,22 +210,22 @@ button {
 .combat-strip {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(88px, 0.58fr) minmax(0, 1fr);
-  gap: 8px;
-  min-height: 104px;
-  padding: 9px;
-  border-radius: 20px;
+  gap: 6px;
+  min-height: 92px;
+  padding: 6px;
+  border-radius: 14px;
 }
 
 .combatant {
   position: relative;
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   min-width: 0;
-  padding: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  border-radius: 16px;
+  padding: 5px;
+  border: 2px solid rgba(4, 48, 74, 0.14);
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.30);
 }
 
@@ -376,9 +376,9 @@ button {
 }
 
 .combatant .stat-bar {
-  margin-top: 7px;
-  padding: 6px 7px 9px;
-  border-radius: 10px;
+  margin-top: 5px;
+  padding: 5px 6px 7px;
+  border-radius: 8px;
 }
 
 .combatant .stat-bar span,
@@ -396,7 +396,7 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 3px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .mini-stats b {
@@ -426,9 +426,9 @@ button {
   flex-direction: column;
   justify-content: center;
   min-width: 0;
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 16px;
+  padding: 6px;
+  border: 2px solid rgba(4, 48, 74, 0.16);
+  border-radius: 12px;
   background:
     radial-gradient(circle at 76% 14%, rgba(255, 255, 255, 0.90), transparent 28%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 226, 92, 0.18)),
@@ -472,10 +472,10 @@ button {
 .board-frame {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   min-height: 0;
-  padding: 10px;
-  border-radius: 22px;
+  padding: 7px;
+  border-radius: 16px;
 }
 
 .board-status {
@@ -483,10 +483,10 @@ button {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 8px;
   align-items: center;
-  min-height: 32px;
-  padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 14px;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 2px solid rgba(4, 48, 74, 0.16);
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.30);
 }
 
@@ -525,10 +525,10 @@ button {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 8px;
   align-items: center;
-  min-height: 28px;
-  padding: 5px 9px;
-  border: 1px solid rgba(255, 116, 200, 0.44);
-  border-radius: 13px;
+  min-height: 24px;
+  padding: 3px 7px;
+  border: 2px solid rgba(143, 16, 104, 0.24);
+  border-radius: 9px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 116, 200, 0.14)),
     rgba(255, 255, 255, 0.24);
@@ -555,39 +555,39 @@ button {
 
 .board-frame .play-board {
   align-self: center;
-  width: min(100%, 620px, calc(100dvh - 500px));
+  width: min(100%, 380px, calc(100dvh - 440px));
   max-height: 100%;
 }
 
 .action-dock {
   display: grid;
   grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
-  gap: 10px;
-  min-height: 132px;
-  padding: 10px;
-  border-radius: 20px;
+  gap: 6px;
+  min-height: 112px;
+  padding: 7px;
+  border-radius: 14px;
 }
 
 .action-dock .decision-panel {
   min-height: 0;
-  padding: 11px;
-  border-radius: 16px;
+  padding: 8px;
+  border-radius: 10px;
 }
 
 .action-dock .decision-panel strong {
-  margin-top: 5px;
-  font-size: 0.9rem;
+  margin-top: 3px;
+  font-size: 0.84rem;
 }
 
 .action-dock .decision-panel p {
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 0.68rem;
   line-height: 1.18;
 }
 
 .action-dock .effect-row {
   gap: 4px;
-  margin-top: 7px;
+  margin-top: 5px;
 }
 
 .action-dock .effect-pill {
@@ -597,13 +597,13 @@ button {
 }
 
 .action-dock .spell-row {
-  gap: 7px;
+  gap: 5px;
 }
 
 .action-dock .spell-button {
   min-height: 0;
-  padding: 9px 8px;
-  border-radius: 16px;
+  padding: 7px 7px;
+  border-radius: 10px;
 }
 
 .action-dock .spell-button span {
@@ -611,19 +611,19 @@ button {
 }
 
 .action-dock .spell-button strong {
-  margin-top: 5px;
+  margin-top: 3px;
   font-size: 0.78rem;
   line-height: 1.02;
 }
 
 .action-dock .spell-button b {
-  margin-top: 4px;
+  margin-top: 3px;
   font-size: 0.56rem;
   line-height: 1.02;
 }
 
 .action-dock .spell-button em {
-  margin-top: 5px;
+  margin-top: 3px;
   font-size: 0.62rem;
   line-height: 1.12;
 }
@@ -631,11 +631,11 @@ button {
 .battle-recap {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 0.78fr) minmax(0, 1fr);
-  gap: 10px;
+  gap: 6px;
   align-items: center;
-  min-height: 132px;
-  padding: 12px;
-  border-radius: 20px;
+  min-height: 112px;
+  padding: 8px;
+  border-radius: 14px;
 }
 
 .battle-recap div,
@@ -655,7 +655,7 @@ button {
 
 .battle-recap strong {
   display: block;
-  margin-top: 7px;
+  margin-top: 4px;
   color: #04304a;
   font-size: 0.92rem;
   line-height: 1.08;
@@ -690,9 +690,9 @@ button {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
-  min-height: 36px;
-  padding: 6px 8px 6px 12px;
-  border-radius: 16px;
+  min-height: 32px;
+  padding: 4px 6px 4px 10px;
+  border-radius: 12px;
 }
 
 .latest-event span {
@@ -2011,7 +2011,7 @@ button {
 
 @media (max-width: 680px) {
   .play-shell {
-    --shell-pad: 8px;
+    --shell-pad: 5px;
     height: auto;
     min-height: 620px;
     overflow-x: hidden;
@@ -2020,15 +2020,15 @@ button {
 
   .cockpit-stage {
     grid-template-rows: auto auto auto auto auto;
-    gap: 7px;
+    gap: 5px;
     height: auto;
     min-height: 0;
   }
 
   .game-bar {
-    min-height: 44px;
-    padding: 5px 6px 5px 12px;
-    border-radius: 17px;
+    min-height: 38px;
+    padding: 4px 5px 4px 10px;
+    border-radius: 12px;
   }
 
   .game-brand strong {
@@ -2048,21 +2048,21 @@ button {
 
   .combat-strip {
     grid-template-columns: minmax(0, 1fr) minmax(82px, 0.56fr) minmax(0, 1fr);
-    min-height: 84px;
-    gap: 6px;
-    padding: 6px;
-    border-radius: 19px;
+    min-height: 76px;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
   }
 
   .combatant {
-    grid-template-columns: 42px minmax(0, 1fr);
-    gap: 6px;
-    padding: 5px;
-    border-radius: 15px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
   }
 
   .portrait-slot {
-    width: 42px;
+    width: 38px;
   }
 
   .combatant-body > span {
@@ -2074,8 +2074,8 @@ button {
   }
 
   .combatant .stat-bar {
-    margin-top: 4px;
-    padding: 4px 6px 7px;
+    margin-top: 3px;
+    padding: 3px 5px 6px;
   }
 
   .combatant .stat-bar span,
@@ -2086,12 +2086,12 @@ button {
 
   .mini-stats {
     gap: 2px;
-    margin-top: 3px;
+    margin-top: 2px;
   }
 
   .duel-pulse {
-    padding: 6px 4px;
-    border-radius: 15px;
+    padding: 5px 3px;
+    border-radius: 10px;
   }
 
   .duel-pulse strong {
@@ -2103,14 +2103,14 @@ button {
   }
 
   .board-frame {
-    gap: 6px;
-    padding: 8px;
-    border-radius: 20px;
+    gap: 4px;
+    padding: 5px;
+    border-radius: 12px;
   }
 
   .board-status {
-    min-height: 30px;
-    padding: 5px 9px;
+    min-height: 26px;
+    padding: 3px 7px;
   }
 
   .board-status strong {
@@ -2119,21 +2119,21 @@ button {
 
   .board-frame .play-board {
     align-self: start;
-    width: min(100%, clamp(276px, calc(100dvh - 506px), 318px));
+    width: min(100%, clamp(292px, calc(100dvh - 458px), 338px));
     margin: 0 auto;
   }
 
   .action-dock {
     grid-template-columns: minmax(0, 0.58fr) minmax(0, 1.42fr);
-    gap: 7px;
-    min-height: 96px;
-    padding: 7px;
-    border-radius: 19px;
+    gap: 5px;
+    min-height: 84px;
+    padding: 5px;
+    border-radius: 12px;
   }
 
   .action-dock .decision-panel {
     min-height: 0;
-    padding: 8px;
+    padding: 6px;
   }
 
   .action-dock .decision-panel span {
@@ -2155,11 +2155,11 @@ button {
 
   .action-dock .spell-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 4px;
   }
 
   .action-dock .spell-button {
-    padding: 7px 6px;
+    padding: 5px;
   }
 
   .action-dock .spell-button span {
@@ -2180,10 +2180,10 @@ button {
 
   .battle-recap {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
-    gap: 7px;
-    min-height: 96px;
-    padding: 8px;
-    border-radius: 19px;
+    gap: 5px;
+    min-height: 84px;
+    padding: 6px;
+    border-radius: 12px;
   }
 
   .battle-recap span {
@@ -2203,8 +2203,8 @@ button {
   }
 
   .latest-event {
-    min-height: 34px;
-    padding: 5px 7px 5px 11px;
+    min-height: 30px;
+    padding: 4px 6px 4px 9px;
   }
 
   .latest-event span {
