@@ -132,7 +132,9 @@ function gemLabel(kind: GemKind): string {
 }
 
 function assetStyle(src: string | null): string {
-  return src ? ` style="--asset-url: url('${src}')"` : '';
+  if (!src) return '';
+  const assetUrl = new URL(src, window.location.href).toString();
+  return ` style="--asset-url: url('${assetUrl}')"`;
 }
 
 function renderPortraitSlot(slot: CharacterSlot): string {
