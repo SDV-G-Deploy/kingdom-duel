@@ -3,7 +3,7 @@ import { areAdjacent, findLegalMoves, getTile } from './engine/board';
 import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
 import { DEFAULT_DUEL_RULES } from './engine/rules';
 import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
-import { chooseDragCommitCell } from './input';
+import { chooseDragCommitCell, chooseSpellTargetTapAction } from './input';
 
 type GemKind = TileKind;
 type CharacterSlot = 'hero' | 'enemy';
@@ -114,6 +114,7 @@ let duel: DuelState = createDuel(2007);
 let selectedCell: Cell | null = null;
 let hoverCell: Cell | null = null;
 let activeSpell: SpellId | null = null;
+let confirmedSpellTarget: Cell | null = null;
 let enemyThinking = false;
 let logOpen = false;
 let bumpCell: Cell | null = null;
@@ -260,17 +261,22 @@ function intentCellSet(intent: EnemyIntent | null): Set<string> {
   return cells;
 }
 
+function activeSpellPreviewCell(): Cell | null {
+  return hoverCell ?? confirmedSpellTarget;
+}
+
 function spellTargetCellSet(): Set<string> {
   const cells = new Set<string>();
-  if (!activeSpell || !hoverCell) return cells;
+  const target = activeSpellPreviewCell();
+  if (!activeSpell || !target) return cells;
   const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
   if (spell.target === 'row') {
-    for (let x = 0; x < duel.board.width; x++) cells.add(cellKey({ x, y: hoverCell.y }));
+    for (let x = 0; x < duel.board.width; x++) cells.add(cellKey({ x, y: target.y }));
     return cells;
   }
 
-  for (let y = hoverCell.y - spell.radius; y <= hoverCell.y + spell.radius; y++) {
-    for (let x = hoverCell.x - spell.radius; x <= hoverCell.x + spell.radius; x++) {
+  for (let y = target.y - spell.radius; y <= target.y + spell.radius; y++) {
+    for (let x = target.x - spell.radius; x <= target.x + spell.radius; x++) {
       if (x >= 0 && x < duel.board.width && y >= 0 && y < duel.board.height) cells.add(cellKey({ x, y }));
     }
   }
@@ -293,6 +299,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
           const classes = [
             sameCell(selectedCell, cell) ? 'is-selected' : '',
             sameCell(hoverCell, cell) ? 'is-hovered' : '',
+            sameCell(confirmedSpellTarget, cell) ? 'is-spell-confirmed' : '',
             neighborCells.has(key) ? 'is-neighbor' : '',
             validSwapCells.has(key) ? 'is-valid-swap' : '',
             sameCell(bumpCell, cell) ? 'is-bumped' : '',
@@ -416,8 +423,9 @@ function previewBacklash(preview: MovePreview | null): number {
 }
 
 function activeSpellTargetPreview(): SpellTargetPreview | null {
-  if (!activeSpell || !hoverCell) return null;
-  const result = castSpell(duel, activeSpell, hoverCell);
+  const target = activeSpellPreviewCell();
+  if (!activeSpell || !target) return null;
+  const result = castSpell(duel, activeSpell, target);
   if (result.events.some((event) => event.type === 'invalid_spell')) return null;
 
   const damage = Math.max(0, duel.enemy.hp - result.state.enemy.hp);
@@ -443,7 +451,7 @@ function activeSpellTargetPreview(): SpellTargetPreview | null {
   return {
     spellId: activeSpell,
     title: spellPreviewTitle(activeSpell, damage, guard, backlash, fatal),
-    hint: spellPreviewHint(activeSpell, hoverCell, converted, fatal),
+    hint: spellPreviewHint(activeSpell, target, converted, fatal),
     effects,
     extraTurn,
     fatal,
@@ -1132,8 +1140,9 @@ function handleBoardTap(cell: Cell): void {
   clearInvalidCue();
 
   if (activeSpell) {
-    if (!sameCell(hoverCell, cell)) {
+    if (chooseSpellTargetTapAction(confirmedSpellTarget, cell) === 'preview') {
       hoverCell = cell;
+      confirmedSpellTarget = cell;
       selectedCell = null;
       bumpCell = null;
       renderApp();
@@ -1143,6 +1152,7 @@ function handleBoardTap(cell: Cell): void {
     const result = castSpell(duel, activeSpell, cell);
     duel = result.state;
     activeSpell = null;
+    confirmedSpellTarget = null;
     selectedCell = null;
     hoverCell = null;
     bumpCell = null;
@@ -1201,6 +1211,7 @@ app.addEventListener('click', (event) => {
     selectedCell = null;
     hoverCell = null;
     activeSpell = null;
+    confirmedSpellTarget = null;
     clearInvalidCue();
     renderApp();
     return;
@@ -1212,6 +1223,7 @@ app.addEventListener('click', (event) => {
     selectedCell = null;
     hoverCell = null;
     activeSpell = null;
+    confirmedSpellTarget = null;
     enemyThinking = false;
     logOpen = false;
     clearEnemyCue();
@@ -1245,6 +1257,7 @@ app.addEventListener('click', (event) => {
   if (spellValue && view === 'play' && duel.current === 'player' && !duel.winner && !enemyThinking) {
     clearEnemyCue();
     activeSpell = activeSpell === spellValue ? null : spellValue;
+    confirmedSpellTarget = null;
     selectedCell = null;
     hoverCell = null;
     clearInvalidCue();

@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert';
-import { chooseDragCommitCell } from './input';
+import { chooseDragCommitCell, chooseSpellTargetTapAction } from './input';
 import type { Cell } from './engine/types';
 
 function key(cell: Cell): string {
@@ -30,7 +30,29 @@ function testDirectionalCellStaysWhenReleaseIsNotAdjacent(): void {
   assert.deepEqual(picked, directional);
 }
 
+function testSpellTargetFirstTapOnlyPreviews(): void {
+  const target = { x: 2, y: 4 };
+
+  assert.equal(chooseSpellTargetTapAction(null, target), 'preview');
+}
+
+function testSpellTargetSecondTapCastsSameCell(): void {
+  const target = { x: 2, y: 4 };
+
+  assert.equal(chooseSpellTargetTapAction(target, target), 'cast');
+}
+
+function testSpellTargetChangedCellPreviewsAgain(): void {
+  const first = { x: 2, y: 4 };
+  const second = { x: 3, y: 4 };
+
+  assert.equal(chooseSpellTargetTapAction(first, second), 'preview');
+}
+
 testReleaseCellWinsWhenDirectionalSwipeIsInvalid();
 testDirectionalCellStaysWhenReleaseIsNotAdjacent();
+testSpellTargetFirstTapOnlyPreviews();
+testSpellTargetSecondTapCastsSameCell();
+testSpellTargetChangedCellPreviewsAgain();
 
 console.log('input tests passed');

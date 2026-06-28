@@ -26,3 +26,7 @@ export function chooseDragCommitCell(
 
   return releaseCell ?? startCell;
 }
+
+export function chooseSpellTargetTapAction(confirmedCell: Cell | null, tappedCell: Cell): 'preview' | 'cast' {
+  return confirmedCell && confirmedCell.x === tappedCell.x && confirmedCell.y === tappedCell.y ? 'cast' : 'preview';
+}
