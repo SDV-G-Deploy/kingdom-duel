@@ -533,7 +533,7 @@ button {
 
 .combatant-body > strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 3px;
   overflow: hidden;
   color: #04304a;
   font-size: 0.9rem;
@@ -542,9 +542,22 @@ button {
   white-space: nowrap;
 }
 
+.combatant-body > small {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: rgba(4, 48, 74, 0.58);
+  font-size: 0.52rem;
+  font-weight: 950;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .combatant .stat-bar {
-  margin-top: 5px;
-  padding: 5px 6px 8px;
+  margin-top: 4px;
+  padding: 4px 6px 7px;
   border-radius: 999px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 255, 255, 0.40)),
@@ -559,7 +572,7 @@ button {
 }
 
 .combatant .stat-bar i {
-  height: 7px;
+  height: 6px;
   border-radius: 999px;
 }
 
@@ -647,6 +660,11 @@ button {
   color: #8f1068;
 }
 
+.combatant.is-braced .guard-chip {
+  border-color: rgba(123, 242, 141, 0.54);
+  background: rgba(123, 242, 141, 0.20);
+}
+
 .combatant.is-ko {
   filter: saturate(0.58);
 }
@@ -668,6 +686,17 @@ button {
     inset 0 -10px 16px rgba(255, 157, 61, 0.14),
     0 9px 18px rgba(255, 157, 61, 0.16);
   text-align: center;
+}
+
+.duel-pulse::before {
+  display: block;
+  width: 18px;
+  height: 6px;
+  margin: 0 auto 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(37, 215, 242, 0.72), rgba(255, 226, 92, 0.74), rgba(255, 116, 200, 0.66));
+  box-shadow: 0 0 12px rgba(255, 226, 92, 0.30);
+  content: "";
 }
 
 .duel-pulse span {

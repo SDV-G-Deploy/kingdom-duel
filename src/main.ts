@@ -519,12 +519,15 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
   const hpPct = actor.hp / actor.maxHp;
   const pressureClass = hpPct <= 0 ? 'is-ko' : hpPct <= 0.28 ? 'is-critical' : actor.guard >= 4 ? 'is-braced' : '';
   const status = hpPct <= 0 ? 'KO' : hpPct <= 0.28 ? 'Critical' : actor.guard >= 4 ? 'Braced' : actor.id === duel.current ? 'Acting' : 'Ready';
+  const faction = actor.id === 'player' ? 'Aurora Glass' : 'Shade Veil';
+  const title = actor.id === 'player' ? 'Dawn duelist' : 'Night duelist';
   return `
     <article class="combatant combatant-${side} ${pressureClass} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
       ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
       <div class="combatant-body">
-        <span>${actor.id === 'player' ? 'Aurora side' : 'Shade side'}</span>
+        <span>${faction}</span>
         <strong>${actor.name}</strong>
+        <small>${title}</small>
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="combat-readout" aria-label="${actor.name} combat resources">
           <b class="guard-chip" title="${status}, Guard ${actor.guard}">Guard ${actor.guard}</b>
@@ -544,8 +547,8 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
     <section class="combat-strip ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
       ${renderActorMeters(duel.player, 'hero')}
       <div class="duel-pulse">
-        <span>${duel.winner ? 'Duel' : enemyCue ? 'Shade' : duel.current === 'player' ? 'Move' : 'Enemy'}</span>
-        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? 'Strike' : duel.current === 'player' ? 'Aurora' : 'Shade'}</strong>
+        <span>${duel.winner ? 'Duel seal' : enemyCue ? 'Shade turn' : duel.current === 'player' ? 'Aurora turn' : 'Shade turn'}</span>
+        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? 'Strike' : duel.current === 'player' ? 'Command' : 'Scheme'}</strong>
         <em>${legalMoves} moves</em>
         ${intent ? `<p>Shade prepares: ${intentReason(intent)}</p>` : ''}
       </div>
@@ -617,7 +620,7 @@ function renderBoardFrame(
                 : preview?.valid
                   ? preview.summary
                 : canMove
-                    ? 'Pick a strike lane'
+                    ? 'Command the glass board'
                     : enemyThinking
                       ? 'Shade Knight is choosing'
                       : 'Resolving cascades'
@@ -824,8 +827,8 @@ function battleRecap(): BattleRecap | null {
 function renderBattleRecap(): string {
   const recap = battleRecap();
   if (!recap) return '';
-  const winnerName = duel.winner === 'player' ? 'Aurora Knight' : 'Shade Knight';
-  const resultTitle = duel.winner === 'player' ? 'Aurora seals the duel' : 'Shade breaks Aurora';
+  const winnerName = duel.winner === 'player' ? 'Aurora Glass' : 'Shade Veil';
+  const resultTitle = duel.winner === 'player' ? 'Aurora seals the glass board' : 'Shade breaks the glass board';
 
   return `
     <section class="battle-recap ${duel.winner === 'player' ? 'is-victory' : 'is-defeat'}" aria-label="Battle recap">
