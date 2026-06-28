@@ -238,7 +238,7 @@ function resolveBoard(initial: DuelState, actor: ActorId, events: DuelEvent[], r
   }
 
   if (state.player.hp <= 0 || state.enemy.hp <= 0) {
-    const winner: ActorId = state.enemy.hp <= 0 ? 'player' : 'enemy';
+    const winner: ActorId = state.player.hp <= 0 ? 'enemy' : 'player';
     events.push({ type: 'battle_ended', winner });
     return { state: { ...state, winner, current: winner }, events };
   }
@@ -509,6 +509,9 @@ function snapshotActor(actor: ActorState): ActorSnapshot {
 function battleDetail(before: DuelState, after: DuelState, events: DuelEvent[]): string {
   const ended = events.find((event) => event.type === 'battle_ended');
   if (ended?.type === 'battle_ended') {
+    if (after.player.hp <= 0 && after.enemy.hp <= 0) {
+      return `${label(ended.winner)} wins because Aurora Knight also reached 0 HP.`;
+    }
     return `${label(ended.winner)} wins because ${label(ended.winner === 'player' ? 'enemy' : 'player')} reached 0 HP.`;
   }
 

@@ -184,6 +184,39 @@ function testBacklashSelfKoUsesActualWinnerInSummary(): void {
   assert.ok(result.state.history[0]?.events.some((event) => event.includes('paid 5 HP backlash')));
 }
 
+function testDoubleKoFromBacklashDoesNotAwardAuroraWin(): void {
+  const tiles: TileKind[] = Array.from({ length: 64 }, (_, index) => {
+    const x = index % 8;
+    const y = Math.floor(index / 8);
+    return ['sun', 'shield', 'sword', 'moon', 'crown', 'shade'][(x + y) % 6] as TileKind;
+  });
+  const board: Board = { width: 8, height: 8, tiles };
+  setTile(board, { x: 0, y: 0 }, 'sword');
+  setTile(board, { x: 1, y: 0 }, 'shade');
+  setTile(board, { x: 2, y: 0 }, 'shield');
+  setTile(board, { x: 3, y: 0 }, 'sun');
+  setTile(board, { x: 4, y: 0 }, 'moon');
+  setTile(board, { x: 5, y: 0 }, 'crown');
+  setTile(board, { x: 6, y: 0 }, 'shield');
+  setTile(board, { x: 7, y: 0 }, 'sun');
+
+  const rules: DuelRules = { ...DEFAULT_DUEL_RULES, match: { ...DEFAULT_DUEL_RULES.match, maxCascades: 0 } };
+  const base = createDuel(2007);
+  const state = {
+    ...base,
+    board,
+    player: { ...base.player, hp: 1, guard: 0, crown: 6 },
+    enemy: { ...base.enemy, hp: 1, guard: 0 },
+    seed: 99,
+  };
+  const result = castSpell(state, 'crown_strike', { x: 0, y: 0 }, rules);
+  assert.equal(result.state.player.hp, 0);
+  assert.equal(result.state.enemy.hp, 0);
+  assert.equal(result.state.winner, 'enemy');
+  assert.match(result.state.history[0]?.summary ?? '', /Shade Knight wins the duel\./);
+  assert.match(result.state.history[0]?.detail ?? '', /Aurora Knight also reached 0 HP\./);
+}
+
 function testEnemyIntentUsesLegalPreview(): void {
   const state = createDuel(2007);
   const intent = getEnemyIntent(state.board);
@@ -235,6 +268,7 @@ testPreviewReportsLegalMoveEffects();
 testOverMatchBonusAppliesToPreviewAndSwap();
 testShadePreviewShowsBacklashBeforeSwap();
 testBacklashSelfKoUsesActualWinnerInSummary();
+testDoubleKoFromBacklashDoesNotAwardAuroraWin();
 testEnemyIntentUsesLegalPreview();
 testSpellRejectsMissingMana();
 testSunBloomCastsAndConvertsTiles();

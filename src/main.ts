@@ -390,7 +390,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   }
 
   const backlash = previewBacklash(preview);
-  const fatalBacklash = backlash >= duel.player.hp;
+  const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   return `
     <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
       <span>Preview · ${swapTruthLabel(preview.from, preview.to)}</span>
@@ -554,7 +554,7 @@ function renderBoardFrame(
 ): string {
   const invalidPreview = !!preview && !preview.valid;
   const backlash = previewBacklash(preview);
-  const fatalBacklash = backlash >= duel.player.hp;
+  const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   const spellPreview = activeSpell ? activeSpellTargetPreview() : null;
   return `
     <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''}" aria-label="Battle board">
