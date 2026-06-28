@@ -188,6 +188,19 @@ function adjacentCellSet(cell: Cell | null): Set<string> {
   return cells;
 }
 
+function validSwapCellSet(cell: Cell | null): Set<string> {
+  const cells = new Set<string>();
+  if (!cell) return cells;
+
+  for (const targetKey of adjacentCellSet(cell)) {
+    const [x, y] = targetKey.split(',').map(Number);
+    const target = { x, y };
+    if (previewSwap(duel.board, cell, target).valid) cells.add(targetKey);
+  }
+
+  return cells;
+}
+
 function statBar(label: string, value: number, max: number, tone: string): string {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return `
@@ -248,6 +261,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
   const intentCells = intentCellSet(intent);
   const spellTargetCells = spellTargetCellSet();
   const neighborCells = activeSpell ? new Set<string>() : adjacentCellSet(selectedCell);
+  const validSwapCells = activeSpell ? new Set<string>() : validSwapCellSet(selectedCell);
   const enemyCueCells = new Set(enemyCue?.cells.map(cellKey) ?? []);
   return `
     <div class="play-board ${activeSpell ? 'is-targeting' : ''}" aria-label="Playable match-3 board">
@@ -259,6 +273,7 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
             sameCell(selectedCell, cell) ? 'is-selected' : '',
             sameCell(hoverCell, cell) ? 'is-hovered' : '',
             neighborCells.has(key) ? 'is-neighbor' : '',
+            validSwapCells.has(key) ? 'is-valid-swap' : '',
             sameCell(bumpCell, cell) ? 'is-bumped' : '',
             enemyCueCells.has(key) ? 'is-enemy-action' : '',
             previewCells.has(key) ? 'is-preview' : '',
@@ -299,7 +314,7 @@ function renderPreviewPanel(preview: MovePreview | null): string {
       <div class="decision-panel is-empty">
         <span>Decision preview</span>
         <strong>Choose a neighbor</strong>
-        <p>Legal swaps will show damage, mana, guard, backlash, and extra-turn value.</p>
+        <p>Bright aqua targets will make a match. Soft white targets are adjacent but may snap back.</p>
       </div>
     `;
   }
@@ -830,6 +845,11 @@ function dragTargetCell(from: Cell, deltaX: number, deltaY: number): Cell | null
   return next;
 }
 
+function cellAtPoint(x: number, y: number): Cell | null {
+  const cellValue = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-cell]')?.dataset.cell;
+  return cellValue === undefined ? null : cellFromIndex(Number(cellValue));
+}
+
 app.addEventListener('click', (event) => {
   const target = event.target as HTMLElement | null;
   if (!target) return;
@@ -923,13 +943,25 @@ window.addEventListener('pointerup', (event) => {
   const endedDrag = dragState;
   dragState = null;
   const targetCell = dragTargetCell(endedDrag.startCell, event.clientX - endedDrag.startX, event.clientY - endedDrag.startY);
+  const releaseCell = cellAtPoint(event.clientX, event.clientY);
+  const releaseIsValidSwap = releaseCell ? previewSwap(duel.board, endedDrag.startCell, releaseCell).valid : false;
+
+  if (releaseCell && areAdjacent(endedDrag.startCell, releaseCell) && (releaseIsValidSwap || !targetCell)) {
+    commitSwap(endedDrag.startCell, releaseCell);
+    return;
+  }
+
   if (targetCell) {
+    const targetIsValidSwap = previewSwap(duel.board, endedDrag.startCell, targetCell).valid;
+    if (!targetIsValidSwap && releaseCell && areAdjacent(endedDrag.startCell, releaseCell)) {
+      commitSwap(endedDrag.startCell, releaseCell);
+      return;
+    }
     commitSwap(endedDrag.startCell, targetCell);
     return;
   }
 
-  const cellValue = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-cell]')?.dataset.cell;
-  handleBoardTap(cellValue === undefined ? endedDrag.startCell : cellFromIndex(Number(cellValue)));
+  handleBoardTap(releaseCell ?? endedDrag.startCell);
 });
 
 window.addEventListener('pointercancel', (event) => {
