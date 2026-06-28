@@ -216,6 +216,7 @@ button {
 }
 
 .combatant {
+  position: relative;
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);
   gap: 8px;
@@ -225,6 +226,51 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.58);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.30);
+}
+
+.combatant::after {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  content: "";
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 5px 10px rgba(13, 96, 151, 0.14);
+}
+
+.combatant-hero {
+  border-color: rgba(37, 215, 242, 0.42);
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.78), transparent 24%),
+    linear-gradient(135deg, rgba(248, 255, 255, 0.58), rgba(37, 215, 242, 0.20) 54%, rgba(255, 226, 92, 0.14)),
+    rgba(255, 255, 255, 0.28);
+}
+
+.combatant-hero::after {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fff9bf 0 34%, transparent 36%),
+    conic-gradient(from 0deg, #ffe25c, #25d7f2, #ffe25c);
+}
+
+.combatant-enemy {
+  border-color: rgba(255, 116, 200, 0.46);
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.70), transparent 22%),
+    linear-gradient(135deg, rgba(248, 255, 255, 0.50), rgba(155, 131, 255, 0.18) 48%, rgba(255, 116, 200, 0.20)),
+    rgba(255, 255, 255, 0.24);
+}
+
+.combatant-enemy::after {
+  border-radius: 42% 58% 45% 55%;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.86), transparent 22%),
+    linear-gradient(145deg, #ff74c8, #4b1aa3);
+  transform: rotate(25deg);
 }
 
 .combatant.is-active {
@@ -237,6 +283,10 @@ button {
 .combatant-enemy.is-cue {
   animation: enemy-card-pulse 760ms ease both;
   border-color: rgba(255, 116, 200, 0.82);
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.76), transparent 22%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.60), rgba(155, 131, 255, 0.24) 42%, rgba(255, 69, 178, 0.30)),
+    rgba(255, 255, 255, 0.26);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
     0 0 0 3px rgba(255, 116, 200, 0.20),
@@ -254,6 +304,9 @@ button {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.68),
+    0 8px 16px rgba(13, 96, 151, 0.14);
 }
 
 .portrait-slot.has-asset {
@@ -281,6 +334,20 @@ button {
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.84) 0 10%, transparent 11%),
     linear-gradient(145deg, #f8ffff, #9b83ff 42%, #ff74c8);
+}
+
+.portrait-enemy {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.62),
+    0 0 0 2px rgba(255, 116, 200, 0.16),
+    0 10px 18px rgba(143, 16, 104, 0.16);
+}
+
+.portrait-hero {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+    0 0 0 2px rgba(37, 215, 242, 0.14),
+    0 10px 18px rgba(13, 96, 151, 0.14);
 }
 
 .combatant-body {
@@ -341,6 +408,16 @@ button {
   font-size: 0.58rem;
   line-height: 1;
   text-align: center;
+}
+
+.combatant-hero .mini-stats b {
+  background: rgba(248, 255, 255, 0.42);
+  color: #006985;
+}
+
+.combatant-enemy .mini-stats b {
+  background: rgba(255, 116, 200, 0.14);
+  color: #7c155f;
 }
 
 .duel-pulse {
