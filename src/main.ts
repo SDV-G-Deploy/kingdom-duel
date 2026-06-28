@@ -358,6 +358,15 @@ function renderEffectPill(effect: PreviewEffect): string {
   return `<em class="effect-pill tone-${effect.tone}">${effect.tone === 'risk' ? '-' : '+'}${effect.value} ${effect.label}</em>`;
 }
 
+function intentReason(intent: EnemyIntent): string {
+  const parts = intent.preview.effects
+    .filter((effect) => effect.label !== 'backlash')
+    .map((effect) => `+${effect.value} ${effect.label}`);
+
+  if (intent.preview.extraTurn) parts.push('extra turn');
+  return parts.length ? parts.join(', ') : intent.preview.summary;
+}
+
 function latestEvent(): string {
   if (enemyCue) return `Shade Knight moved: ${enemyCue.summary}.`;
   if (invalidCue) return invalidCue;
@@ -407,7 +416,7 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
         <span>${duel.winner ? 'Battle ended' : enemyCue ? 'Enemy action' : duel.current === 'player' ? 'Turn' : 'Enemy'}</span>
         <strong>${duel.winner ? (duel.winner === 'player' ? 'You win' : 'Shade wins') : enemyCue ? enemyCue.summary : duel.current === 'player' ? 'Your move' : 'Enemy move'}</strong>
         <em>${legalMoves} moves</em>
-        ${intent ? `<p>Intent: ${intent.preview.summary}</p>` : ''}
+        ${intent ? `<p>Shade plan: ${intentReason(intent)}</p>` : ''}
       </div>
       ${renderActorMeters(duel.enemy, 'enemy')}
     </section>
@@ -456,6 +465,16 @@ function renderBoardFrame(
                       : 'Resolving cascades'
         }</strong>
       </div>
+      ${
+        intent && canMove && !enemyCue && !activeSpellName
+          ? `
+            <div class="intent-strip" aria-label="Enemy intent">
+              <span>Shade plan</span>
+              <strong>${intentReason(intent)}</strong>
+            </div>
+          `
+          : ''
+      }
       ${renderPlayableBoard(preview, intent)}
     </section>
   `;
