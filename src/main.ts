@@ -541,6 +541,7 @@ function renderLogSheet(): string {
         <button class="icon-action" data-action="toggle-log" type="button" aria-label="Close combat log">Close</button>
       </div>
       <div class="log-actions" aria-label="Combat log export actions">
+        <button data-action="copy-battle-report" type="button">Copy compact report</button>
         <button data-action="copy-battle-log" type="button">Copy readable log</button>
         <button data-action="copy-battle-trace" type="button">Copy debug trace</button>
       </div>
@@ -571,6 +572,51 @@ function readableBattleLog(): string {
       return `Turn ${entry.turn} / ${actor}: ${entry.summary}\n  ${entry.detail}${events}`;
     })
     .join('\n\n');
+}
+
+function compactBattleReport(): string {
+  const history = [...duel.history].reverse();
+  const playerHpLost = history.reduce((sum, entry) => sum + Math.max(0, entry.before.player.hp - entry.after.player.hp), 0);
+  const enemyHpLost = history.reduce((sum, entry) => sum + Math.max(0, entry.before.enemy.hp - entry.after.enemy.hp), 0);
+  const playerBacklash = history.reduce((sum, entry) => sum + sumNumbers(entry.events, /paid (\\d+) HP backlash/), 0);
+  const playerExtraTurns = history.filter((entry) => entry.actor === 'player' && entry.events.some((event) => event.includes('kept the turn'))).length;
+  const enemyExtraTurns = history.filter((entry) => entry.actor === 'enemy' && entry.events.some((event) => event.includes('kept the turn'))).length;
+  const spells = history.flatMap((entry) => entry.events.filter((event) => event.startsWith('cast ')));
+  const keyTail = history
+    .filter((entry) => entry.actor !== 'system')
+    .slice(-6)
+    .map((entry) => `T${entry.turn} ${entry.actor === 'player' ? 'Aurora' : 'Shade'}: ${entry.summary} (${entry.detail})`);
+  const unspentMana = duel.player.sun + duel.player.moon + duel.player.crown;
+  const reason =
+    duel.winner === 'enemy' && unspentMana >= 10
+      ? `Likely loss reason: Aurora died with ${unspentMana} unspent mana; spend spells earlier.`
+      : duel.winner === 'enemy'
+        ? 'Likely loss reason: Aurora HP reached 0 before enough damage/spell pressure.'
+        : duel.winner === 'player'
+          ? 'Win reason: Shade HP reached 0.'
+          : 'Battle is still unresolved.';
+
+  return [
+    'Kingdom Duel compact battle report',
+    `Seed: ${duel.seed}`,
+    `Winner: ${duel.winner ?? 'none'} on turn ${duel.turn}`,
+    `Final: Aurora ${duel.player.hp}/${duel.player.maxHp} HP, Guard ${duel.player.guard}, mana S${duel.player.sun}/M${duel.player.moon}/C${duel.player.crown}`,
+    `Final: Shade ${duel.enemy.hp}/${duel.enemy.maxHp} HP, Guard ${duel.enemy.guard}, mana S${duel.enemy.sun}/M${duel.enemy.moon}/C${duel.enemy.crown}`,
+    `HP lost: Aurora ${playerHpLost}, Shade ${enemyHpLost}`,
+    `Backlash paid by Aurora: ${playerBacklash}`,
+    `Extra turns: Aurora ${playerExtraTurns}, Shade ${enemyExtraTurns}`,
+    `Spells cast: ${spells.length ? spells.join('; ') : 'none'}`,
+    reason,
+    'Last key actions:',
+    ...keyTail,
+  ].join('\n');
+}
+
+function sumNumbers(lines: string[], pattern: RegExp): number {
+  return lines.reduce((sum, line) => {
+    const match = line.match(pattern);
+    return sum + (match ? Number(match[1]) : 0);
+  }, 0);
 }
 
 function debugBattleTrace(): string {
@@ -1067,6 +1113,11 @@ app.addEventListener('click', (event) => {
 
   if (action === 'copy-battle-log') {
     void copyToClipboard(readableBattleLog(), 'Battle log');
+    return;
+  }
+
+  if (action === 'copy-battle-report') {
+    void copyToClipboard(compactBattleReport(), 'Battle report');
     return;
   }
 
