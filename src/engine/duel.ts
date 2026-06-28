@@ -247,7 +247,7 @@ function applyMatchEffects(state: DuelState, actor: ActorId, matches: MatchGroup
   const events: DuelEvent[] = [];
 
   for (const match of matches) {
-    const amount = match.cells.length;
+    const amount = effectAmount(match, rules);
     events.push({ type: 'match', actor, tile: match.tile, cells: match.cells });
     next = applyTileEffect(next, actor, match.tile, amount, events, rules);
   }
@@ -365,7 +365,7 @@ function scoreMove(board: Board, from: Cell, to: Cell, rules: DuelRules): { scor
 function scorePreview(matches: MatchGroup[], rules: DuelRules): number {
   let score = 0;
   for (const match of matches) {
-    const value = match.cells.length;
+    const value = effectAmount(match, rules);
     const tileRule = rules.tiles[match.tile];
     score += value + value * tileRule.enemyScorePerTile;
     if (match.cells.length >= rules.match.extraTurnLength) score += rules.enemy.extraTurnScore;
@@ -377,7 +377,7 @@ function previewEffects(matches: MatchGroup[], rules: DuelRules): PreviewEffect[
   const effects = new Map<string, PreviewEffect>();
 
   for (const match of matches) {
-    const amount = match.cells.length;
+    const amount = effectAmount(match, rules);
     const effect = rules.tiles[match.tile].effect;
     if (effect.type === 'damage') {
       addPreviewEffect(effects, 'damage', amount * effect.amountPerTile, 'damage');
@@ -394,6 +394,10 @@ function previewEffects(matches: MatchGroup[], rules: DuelRules): PreviewEffect[
   }
 
   return [...effects.values()];
+}
+
+function effectAmount(match: MatchGroup, rules: DuelRules): number {
+  return match.cells.length + (match.cells.length >= rules.match.extraTurnLength ? 1 : 0);
 }
 
 function addPreviewEffect(effects: Map<string, PreviewEffect>, label: string, value: number, tone: PreviewEffect['tone']): void {

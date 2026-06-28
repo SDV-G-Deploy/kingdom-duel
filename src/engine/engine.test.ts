@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { areAdjacent, createBoard, findLegalMoves, findMatches, setTile, swapTiles } from './board';
 import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './duel';
 import { DEFAULT_DUEL_RULES } from './rules';
-import type { DuelRules } from './types';
+import type { Board, DuelRules, TileKind } from './types';
 
 function testBoardGeneration(): void {
   const { board } = createBoard(8, 8, 42);
@@ -102,6 +102,31 @@ function testPreviewReportsLegalMoveEffects(): void {
   }
 }
 
+function testOverMatchBonusAppliesToPreviewAndSwap(): void {
+  const tiles: TileKind[] = Array.from({ length: 64 }, (_, index) => {
+    const x = index % 8;
+    const y = Math.floor(index / 8);
+    return ['sun', 'shield', 'sword', 'moon', 'crown', 'shade'][(x + y) % 6] as TileKind;
+  });
+  const board: Board = { width: 8, height: 8, tiles };
+  setTile(board, { x: 0, y: 0 }, 'sun');
+  setTile(board, { x: 1, y: 0 }, 'sun');
+  setTile(board, { x: 2, y: 0 }, 'shield');
+  setTile(board, { x: 3, y: 0 }, 'sun');
+  setTile(board, { x: 2, y: 1 }, 'sun');
+
+  const preview = previewSwap(board, { x: 2, y: 1 }, { x: 2, y: 0 });
+  assert.equal(preview.valid, true);
+  if (preview.valid) {
+    assert.equal(preview.effects.find((effect) => effect.label === 'sun')?.value, 5);
+    assert.equal(preview.extraTurn, true);
+  }
+
+  const state = { ...createDuel(2007), board, seed: 99 };
+  const result = applySwap(state, { x: 2, y: 1 }, { x: 2, y: 0 });
+  assert.equal(result.state.player.sun, 5);
+}
+
 function testEnemyIntentUsesLegalPreview(): void {
   const state = createDuel(2007);
   const intent = getEnemyIntent(state.board);
@@ -149,6 +174,7 @@ testResolvedBoardRemainsPlayable();
 testRulesCanConfigureActorsAndBoard();
 testPreviewRejectsBadSwap();
 testPreviewReportsLegalMoveEffects();
+testOverMatchBonusAppliesToPreviewAndSwap();
 testEnemyIntentUsesLegalPreview();
 testSpellRejectsMissingMana();
 testSunBloomCastsAndConvertsTiles();
