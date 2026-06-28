@@ -13,7 +13,9 @@ import {
 import { DEFAULT_DUEL_RULES } from './rules';
 import type {
   ActorId,
+  ActorSnapshot,
   ActorState,
+  BattleLogEntry,
   Board,
   Cell,
   DuelEvent,
@@ -30,7 +32,7 @@ import type {
 
 export function createDuel(seed = 2007, rules: DuelRules = DEFAULT_DUEL_RULES): DuelState {
   const created = createBoard(rules.board.width, rules.board.height, seed);
-  return {
+  const state: DuelState = {
     board: created.board,
     player: createActor('player', rules),
     enemy: createActor('enemy', rules),
@@ -40,6 +42,13 @@ export function createDuel(seed = 2007, rules: DuelRules = DEFAULT_DUEL_RULES): 
     selected: null,
     winner: null,
     log: rules.openingLog,
+    history: [],
+  };
+  return {
+    ...state,
+    history: rules.openingLog.map((message, index) =>
+      createBattleLogEntry(state, state, 'system', message, message, [], index + 1),
+    ),
   };
 }
 
@@ -62,8 +71,9 @@ export function applySwap(
 
   const events: DuelEvent[] = [{ type: 'swap', actor: state.current, from, to }];
   const resolved = resolveBoard({ ...state, board }, state.current, events, rules);
+  const summary = eventSummary(resolved.events, state.current);
   return {
-    state: appendLog(resolved.state, eventSummary(resolved.events, state.current)),
+    state: recordBattleEntry(state, resolved.state, state.current, summary, resolved.events),
     events: resolved.events,
   };
 }
@@ -135,8 +145,9 @@ export function castSpell(
   }
 
   const resolved = resolveBoard(next, actor, events, rules);
+  const summary = eventSummary(resolved.events, actor);
   return {
-    state: appendLog(resolved.state, eventSummary(resolved.events, actor)),
+    state: recordBattleEntry(state, resolved.state, actor, summary, resolved.events),
     events: resolved.events,
   };
 }
@@ -445,6 +456,102 @@ function appendLog(state: DuelState, message: string): DuelState {
   return { ...state, log: [message, ...state.log].slice(0, 6) };
 }
 
+function recordBattleEntry(
+  before: DuelState,
+  after: DuelState,
+  actor: ActorId | 'system',
+  summary: string,
+  events: DuelEvent[],
+): DuelState {
+  const entry = createBattleLogEntry(before, after, actor, summary, battleDetail(before, after, events), eventLines(events));
+  return appendLog({ ...after, history: [entry, ...after.history] }, summary);
+}
+
+function createBattleLogEntry(
+  before: DuelState,
+  after: DuelState,
+  actor: ActorId | 'system',
+  summary: string,
+  detail: string,
+  events: string[],
+  id = before.history.length + 1,
+): BattleLogEntry {
+  return {
+    id,
+    turn: before.turn,
+    actor,
+    summary,
+    detail,
+    events,
+    before: snapshotState(before),
+    after: snapshotState(after),
+  };
+}
+
+function snapshotState(state: DuelState): BattleLogEntry['before'] {
+  return {
+    player: snapshotActor(state.player),
+    enemy: snapshotActor(state.enemy),
+  };
+}
+
+function snapshotActor(actor: ActorState): ActorSnapshot {
+  return {
+    hp: actor.hp,
+    maxHp: actor.maxHp,
+    guard: actor.guard,
+    sun: actor.sun,
+    moon: actor.moon,
+    crown: actor.crown,
+  };
+}
+
+function battleDetail(before: DuelState, after: DuelState, events: DuelEvent[]): string {
+  const ended = events.find((event) => event.type === 'battle_ended');
+  if (ended?.type === 'battle_ended') {
+    return `${label(ended.winner)} wins because ${label(ended.winner === 'player' ? 'enemy' : 'player')} reached 0 HP.`;
+  }
+
+  const deltas = [
+    actorDelta('Aurora', before.player, after.player),
+    actorDelta('Shade', before.enemy, after.enemy),
+  ].filter(Boolean);
+  return deltas.length ? deltas.join(' | ') : 'Board changed without stat damage.';
+}
+
+function actorDelta(name: string, before: ActorState, after: ActorState): string {
+  const parts: string[] = [];
+  if (before.hp !== after.hp) parts.push(`HP ${before.hp}->${after.hp}`);
+  if (before.guard !== after.guard) parts.push(`Guard ${before.guard}->${after.guard}`);
+  if (before.sun !== after.sun) parts.push(`Sun ${before.sun}->${after.sun}`);
+  if (before.moon !== after.moon) parts.push(`Moon ${before.moon}->${after.moon}`);
+  if (before.crown !== after.crown) parts.push(`Crown ${before.crown}->${after.crown}`);
+  return parts.length ? `${name}: ${parts.join(', ')}` : '';
+}
+
+function eventLines(events: DuelEvent[]): string[] {
+  return events
+    .map((event) => {
+      if (event.type === 'swap') return `swapped (${event.from.x + 1},${event.from.y + 1}) -> (${event.to.x + 1},${event.to.y + 1})`;
+      if (event.type === 'spell_cast') return `cast ${DEFAULT_DUEL_RULES.spells[event.spell].name} at (${event.target.x + 1},${event.target.y + 1})`;
+      if (event.type === 'match') return `matched ${event.cells.length} ${event.tile}`;
+      if (event.type === 'damage') return `${label(event.actor)} dealt ${event.amount} damage`;
+      if (event.type === 'guard') return `${label(event.actor)} gained ${event.amount} Guard`;
+      if (event.type === 'mana') return `${label(event.actor)} gained ${event.amount} ${event.tile}`;
+      if (event.type === 'backlash') return `${label(event.actor)} paid ${event.amount} HP backlash`;
+      if (event.type === 'extra_turn') return `${label(event.actor)} kept the turn`;
+      if (event.type === 'tiles_converted') return `converted ${event.cells.length} tiles to ${event.to}`;
+      if (event.type === 'row_cleared') return `cleared row ${event.row + 1}`;
+      if (event.type === 'board_refilled') return 'board refilled';
+      if (event.type === 'battle_ended') return `${label(event.winner)} won`;
+      if (event.type === 'invalid_swap') return `invalid swap (${event.from.x + 1},${event.from.y + 1}) -> (${event.to.x + 1},${event.to.y + 1})`;
+      if (event.type === 'invalid_spell') return `invalid spell: ${event.reason}`;
+      if (event.type === 'enemy_intent') return event.text;
+      return null;
+    })
+    .filter((line): line is string => !!line);
+}
+
 function withLog(state: DuelState, events: DuelEvent[], message: string): SwapResult {
-  return { state: appendLog(state, message), events };
+  return { state: recordBattleEntry(state, state, state.current, message, events), events };
 }

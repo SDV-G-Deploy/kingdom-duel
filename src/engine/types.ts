@@ -28,6 +28,25 @@ export type ActorState = {
   crown: number;
 };
 
+export type ActorSnapshot = Pick<ActorState, 'hp' | 'maxHp' | 'guard' | 'sun' | 'moon' | 'crown'>;
+
+export type BattleLogEntry = {
+  id: number;
+  turn: number;
+  actor: ActorId | 'system';
+  summary: string;
+  detail: string;
+  events: string[];
+  before: {
+    player: ActorSnapshot;
+    enemy: ActorSnapshot;
+  };
+  after: {
+    player: ActorSnapshot;
+    enemy: ActorSnapshot;
+  };
+};
+
 export type ActorTemplate = {
   name: string;
   hp: number;
@@ -108,6 +127,7 @@ export type DuelState = {
   selected: Cell | null;
   winner: ActorId | null;
   log: string[];
+  history: BattleLogEntry[];
 };
 
 export type DuelEvent =

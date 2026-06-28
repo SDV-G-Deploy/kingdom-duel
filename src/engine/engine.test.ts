@@ -29,6 +29,16 @@ function testLegalMoveResolves(): void {
   assert.ok(result.events.some((event) => event.type === 'match'), 'legal swap should produce match events');
 }
 
+function testBattleHistoryKeepsFullActionEntry(): void {
+  const state = createDuel(2007);
+  const move = findLegalMoves(state.board)[0];
+  const result = applySwap(state, move.from, move.to);
+  assert.equal(result.state.history.length, state.history.length + 1);
+  assert.ok(result.state.history[0]?.summary.length > 0);
+  assert.ok(result.state.history[0]?.detail.length > 0);
+  assert.ok(result.state.history[0]?.events.some((event) => event.includes('swapped')));
+}
+
 function testManualMatchDetection(): void {
   const state = createDuel(300);
   const board = { ...state.board, tiles: [...state.board.tiles] };
@@ -193,6 +203,7 @@ testBoardGeneration();
 testAdjacency();
 testInvalidSwapDoesNotChangeTurn();
 testLegalMoveResolves();
+testBattleHistoryKeepsFullActionEntry();
 testManualMatchDetection();
 testEnemyTurn();
 testResolvedBoardRemainsPlayable();

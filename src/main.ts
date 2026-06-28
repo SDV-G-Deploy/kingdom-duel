@@ -540,11 +540,63 @@ function renderLogSheet(): string {
         <strong>Combat log</strong>
         <button class="icon-action" data-action="toggle-log" type="button" aria-label="Close combat log">Close</button>
       </div>
+      <div class="log-actions" aria-label="Combat log export actions">
+        <button data-action="copy-battle-log" type="button">Copy readable log</button>
+        <button data-action="copy-battle-trace" type="button">Copy debug trace</button>
+      </div>
       <ol class="combat-log">
-        ${duel.log.map((entry) => `<li>${entry}</li>`).join('')}
+        ${duel.history
+          .map(
+            (entry) => `
+              <li>
+                <span>Turn ${entry.turn} · ${entry.actor === 'system' ? 'Setup' : entry.actor === 'player' ? 'Aurora' : 'Shade'}</span>
+                <strong>${entry.summary}</strong>
+                <p>${entry.detail}</p>
+                ${entry.events.length ? `<small>${entry.events.join(' · ')}</small>` : ''}
+              </li>
+            `,
+          )
+          .join('')}
       </ol>
     </aside>
   `;
+}
+
+function readableBattleLog(): string {
+  return [...duel.history]
+    .reverse()
+    .map((entry) => {
+      const actor = entry.actor === 'system' ? 'Setup' : entry.actor === 'player' ? 'Aurora' : 'Shade';
+      const events = entry.events.length ? `\n  events: ${entry.events.join('; ')}` : '';
+      return `Turn ${entry.turn} / ${actor}: ${entry.summary}\n  ${entry.detail}${events}`;
+    })
+    .join('\n\n');
+}
+
+function debugBattleTrace(): string {
+  return JSON.stringify(
+    {
+      seed: duel.seed,
+      turn: duel.turn,
+      current: duel.current,
+      winner: duel.winner,
+      player: duel.player,
+      enemy: duel.enemy,
+      history: [...duel.history].reverse(),
+    },
+    null,
+    2,
+  );
+}
+
+async function copyToClipboard(text: string, label: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+    showInvalidCue(`${label} copied.`);
+  } catch {
+    showInvalidCue(`${label} copy failed.`);
+  }
+  renderApp();
 }
 
 function renderPlayable(): string {
@@ -1010,6 +1062,16 @@ app.addEventListener('click', (event) => {
   if (action === 'toggle-log') {
     logOpen = !logOpen;
     renderApp();
+    return;
+  }
+
+  if (action === 'copy-battle-log') {
+    void copyToClipboard(readableBattleLog(), 'Battle log');
+    return;
+  }
+
+  if (action === 'copy-battle-trace') {
+    void copyToClipboard(debugBattleTrace(), 'Battle trace');
     return;
   }
 

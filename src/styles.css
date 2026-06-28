@@ -685,6 +685,25 @@ button {
   font-size: 1rem;
 }
 
+.log-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.log-actions button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  border-radius: 12px;
+  color: #04304a;
+  background: rgba(255, 255, 255, 0.42);
+  font-size: 0.68rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
 .stat-bar {
   position: relative;
   display: grid;
@@ -1059,6 +1078,35 @@ button {
   font-size: 0.82rem;
   font-weight: 800;
   line-height: 1.2;
+}
+
+.combat-log li span,
+.combat-log li small {
+  display: block;
+  color: rgba(4, 48, 74, 0.58);
+  font-size: 0.66rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.combat-log li strong {
+  display: block;
+  margin-top: 3px;
+  color: #04304a;
+  font-size: 0.84rem;
+}
+
+.combat-log li p {
+  margin: 4px 0 0;
+  color: rgba(4, 48, 74, 0.74);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.combat-log li small {
+  margin-top: 5px;
+  line-height: 1.25;
+  text-transform: none;
 }
 
 .hero-band {
