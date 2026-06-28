@@ -2011,7 +2011,7 @@ button {
 
 @media (max-width: 680px) {
   .play-shell {
-    --shell-pad: 5px;
+    --shell-pad: 0px;
     height: auto;
     min-height: 620px;
     overflow-x: hidden;
@@ -2020,19 +2020,30 @@ button {
 
   .cockpit-stage {
     grid-template-rows: auto auto auto auto auto;
-    gap: 5px;
+    gap: 0;
     height: auto;
     min-height: 0;
   }
 
+  .game-bar,
+  .combat-strip,
+  .board-frame,
+  .action-dock,
+  .battle-recap,
+  .latest-event {
+    border-width: 0 0 2px;
+    border-color: rgba(4, 48, 74, 0.28);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
   .game-bar {
-    min-height: 38px;
-    padding: 4px 5px 4px 10px;
-    border-radius: 12px;
+    min-height: 34px;
+    padding: 3px 5px 3px 10px;
   }
 
   .game-brand strong {
-    font-size: 0.94rem;
+    font-size: 0.9rem;
   }
 
   .game-actions {
@@ -2040,48 +2051,47 @@ button {
   }
 
   .icon-action {
-    min-width: 34px;
-    min-height: 32px;
-    padding: 0 8px;
-    font-size: 0.68rem;
+    min-width: 31px;
+    min-height: 29px;
+    padding: 0 7px;
+    font-size: 0.64rem;
   }
 
   .combat-strip {
-    grid-template-columns: minmax(0, 1fr) minmax(82px, 0.56fr) minmax(0, 1fr);
-    min-height: 76px;
-    gap: 4px;
-    padding: 4px;
-    border-radius: 12px;
+    grid-template-columns: minmax(0, 1fr) minmax(72px, 0.48fr) minmax(0, 1fr);
+    min-height: 68px;
+    gap: 3px;
+    padding: 3px;
   }
 
   .combatant {
-    grid-template-columns: 38px minmax(0, 1fr);
-    gap: 4px;
-    padding: 4px;
-    border-radius: 10px;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 3px;
+    padding: 3px;
+    border-radius: 8px;
   }
 
   .portrait-slot {
-    width: 38px;
+    width: 32px;
   }
 
   .combatant-body > span {
-    font-size: 0.54rem;
+    font-size: 0.50rem;
   }
 
   .combatant-body > strong {
-    font-size: 0.74rem;
+    font-size: 0.68rem;
   }
 
   .combatant .stat-bar {
-    margin-top: 3px;
-    padding: 3px 5px 6px;
+    margin-top: 2px;
+    padding: 2px 4px 5px;
   }
 
   .combatant .stat-bar span,
   .combatant .stat-bar strong,
   .mini-stats b {
-    font-size: 0.52rem;
+    font-size: 0.48rem;
   }
 
   .mini-stats {
@@ -2090,12 +2100,12 @@ button {
   }
 
   .duel-pulse {
-    padding: 5px 3px;
-    border-radius: 10px;
+    padding: 4px 2px;
+    border-radius: 8px;
   }
 
   .duel-pulse strong {
-    font-size: 0.82rem;
+    font-size: 0.76rem;
   }
 
   .duel-pulse p {
@@ -2103,45 +2113,50 @@ button {
   }
 
   .board-frame {
-    gap: 4px;
-    padding: 5px;
-    border-radius: 12px;
+    gap: 3px;
+    padding: 4px;
   }
 
   .board-status {
-    min-height: 26px;
-    padding: 3px 7px;
+    min-height: 24px;
+    padding: 2px 6px;
   }
 
   .board-status strong {
-    font-size: 0.78rem;
+    font-size: 0.74rem;
   }
 
   .board-frame .play-board {
     align-self: start;
-    width: min(100%, clamp(292px, calc(100dvh - 458px), 338px));
+    width: min(100%, clamp(270px, calc(100dvh - 510px), 308px));
     margin: 0 auto;
+  }
+
+  .play-board {
+    gap: 4px;
+    padding: 8px;
+    border-width: 2px;
+    border-radius: 14px;
   }
 
   .action-dock {
     grid-template-columns: minmax(0, 0.58fr) minmax(0, 1.42fr);
-    gap: 5px;
-    min-height: 84px;
-    padding: 5px;
-    border-radius: 12px;
+    gap: 3px;
+    min-height: 76px;
+    padding: 3px;
   }
 
   .action-dock .decision-panel {
     min-height: 0;
-    padding: 6px;
+    padding: 5px;
   }
 
   .action-dock .decision-panel span {
-    font-size: 0.6rem;
+    font-size: 0.54rem;
   }
 
   .action-dock .decision-panel strong {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     line-height: 1.05;
   }
 
@@ -2155,23 +2170,24 @@ button {
 
   .action-dock .spell-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px;
+    gap: 3px;
   }
 
   .action-dock .spell-button {
-    padding: 5px;
+    padding: 4px;
+    border-radius: 8px;
   }
 
   .action-dock .spell-button span {
-    font-size: 0.52rem;
+    font-size: 0.48rem;
   }
 
   .action-dock .spell-button strong {
-    font-size: 0.68rem;
+    font-size: 0.62rem;
   }
 
   .action-dock .spell-button b {
-    font-size: 0.50rem;
+    font-size: 0.46rem;
   }
 
   .action-dock .spell-button em {
@@ -2180,10 +2196,9 @@ button {
 
   .battle-recap {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
-    gap: 5px;
-    min-height: 84px;
-    padding: 6px;
-    border-radius: 12px;
+    gap: 3px;
+    min-height: 76px;
+    padding: 4px;
   }
 
   .battle-recap span {
@@ -2203,8 +2218,8 @@ button {
   }
 
   .latest-event {
-    min-height: 30px;
-    padding: 4px 6px 4px 9px;
+    min-height: 28px;
+    padding: 3px 5px 3px 8px;
   }
 
   .latest-event span {
