@@ -11,6 +11,14 @@ type AssetSlot = {
   path: string;
   src: string | null;
 };
+type SpellTargetPreview = {
+  spellId: SpellId;
+  title: string;
+  hint: string;
+  effects: PreviewEffect[];
+  extraTurn: boolean;
+  fatal: boolean;
+};
 
 const boardPattern: GemKind[] = [
   'sun',
@@ -303,6 +311,20 @@ function renderPlayableBoard(preview: MovePreview | null, intent: EnemyIntent | 
 function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | null): string {
   if (activeSpell) {
     const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
+    const spellPreview = activeSpellTargetPreview();
+    if (spellPreview) {
+      return `
+        <div class="decision-panel ${spellPreview.extraTurn ? 'is-extra' : ''} ${spellPreview.fatal ? 'is-risk' : ''}">
+          <span>${spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
+          <strong>${spellPreview.title}</strong>
+          <p>${spellPreview.hint}</p>
+          <div class="effect-row">
+            ${spellPreview.effects.map(renderEffectPill).join('')}
+            ${spellPreview.extraTurn ? '<em class="effect-pill tone-extra">extra turn</em>' : ''}
+          </div>
+        </div>
+      `;
+    }
     return `
       <div class="decision-panel is-extra">
         <span>${spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
@@ -393,6 +415,56 @@ function previewBacklash(preview: MovePreview | null): number {
   return preview.effects.find((effect) => effect.label === 'backlash')?.value ?? 0;
 }
 
+function activeSpellTargetPreview(): SpellTargetPreview | null {
+  if (!activeSpell || !hoverCell) return null;
+  const result = castSpell(duel, activeSpell, hoverCell);
+  if (result.events.some((event) => event.type === 'invalid_spell')) return null;
+
+  const damage = Math.max(0, duel.enemy.hp - result.state.enemy.hp);
+  const guard = Math.max(0, result.state.player.guard - duel.player.guard);
+  const sun = Math.max(0, result.state.player.sun - duel.player.sun);
+  const moon = Math.max(0, result.state.player.moon - duel.player.moon);
+  const crown = Math.max(0, result.state.player.crown - duel.player.crown);
+  const backlash = Math.max(0, duel.player.hp - result.state.player.hp);
+  const converted = result.events
+    .filter((event) => event.type === 'tiles_converted')
+    .reduce((sum, event) => sum + event.cells.length, 0);
+  const effects: PreviewEffect[] = [
+    damage ? { label: 'damage', value: damage, tone: 'damage' } : null,
+    guard ? { label: 'guard', value: guard, tone: 'guard' } : null,
+    sun ? { label: 'sun', value: sun, tone: 'mana' } : null,
+    moon ? { label: 'moon', value: moon, tone: 'mana' } : null,
+    crown ? { label: 'crown', value: crown, tone: 'mana' } : null,
+    backlash ? { label: 'backlash', value: backlash, tone: 'risk' } : null,
+  ].filter((effect): effect is PreviewEffect => !!effect);
+  const fatal = result.state.winner === 'enemy';
+  const extraTurn = result.state.current === 'player' && !result.state.winner;
+
+  return {
+    spellId: activeSpell,
+    title: spellPreviewTitle(activeSpell, damage, guard, backlash, fatal),
+    hint: spellPreviewHint(activeSpell, hoverCell, converted, fatal),
+    effects,
+    extraTurn,
+    fatal,
+  };
+}
+
+function spellPreviewTitle(spellId: SpellId, damage: number, guard: number, backlash: number, fatal: boolean): string {
+  if (fatal) return `Fatal ${DEFAULT_DUEL_RULES.spells[spellId].name}`;
+  if (backlash) return `${DEFAULT_DUEL_RULES.spells[spellId].name}: backlash risk`;
+  if (damage) return `${DEFAULT_DUEL_RULES.spells[spellId].name}: ${damage} damage`;
+  if (guard) return `${DEFAULT_DUEL_RULES.spells[spellId].name}: +${guard} Guard`;
+  return `${DEFAULT_DUEL_RULES.spells[spellId].name}: setup`;
+}
+
+function spellPreviewHint(spellId: SpellId, target: Cell, converted: number, fatal: boolean): string {
+  const fatalCopy = fatal ? ' This will drop Aurora to 0.' : '';
+  if (spellId === 'crown_strike') return `Row ${target.y + 1} resolves now, then cascades.${fatalCopy}`;
+  if (spellId === 'glass_ward') return `Gain guard and convert ${converted} nearby shade to shield.${fatalCopy}`;
+  return `Convert ${converted} tiles to sun, then resolve cascades.${fatalCopy}`;
+}
+
 function backlashPreviewTitle(backlash: number, fatal: boolean): string {
   return fatal ? `Fatal backlash: -${backlash} HP` : `Backlash risk: -${backlash} HP`;
 }
@@ -469,12 +541,17 @@ function renderBoardFrame(
   const invalidPreview = !!preview && !preview.valid;
   const backlash = previewBacklash(preview);
   const fatalBacklash = backlash >= duel.player.hp;
+  const spellPreview = activeSpell ? activeSpellTargetPreview() : null;
   return `
     <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''}" aria-label="Battle board">
       <div class="board-status">
         <span>${
           enemyCue
             ? 'Enemy moved'
+            : spellPreview?.fatal
+            ? 'Fatal spell'
+            : spellPreview
+            ? 'Spell preview'
             : activeSpellName
             ? 'Spell targeting'
             : fatalBacklash
@@ -492,6 +569,8 @@ function renderBoardFrame(
         <strong>${
           enemyCue
             ? `Shade Knight action: ${enemyCue.summary}`
+            : spellPreview
+            ? spellPreview.title
             : activeSpellName
             ? `Choose target for ${activeSpellName}`
             : fatalBacklash
@@ -1053,6 +1132,14 @@ function handleBoardTap(cell: Cell): void {
   clearInvalidCue();
 
   if (activeSpell) {
+    if (!sameCell(hoverCell, cell)) {
+      hoverCell = cell;
+      selectedCell = null;
+      bumpCell = null;
+      renderApp();
+      return;
+    }
+
     const result = castSpell(duel, activeSpell, cell);
     duel = result.state;
     activeSpell = null;
@@ -1223,6 +1310,10 @@ window.addEventListener('pointerup', (event) => {
   });
 
   if (targetCell || releaseCell) {
+    if (activeSpell) {
+      handleBoardTap(releaseCell ?? targetCell ?? commitCell);
+      return;
+    }
     commitSwap(endedDrag.startCell, commitCell);
     return;
   }
