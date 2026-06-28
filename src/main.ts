@@ -262,7 +262,7 @@ function intentCellSet(intent: EnemyIntent | null): Set<string> {
 }
 
 function activeSpellPreviewCell(): Cell | null {
-  return hoverCell ?? confirmedSpellTarget;
+  return confirmedSpellTarget ?? hoverCell;
 }
 
 function spellTargetCellSet(): Set<string> {
@@ -320,11 +320,12 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
     const spell = DEFAULT_DUEL_RULES.spells[activeSpell];
     const spellPreview = activeSpellTargetPreview();
     if (spellPreview) {
+      const confirmHint = confirmedSpellTarget ? ' Tap same target again to cast.' : '';
       return `
         <div class="decision-panel ${spellPreview.extraTurn ? 'is-extra' : ''} ${spellPreview.fatal ? 'is-risk' : ''}">
-          <span>${spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
+          <span>${confirmedSpellTarget ? 'Target confirmed' : spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
           <strong>${spellPreview.title}</strong>
-          <p>${spellPreview.hint}</p>
+          <p>${spellPreview.hint}${confirmHint}</p>
           <div class="effect-row">
             ${spellPreview.effects.map(renderEffectPill).join('')}
             ${spellPreview.extraTurn ? '<em class="effect-pill tone-extra">extra turn</em>' : ''}
@@ -558,6 +559,8 @@ function renderBoardFrame(
             ? 'Enemy moved'
             : spellPreview?.fatal
             ? 'Fatal spell'
+            : spellPreview && confirmedSpellTarget
+            ? 'Spell armed'
             : spellPreview
             ? 'Spell preview'
             : activeSpellName
@@ -577,6 +580,8 @@ function renderBoardFrame(
         <strong>${
           enemyCue
             ? `Shade Knight action: ${enemyCue.summary}`
+            : spellPreview && confirmedSpellTarget
+            ? `Tap same target again: ${spellPreview.title}`
             : spellPreview
             ? spellPreview.title
             : activeSpellName
