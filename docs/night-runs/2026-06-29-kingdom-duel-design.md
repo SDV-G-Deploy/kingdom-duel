@@ -112,5 +112,9 @@ Future wakes append here with:
     - `npm run build` passed
     - `git diff --check` passed
     - local Chromium mobile capture taken at `390x844`
-  - commit/push/deploy status: local only so far at this log point
+  - commit/push/deploy status:
+    - committed as `f95fa65` (`Refine shell depth surfaces`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28341973339` succeeded for `f95fa65`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-BXXFZsQk.js` plus `assets/index-Rxoojua2.css`
   - next recommendation: ability chip desirability and command-deck tactility
