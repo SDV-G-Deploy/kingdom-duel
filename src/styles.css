@@ -31,6 +31,20 @@
     inset 0 2px 0 rgba(255, 255, 255, 0.92),
     inset 0 -16px 24px rgba(0, 74, 133, 0.10),
     0 14px 26px var(--shadow-blue);
+  --shell-surface-top:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(208, 248, 255, 0.62) 58%, rgba(160, 232, 255, 0.22)),
+    rgba(255, 255, 255, 0.66);
+  --shell-surface-mid:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(190, 241, 255, 0.44) 54%, rgba(130, 229, 210, 0.18)),
+    rgba(255, 255, 255, 0.42);
+  --shell-surface-bottom:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(214, 246, 255, 0.52) 56%, rgba(177, 235, 195, 0.20)),
+    rgba(255, 255, 255, 0.50);
+  --shell-inner-rim:
+    inset 0 2px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -14px 22px rgba(0, 74, 133, 0.06);
+  --shell-drop:
+    0 10px 22px rgba(13, 96, 151, 0.12);
   --toy-rim:
     0 0 0 1px rgba(255, 255, 255, 0.82),
     0 0 0 3px rgba(37, 215, 242, 0.16);
@@ -237,12 +251,8 @@ button {
 .latest-event,
 .log-sheet {
   border: 2px solid var(--rim-chrome);
-  background:
-    var(--material-pearl);
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.94),
-    inset 0 -16px 24px rgba(0, 74, 133, 0.08),
-    0 10px 22px rgba(13, 96, 151, 0.16);
+  background: var(--shell-surface-mid);
+  box-shadow: var(--shell-inner-rim), var(--shell-drop);
   backdrop-filter: blur(10px) saturate(1.22);
 }
 
@@ -253,7 +263,13 @@ button {
   gap: 10px;
   min-height: 40px;
   padding: 4px 6px 4px 12px;
-  border-radius: 14px;
+  border-color: rgba(255, 255, 255, 0.84);
+  border-radius: 18px 18px 12px 12px;
+  background: var(--shell-surface-top);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -10px 16px rgba(0, 74, 133, 0.05),
+    0 6px 14px rgba(13, 96, 151, 0.10);
 }
 
 .game-brand strong,
@@ -307,10 +323,10 @@ button {
   gap: 6px;
   min-height: 86px;
   padding: 6px;
-  border-radius: 14px;
+  border-radius: 18px 18px 10px 10px;
   background:
-    linear-gradient(90deg, rgba(37, 215, 242, 0.20), rgba(255, 255, 255, 0.72) 42%, rgba(255, 116, 200, 0.18)),
-    var(--material-pearl);
+    linear-gradient(90deg, rgba(37, 215, 242, 0.16), rgba(255, 255, 255, 0.80) 42%, rgba(255, 116, 200, 0.14)),
+    var(--shell-surface-top);
 }
 
 .battle-console .combat-strip,
@@ -319,25 +335,30 @@ button {
 .battle-console .battle-recap {
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.90),
-    inset 0 -12px 18px rgba(0, 74, 133, 0.06);
+    inset 0 -12px 18px rgba(0, 74, 133, 0.06),
+    0 4px 10px rgba(13, 96, 151, 0.06);
   backdrop-filter: none;
 }
 
 .battle-console .combat-strip {
   border-color: rgba(255, 255, 255, 0.72);
-  border-radius: 18px 18px 12px 12px;
+  border-radius: 20px 20px 10px 10px;
   clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%);
 }
 
 .battle-console .board-frame {
-  border-color: rgba(255, 255, 255, 0.84);
-  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0.90);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.92), transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(181, 240, 255, 0.30) 52%, rgba(155, 255, 79, 0.12)),
+    rgba(255, 255, 255, 0.46);
 }
 
 .battle-console .action-dock,
 .battle-console .battle-recap {
   border-color: rgba(255, 255, 255, 0.72);
-  border-radius: 12px 12px 18px 18px;
+  border-radius: 10px 10px 20px 20px;
   clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
 }
 
@@ -893,11 +914,11 @@ button {
   gap: 6px;
   min-height: 104px;
   padding: 7px;
-  border-color: rgba(255, 255, 255, 0.74);
-  border-radius: 18px 18px 12px 12px;
+  border-color: rgba(255, 255, 255, 0.82);
+  border-radius: 10px 10px 20px 20px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(199, 248, 255, 0.52) 58%, rgba(123, 242, 141, 0.20)),
-    rgba(255, 255, 255, 0.46);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(206, 244, 255, 0.48) 58%, rgba(159, 235, 184, 0.16)),
+    rgba(255, 255, 255, 0.50);
 }
 
 .action-dock .decision-panel {
@@ -1226,7 +1247,9 @@ button {
   align-items: center;
   min-height: 32px;
   padding: 4px 6px 4px 10px;
-  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0.82);
+  border-radius: 10px 10px 18px 18px;
+  background: var(--shell-surface-bottom);
 }
 
 .latest-event span {
@@ -1261,7 +1284,10 @@ button {
   max-height: min(430px, calc(100dvh - 120px));
   padding: 12px;
   overflow: auto;
-  border-radius: 20px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(214, 246, 255, 0.56) 58%, rgba(178, 231, 210, 0.18)),
+    rgba(255, 255, 255, 0.60);
 }
 
 .log-sheet-head {

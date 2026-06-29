@@ -100,3 +100,17 @@ Future wakes append here with:
     - GitHub Pages workflow `28341340482` succeeded for `abd15e3`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-yaf6xIhm.js` plus `assets/index-BNN2klNn.css`
   - next recommendation: shell depth and anti-card cleanup, unless a real-phone QA slot opens for live touch validation first
+
+- 2026-06-29T00:52:45Z
+  - bounded pass: Shell depth and anti-card cleanup
+  - files changed:
+    - `src/styles.css`
+    - `docs/SHELL_DEPTH_ANTI_CARD_PASS_2026-06-29.md`
+    - `screenshots/research/shell-depth-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile capture taken at `390x844`
+  - commit/push/deploy status: local only so far at this log point
+  - next recommendation: ability chip desirability and command-deck tactility
