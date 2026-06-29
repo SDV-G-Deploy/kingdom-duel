@@ -26,6 +26,7 @@ type BattleRecap = {
   pressure: string;
   lesson: string;
 };
+type DebugPreset = 'result-victory' | 'result-defeat';
 
 const boardPattern: GemKind[] = [
   'sun',
@@ -115,9 +116,12 @@ if (!appRoot) {
 }
 
 const app = appRoot;
+const search = new URLSearchParams(window.location.search);
+const debugPreset = search.get('debug');
 
-let view: 'play' | 'moodboard' = new URLSearchParams(window.location.search).get('view') === 'moodboard' ? 'moodboard' : 'play';
-let duel: DuelState = createDuel(2007);
+let view: 'play' | 'moodboard' = search.get('view') === 'moodboard' ? 'moodboard' : 'play';
+let duel: DuelState =
+  debugPreset === 'result-victory' || debugPreset === 'result-defeat' ? createDebugDuel(debugPreset) : createDuel(2007);
 let selectedCell: Cell | null = null;
 let hoverCell: Cell | null = null;
 let activeSpell: SpellId | null = null;
@@ -136,6 +140,109 @@ let enemyCueTimer: number | null = null;
 function gemIcon(kind: GemKind): string {
   void kind;
   return '';
+}
+
+function createDebugDuel(preset: DebugPreset): DuelState {
+  const base = createDuel(2007);
+  if (preset === 'result-victory') {
+    return {
+      ...base,
+      current: 'player',
+      turn: 7,
+      winner: 'player',
+      player: { ...base.player, hp: 13, guard: 4, sun: 1, moon: 2, crown: 0 },
+      enemy: { ...base.enemy, hp: 0, guard: 1, sun: 3, moon: 1, crown: 1 },
+      log: [
+        'Aurora Knight opens the glass duel.',
+        'Sun Bloom ignites the center lane.',
+        'Aurora Knight seals the last break in Shade Veil.',
+      ],
+      history: [
+        ...base.history,
+        {
+          id: 3,
+          turn: 4,
+          actor: 'player',
+          summary: 'Sun Bloom re-cut the board and kept the turn.',
+          detail: 'Aurora Knight cast Sun Bloom to convert the center cluster into sun and reopen lethal pressure.',
+          events: ['cast Sun Bloom', 'matched 4 sun for 4 mana', 'kept the turn'],
+          before: {
+            player: { hp: 18, maxHp: 20, guard: 2, sun: 5, moon: 1, crown: 0 },
+            enemy: { hp: 14, maxHp: 20, guard: 2, sun: 0, moon: 2, crown: 1 },
+          },
+          after: {
+            player: { hp: 18, maxHp: 20, guard: 2, sun: 3, moon: 1, crown: 0 },
+            enemy: { hp: 9, maxHp: 20, guard: 1, sun: 0, moon: 2, crown: 1 },
+          },
+        },
+        {
+          id: 4,
+          turn: 7,
+          actor: 'player',
+          summary: 'Aurora Knight finished the duel with a crown strike.',
+          detail: 'Aurora Knight converted stored mana into a final Crown Strike and dropped Shade Knight to 0 HP.',
+          events: ['cast Crown Strike', 'dealt 9 damage', 'Shade Knight reached 0 HP'],
+          before: {
+            player: { hp: 13, maxHp: 20, guard: 3, sun: 1, moon: 2, crown: 5 },
+            enemy: { hp: 8, maxHp: 20, guard: 1, sun: 3, moon: 1, crown: 1 },
+          },
+          after: {
+            player: { hp: 13, maxHp: 20, guard: 4, sun: 1, moon: 2, crown: 0 },
+            enemy: { hp: 0, maxHp: 20, guard: 1, sun: 3, moon: 1, crown: 1 },
+          },
+        },
+      ],
+    };
+  }
+
+  return {
+    ...base,
+    current: 'enemy',
+    turn: 6,
+    winner: 'enemy',
+    player: { ...base.player, hp: 0, guard: 0, sun: 4, moon: 3, crown: 4 },
+    enemy: { ...base.enemy, hp: 8, guard: 2, sun: 1, moon: 1, crown: 2 },
+    log: [
+      'Aurora Knight opens the glass duel.',
+      'Shade Knight chains a backlash trap.',
+      'Aurora Knight falls under shade pressure.',
+    ],
+    history: [
+      ...base.history,
+      {
+        id: 3,
+        turn: 5,
+        actor: 'enemy',
+        summary: 'Shade Knight chained a backlash line and kept the turn.',
+        detail: 'Shade Knight converted a shade pocket into damage pressure and forced Aurora low before the last exchange.',
+        events: ['matched 4 shade', 'Aurora paid 4 HP backlash', 'kept the turn'],
+        before: {
+          player: { hp: 8, maxHp: 20, guard: 1, sun: 4, moon: 2, crown: 4 },
+          enemy: { hp: 13, maxHp: 20, guard: 1, sun: 1, moon: 1, crown: 2 },
+        },
+        after: {
+          player: { hp: 4, maxHp: 20, guard: 0, sun: 4, moon: 2, crown: 4 },
+          enemy: { hp: 13, maxHp: 20, guard: 2, sun: 1, moon: 1, crown: 2 },
+        },
+      },
+      {
+        id: 4,
+        turn: 6,
+        actor: 'player',
+        summary: 'Aurora Knight broke on a risky sword answer.',
+        detail: 'Aurora Knight tried to answer with sword pressure but paid fatal shade backlash and fell with mana still banked.',
+        events: ['matched 3 swords', 'Aurora paid 4 HP backlash', 'Aurora Knight reached 0 HP'],
+        before: {
+          player: { hp: 4, maxHp: 20, guard: 0, sun: 4, moon: 3, crown: 4 },
+          enemy: { hp: 8, maxHp: 20, guard: 2, sun: 1, moon: 1, crown: 2 },
+        },
+        after: {
+          player: { hp: 0, maxHp: 20, guard: 0, sun: 4, moon: 3, crown: 4 },
+          enemy: { hp: 8, maxHp: 20, guard: 2, sun: 1, moon: 1, crown: 2 },
+        },
+      },
+    ],
+  };
 }
 
 function gemLabel(kind: GemKind): string {
@@ -652,7 +759,7 @@ function renderActionDock(preview: MovePreview | null, canMove: boolean): string
 
 function renderLatestEvent(): string {
   return `
-    <section class="latest-event" aria-label="Latest combat event">
+    <section class="latest-event ${duel.winner ? 'is-terminal' : ''}" aria-label="Latest combat event">
       <span>${latestEvent()}</span>
       <button data-action="toggle-log" type="button" aria-expanded="${logOpen}">Full log</button>
     </section>
@@ -824,11 +931,38 @@ function battleRecap(): BattleRecap | null {
   };
 }
 
+function actorReserve(actor: DuelState['player']): number {
+  return actor.sun + actor.moon + actor.crown;
+}
+
+function resultStanceLabel(actorId: 'player' | 'enemy'): string {
+  if (!duel.winner) return actorId === 'player' ? 'Aurora Glass' : 'Shade Veil';
+  if (duel.winner === actorId) return actorId === 'player' ? 'Board sealed' : 'Board broken';
+  return actorId === 'player' ? 'Aurora fallen' : 'Shade fallen';
+}
+
+function renderResultStand(actor: DuelState['player'], side: 'hero' | 'enemy'): string {
+  const actorId = side === 'hero' ? 'player' : 'enemy';
+  const faction = actorId === 'player' ? 'Aurora Glass' : 'Shade Veil';
+  return `
+    <div class="recap-stand recap-stand-${side} ${duel.winner === actorId ? 'is-winner' : 'is-loser'}">
+      ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
+      <div class="recap-stand-copy">
+        <span>${faction}</span>
+        <strong>${actor.name}</strong>
+        <b>${resultStanceLabel(actorId)}</b>
+        <em>HP ${actor.hp}/${actor.maxHp} · Guard ${actor.guard} · Reserve ${actorReserve(actor)}</em>
+      </div>
+    </div>
+  `;
+}
+
 function renderBattleRecap(): string {
   const recap = battleRecap();
   if (!recap) return '';
   const winnerName = duel.winner === 'player' ? 'Aurora Glass' : 'Shade Veil';
   const resultTitle = duel.winner === 'player' ? 'Aurora seals the glass board' : 'Shade breaks the glass board';
+  const terminalScore = `Aurora ${duel.player.hp}/${duel.player.maxHp} HP · Shade ${duel.enemy.hp}/${duel.enemy.maxHp} HP`;
 
   return `
     <section class="battle-recap ${duel.winner === 'player' ? 'is-victory' : 'is-defeat'}" aria-label="Battle recap">
@@ -839,10 +973,13 @@ function renderBattleRecap(): string {
       <div class="recap-main">
         <span>${resultTitle}</span>
         <strong>${recap.cause}</strong>
+        <b>${terminalScore}</b>
       </div>
-      <p>${recap.turningPoint}</p>
-      <p>${recap.pressure}</p>
-      <em>${recap.lesson}</em>
+      ${renderResultStand(duel.player, 'hero')}
+      ${renderResultStand(duel.enemy, 'enemy')}
+      <p class="recap-turning-point">${recap.turningPoint}</p>
+      <p class="recap-pressure">${recap.pressure}</p>
+      <em class="recap-lesson">${recap.lesson}</em>
     </section>
   `;
 }
