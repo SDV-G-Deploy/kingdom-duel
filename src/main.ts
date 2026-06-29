@@ -26,6 +26,10 @@ type BattleRecap = {
   pressure: string;
   lesson: string;
 };
+type TerminalBeat = {
+  title: string;
+  detail: string;
+};
 type DebugPreset =
   | 'result-victory'
   | 'result-defeat'
@@ -1021,6 +1025,45 @@ function battleRecap(): BattleRecap | null {
   };
 }
 
+function terminalBeat(): TerminalBeat | null {
+  if (!duel.winner) return null;
+
+  const history = [...duel.history].reverse();
+  const combatHistory = history.filter((entry) => entry.actor !== 'system');
+  const terminalEntry = combatHistory[combatHistory.length - 1];
+  if (!terminalEntry) return null;
+
+  const backlash = sumNumbers(terminalEntry.events, /paid (\d+) HP backlash/);
+  const spells = terminalEntry.events.filter((event) => event.startsWith('cast '));
+  const actorName = terminalEntry.actor === 'player' ? 'Aurora' : 'Shade';
+
+  if (duel.winner === 'player') {
+    if (spells.length) {
+      return {
+        title: `${actorName} spent banked mana for the finish`,
+        detail: `${spells[0]} converted the last opening before Shade could reset guard.`,
+      };
+    }
+
+    return {
+      title: `${actorName} closed with a clean board strike`,
+      detail: 'The final exchange stayed on-board and denied Shade one more chain.',
+    };
+  }
+
+  if (backlash > 0 && terminalEntry.actor === 'player') {
+    return {
+      title: `Aurora broke on a ${backlash} HP backlash`,
+      detail: 'The answer line looked live, but shade pressure turned the last move into a self-break.',
+    };
+  }
+
+  return {
+    title: `Shade held tempo in the last exchange`,
+    detail: 'Aurora lost the last safe line before the board could be stabilized.',
+  };
+}
+
 function actorReserve(actor: DuelState['player']): number {
   return actor.sun + actor.moon + actor.crown;
 }
@@ -1050,6 +1093,12 @@ function renderResultStand(actor: DuelState['player'], side: 'hero' | 'enemy'): 
 function renderBattleRecap(): string {
   const recap = battleRecap();
   if (!recap) return '';
+  const beat = terminalBeat();
+  const history = [...duel.history].reverse();
+  const playerExtraTurns = history.filter((entry) => entry.actor === 'player' && entry.events.some((event) => event.includes('kept the turn'))).length;
+  const enemyExtraTurns = history.filter((entry) => entry.actor === 'enemy' && entry.events.some((event) => event.includes('kept the turn'))).length;
+  const playerBacklash = history.reduce((sum, entry) => sum + sumNumbers(entry.events, /paid (\d+) HP backlash/), 0);
+  const terminalReserve = duel.player.sun + duel.player.moon + duel.player.crown;
   const winnerName = duel.winner === 'player' ? 'Aurora Glass' : 'Shade Veil';
   const resultTitle = duel.winner === 'player' ? 'Aurora seals the glass board' : 'Shade breaks the glass board';
   const terminalScore = `Aurora ${duel.player.hp}/${duel.player.maxHp} HP · Shade ${duel.enemy.hp}/${duel.enemy.maxHp} HP`;
@@ -1068,8 +1117,37 @@ function renderBattleRecap(): string {
         <strong>${recap.cause}</strong>
         <b>${terminalScore}</b>
       </div>
+      ${
+        beat
+          ? `
+            <div class="recap-beat">
+              <span>Final exchange</span>
+              <strong>${beat.title}</strong>
+              <b>${beat.detail}</b>
+            </div>
+          `
+          : ''
+      }
       ${renderResultStand(duel.player, 'hero')}
       ${renderResultStand(duel.enemy, 'enemy')}
+      <div class="recap-metrics" aria-label="Terminal battle metrics">
+        <em class="recap-metric">
+          <span>Turn</span>
+          <strong>${duel.turn}</strong>
+        </em>
+        <em class="recap-metric">
+          <span>Chains</span>
+          <strong>A${playerExtraTurns}/S${enemyExtraTurns}</strong>
+        </em>
+        <em class="recap-metric">
+          <span>Backlash</span>
+          <strong>${playerBacklash} HP</strong>
+        </em>
+        <em class="recap-metric">
+          <span>Reserve</span>
+          <strong>${terminalReserve}</strong>
+        </em>
+      </div>
       <p class="recap-turning-point">${recap.turningPoint}</p>
       <p class="recap-pressure">${recap.pressure}</p>
       <em class="recap-lesson">${recap.lesson}</em>

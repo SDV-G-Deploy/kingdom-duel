@@ -1165,6 +1165,20 @@ button {
   border-left: 3px solid rgba(255, 226, 92, 0.70);
 }
 
+.recap-beat {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(125, 223, 255, 0.16)),
+    rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 8px 18px rgba(13, 96, 151, 0.1);
+}
+
 .battle-recap span {
   display: block;
   color: #8f1068;
@@ -1285,6 +1299,43 @@ button {
   grid-column: span 1;
 }
 
+.recap-metrics {
+  grid-column: 3 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.recap-metric {
+  display: grid;
+  gap: 3px;
+  padding: 6px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.26)),
+    rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 6px 12px rgba(4, 48, 74, 0.08);
+}
+
+.recap-metric span,
+.recap-metric strong {
+  display: block;
+}
+
+.recap-metric span {
+  color: #007092;
+  font-size: 0.54rem;
+}
+
+.recap-metric strong {
+  color: #04304a;
+  font-size: 0.7rem;
+  line-height: 1.05;
+}
+
 .recap-actions {
   grid-column: 1 / -1;
   display: grid;
@@ -1325,6 +1376,13 @@ button {
 
 .battle-recap.is-victory .recap-main {
   border-left-color: rgba(255, 226, 92, 0.84);
+}
+
+.battle-recap.is-victory .recap-beat,
+.battle-recap.is-victory .recap-metric {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 238, 148, 0.2)),
+    rgba(255, 255, 255, 0.32);
 }
 
 .battle-recap.is-victory .recap-seal {
@@ -1372,9 +1430,18 @@ button {
   border-left-color: rgba(255, 116, 200, 0.82);
 }
 
+.battle-recap.is-defeat .recap-beat,
+.battle-recap.is-defeat .recap-metric {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(255, 188, 222, 0.22)),
+    rgba(255, 255, 255, 0.26);
+}
+
 .battle-recap.is-defeat .recap-main b,
+.battle-recap.is-defeat .recap-beat span,
 .battle-recap.is-defeat .recap-stand-copy span,
-.battle-recap.is-defeat .recap-stand-copy b {
+.battle-recap.is-defeat .recap-stand-copy b,
+.battle-recap.is-defeat .recap-metric span {
   color: #8f1068;
 }
 
@@ -3163,6 +3230,10 @@ button {
     padding: 6px 7px;
   }
 
+  .recap-beat {
+    padding: 6px 7px;
+  }
+
   .recap-main b,
   .battle-recap p,
   .battle-recap em {
@@ -3172,6 +3243,11 @@ button {
 
   .recap-main b {
     font-size: 0.52rem;
+  }
+
+  .recap-beat b {
+    font-size: 0.56rem;
+    line-height: 1.12;
   }
 
   .recap-seal {
@@ -3205,6 +3281,23 @@ button {
   .recap-stand-copy em {
     font-size: 0.48rem;
     line-height: 1.08;
+  }
+
+  .recap-metrics {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recap-metric {
+    padding: 5px 6px;
+  }
+
+  .recap-metric span {
+    font-size: 0.48rem;
+  }
+
+  .recap-metric strong {
+    font-size: 0.62rem;
   }
 
   .recap-turning-point,
