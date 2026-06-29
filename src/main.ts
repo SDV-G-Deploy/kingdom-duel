@@ -1053,6 +1053,9 @@ function renderBattleRecap(): string {
   const winnerName = duel.winner === 'player' ? 'Aurora Glass' : 'Shade Veil';
   const resultTitle = duel.winner === 'player' ? 'Aurora seals the glass board' : 'Shade breaks the glass board';
   const terminalScore = `Aurora ${duel.player.hp}/${duel.player.maxHp} HP · Shade ${duel.enemy.hp}/${duel.enemy.maxHp} HP`;
+  const resultActionCopy =
+    duel.winner === 'player' ? 'Board sealed. Bank the line and study the finish.' : 'Board lost. Study the break before the next duel.';
+  const resultActionLabel = duel.winner === 'player' ? 'Study victory log' : 'Study defeat log';
 
   return `
     <section class="battle-recap ${duel.winner === 'player' ? 'is-victory' : 'is-defeat'}" aria-label="Battle recap">
@@ -1070,6 +1073,10 @@ function renderBattleRecap(): string {
       <p class="recap-turning-point">${recap.turningPoint}</p>
       <p class="recap-pressure">${recap.pressure}</p>
       <em class="recap-lesson">${recap.lesson}</em>
+      <div class="recap-actions">
+        <span>${resultActionCopy}</span>
+        <button data-action="toggle-log" type="button" aria-expanded="${logOpen}">${resultActionLabel}</button>
+      </div>
     </section>
   `;
 }

@@ -1269,7 +1269,8 @@ button {
 
 .recap-turning-point,
 .recap-pressure,
-.recap-lesson {
+.recap-lesson,
+.recap-actions {
   padding: 6px 8px;
   border-radius: 11px;
   background: rgba(255, 255, 255, 0.34);
@@ -1282,6 +1283,33 @@ button {
 .recap-pressure,
 .recap-lesson {
   grid-column: span 1;
+}
+
+.recap-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.recap-actions span {
+  color: rgba(4, 48, 74, 0.78);
+  font-size: 0.66rem;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.recap-actions button {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  color: #04304a;
+  background: rgba(255, 255, 255, 0.48);
+  font-size: 0.64rem;
+  font-weight: 950;
+  cursor: pointer;
 }
 
 .battle-recap.is-victory {
@@ -1305,6 +1333,16 @@ button {
     inset 0 -14px 18px rgba(255, 157, 61, 0.14),
     0 12px 24px rgba(255, 157, 61, 0.18),
     0 0 22px rgba(255, 226, 92, 0.18);
+}
+
+.battle-recap.is-victory .recap-actions {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 238, 148, 0.20)),
+    rgba(255, 255, 255, 0.30);
+}
+
+.battle-recap.is-victory .recap-actions button {
+  border-color: rgba(255, 226, 92, 0.72);
 }
 
 .battle-recap.is-defeat {
@@ -1338,6 +1376,20 @@ button {
 .battle-recap.is-defeat .recap-stand-copy span,
 .battle-recap.is-defeat .recap-stand-copy b {
   color: #8f1068;
+}
+
+.battle-recap.is-defeat .recap-actions {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 188, 222, 0.22)),
+    rgba(255, 255, 255, 0.28);
+}
+
+.battle-recap.is-defeat .recap-actions button {
+  border-color: rgba(255, 116, 200, 0.72);
+}
+
+.battle-recap.is-defeat .recap-actions span {
+  color: rgba(86, 14, 68, 0.84);
 }
 
 .latest-event {
@@ -3233,5 +3285,20 @@ button {
   .recap-lesson {
     grid-column: 1 / -1;
     padding: 4px 6px;
+  }
+
+  .recap-actions {
+    gap: 6px;
+    padding: 4px 6px;
+  }
+
+  .recap-actions span {
+    font-size: 0.60rem;
+  }
+
+  .recap-actions button {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 0.58rem;
   }
 }
