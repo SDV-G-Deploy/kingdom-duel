@@ -150,5 +150,9 @@ Future wakes append here with:
     - `npm run build` passed
     - `git diff --check` passed
     - local Chromium mobile capture taken at `390x844`
-  - commit/push/deploy status: local only so far at this log point
+  - commit/push/deploy status:
+    - committed as `be59d23` (`Clarify Aurora shade intent read`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28343488558` succeeded for `be59d23`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-BDxDTuMk.js` plus `assets/index-Bug5dPnN.css`
   - next recommendation: mobile screenshot QA at `390x700` and `390x844`, unless a fresh board-adjacent readability issue appears first
