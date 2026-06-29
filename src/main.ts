@@ -523,7 +523,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
 
   if (!selectedCell) {
     return `
-      <div class="decision-panel is-empty">
+      <div class="decision-panel is-empty is-deck">
         <span>Command deck</span>
         <strong>Pick a strike gem</strong>
         <p>Select one gem. Bright sockets are safe swaps; pink notches show Shade pressure.</p>
@@ -533,7 +533,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
 
   if (!preview) {
     return `
-      <div class="decision-panel is-empty">
+      <div class="decision-panel is-empty is-deck">
         <span>Command deck</span>
         <strong>Choose a lit socket</strong>
         <p>Aqua sockets can strike. Pale sockets are only a test and may snap back.</p>

@@ -118,3 +118,18 @@ Future wakes append here with:
     - GitHub Pages workflow `28341973339` succeeded for `f95fa65`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-BXXFZsQk.js` plus `assets/index-Rxoojua2.css`
   - next recommendation: ability chip desirability and command-deck tactility
+
+- 2026-06-29T01:17:58Z
+  - bounded pass: Ability chip desirability and command-deck tactility
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/ABILITY_CHIP_TACTILITY_PASS_2026-06-29.md`
+    - `screenshots/research/ability-chip-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile capture taken at `390x844`
+  - commit/push/deploy status: local only so far at this log point
+  - next recommendation: Aurora/Shade character fantasy and enemy intent clarity
