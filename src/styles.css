@@ -808,6 +808,45 @@ button {
     0 16px 32px rgba(143, 16, 104, 0.15);
 }
 
+.board-frame.is-spell-aim .board-status {
+  border-color: rgba(68, 214, 255, 0.64);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(111, 232, 255, 0.30)),
+    rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 24px rgba(37, 215, 242, 0.12);
+}
+
+.board-frame.is-spell-aim .board-status span {
+  color: #0093bb;
+}
+
+.board-frame.is-spell-armed .board-status {
+  border-color: rgba(255, 210, 77, 0.70);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 226, 92, 0.30)),
+    rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 12px 24px rgba(255, 157, 61, 0.14);
+}
+
+.board-frame.is-spell-armed .board-status span {
+  color: #a15a00;
+}
+
+.board-frame.is-snap-back .board-status {
+  border-color: rgba(255, 116, 200, 0.52);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.80), rgba(255, 188, 222, 0.28)),
+    rgba(255, 255, 255, 0.30);
+}
+
+.board-frame.is-snap-back .board-status span {
+  color: #8f1068;
+}
+
 .intent-strip {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -866,6 +905,45 @@ button {
   padding: 9px;
   border-radius: 14px;
   border-color: rgba(37, 215, 242, 0.46);
+}
+
+.action-dock .decision-panel.is-aim {
+  border-color: rgba(68, 214, 255, 0.56);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.86), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(111, 232, 255, 0.18)),
+    rgba(255, 255, 255, 0.46);
+}
+
+.action-dock .decision-panel.is-armed {
+  border-color: rgba(255, 210, 77, 0.68);
+  background:
+    radial-gradient(circle at 90% 18%, rgba(255, 255, 255, 0.88), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 226, 92, 0.24)),
+    rgba(255, 255, 255, 0.50);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -8px 12px rgba(255, 157, 61, 0.08),
+    0 10px 18px rgba(255, 157, 61, 0.12);
+}
+
+.action-dock .decision-panel.is-backlash,
+.action-dock .decision-panel.is-snapback {
+  border-color: rgba(255, 116, 200, 0.58);
+}
+
+.action-dock .decision-panel.is-backlash {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(255, 255, 255, 0.82), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 116, 200, 0.18)),
+    rgba(255, 255, 255, 0.42);
+}
+
+.action-dock .decision-panel.is-snapback {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.82), transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 188, 222, 0.18)),
+    rgba(255, 255, 255, 0.42);
 }
 
 .action-dock .decision-panel strong {

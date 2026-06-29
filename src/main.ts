@@ -2,7 +2,7 @@ import './styles.css';
 import { areAdjacent, findLegalMoves, getTile } from './engine/board';
 import { applySwap, castSpell, createDuel, getEnemyIntent, previewSwap, runEnemyTurn } from './engine/duel';
 import { DEFAULT_DUEL_RULES } from './engine/rules';
-import type { Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
+import type { Board, Cell, DuelState, EnemyIntent, ManaCost, MovePreview, PreviewEffect, SpellId, TileKind } from './engine/types';
 import { chooseDragCommitCell, chooseSpellTargetTapAction } from './input';
 
 type GemKind = TileKind;
@@ -26,7 +26,13 @@ type BattleRecap = {
   pressure: string;
   lesson: string;
 };
-type DebugPreset = 'result-victory' | 'result-defeat';
+type DebugPreset =
+  | 'result-victory'
+  | 'result-defeat'
+  | 'state-spell-aim'
+  | 'state-spell-armed'
+  | 'state-backlash'
+  | 'state-snapback';
 
 const boardPattern: GemKind[] = [
   'sun',
@@ -137,6 +143,31 @@ let invalidCueTimer: number | null = null;
 let enemyCue: { cells: Cell[]; summary: string } | null = null;
 let enemyCueTimer: number | null = null;
 
+if (debugPreset === 'state-spell-aim') {
+  duel.player = { ...duel.player, sun: 6 };
+  activeSpell = 'sun_bloom';
+  hoverCell = { x: 3, y: 3 };
+}
+
+if (debugPreset === 'state-spell-armed') {
+  duel.player = { ...duel.player, moon: 5 };
+  activeSpell = 'glass_ward';
+  hoverCell = { x: 3, y: 3 };
+  confirmedSpellTarget = { x: 3, y: 3 };
+}
+
+if (debugPreset === 'state-backlash') {
+  duel = createBacklashDebugDuel();
+  selectedCell = { x: 2, y: 1 };
+  hoverCell = { x: 2, y: 0 };
+}
+
+if (debugPreset === 'state-snapback') {
+  selectedCell = { x: 2, y: 1 };
+  hoverCell = { x: 1, y: 1 };
+  invalidCue = 'No match: the target tile snapped back.';
+}
+
 function gemIcon(kind: GemKind): string {
   void kind;
   return '';
@@ -242,6 +273,30 @@ function createDebugDuel(preset: DebugPreset): DuelState {
         },
       },
     ],
+  };
+}
+
+function createBacklashDebugDuel(): DuelState {
+  const base = createDuel(2007);
+  const tiles: TileKind[] = Array.from({ length: 64 }, (_, index) => {
+    const x = index % 8;
+    const y = Math.floor(index / 8);
+    return ['sun', 'shield', 'sword', 'moon', 'crown', 'shade'][(x + y) % 6] as TileKind;
+  });
+  const board: Board = { width: 8, height: 8, tiles };
+  board.tiles[0] = 'shade';
+  board.tiles[1] = 'shade';
+  board.tiles[2] = 'sun';
+  board.tiles[3] = 'shade';
+  board.tiles[10] = 'shade';
+
+  return {
+    ...base,
+    board,
+    seed: 99,
+    player: { ...base.player, hp: 4, guard: 0 },
+    enemy: { ...base.enemy, hp: 14, guard: 1 },
+    log: ['Shade pressure is climbing. One sword answer risks lethal backlash.'],
   };
 }
 
@@ -436,7 +491,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
     if (spellPreview) {
       const confirmHint = confirmedSpellTarget ? ' Tap same target again to cast.' : '';
       return `
-        <div class="decision-panel ${spellPreview.extraTurn ? 'is-extra' : ''} ${spellPreview.fatal ? 'is-risk' : ''}">
+        <div class="decision-panel ${spellPreview.extraTurn ? 'is-extra' : ''} ${spellPreview.fatal ? 'is-risk' : ''} ${confirmedSpellTarget ? 'is-armed' : 'is-aim'}">
           <span>${confirmedSpellTarget ? 'Spell armed' : spellRoleLabel(activeSpell)} · ${costLabel(spell.cost)}</span>
           <strong>${spellPreview.title}</strong>
           <p>${spellPreview.hint}${confirmHint}</p>
@@ -458,7 +513,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
 
   if (snapBackCue) {
     return `
-      <div class="decision-panel is-risk">
+      <div class="decision-panel is-risk is-snapback">
         <span>Strike failed</span>
         <strong>No match. Gem snaps back.</strong>
         <p>${snapBackCue}</p>
@@ -488,7 +543,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
 
   if (!preview.valid) {
     return `
-      <div class="decision-panel is-risk">
+      <div class="decision-panel is-risk is-snapback">
         <span>Strike failed</span>
         <strong>${swapTruthLabel(preview.from, preview.to)}: no match</strong>
         <p>No chain forms here. Shift to a bright socket before Shade gets tempo.</p>
@@ -499,7 +554,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const backlash = previewBacklash(preview);
   const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   return `
-    <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk' : ''}">
+    <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk is-backlash' : ''}">
       <span>${backlash ? 'Risk strike' : preview.extraTurn ? 'Tempo strike' : 'Strike locked'} · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
       ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
@@ -676,7 +731,7 @@ function renderBoardFrame(
   const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   const spellPreview = activeSpell ? activeSpellTargetPreview() : null;
   return `
-    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''}" aria-label="Battle board">
+    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''} ${spellPreview && !confirmedSpellTarget ? 'is-spell-aim' : ''} ${spellPreview && confirmedSpellTarget ? 'is-spell-armed' : ''} ${snapBackCue || invalidPreview ? 'is-snap-back' : ''}" aria-label="Battle board">
       <div class="board-status">
         <span>${
           enemyCue

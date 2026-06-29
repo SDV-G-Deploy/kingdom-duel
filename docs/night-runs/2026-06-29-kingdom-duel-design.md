@@ -78,3 +78,21 @@ Future wakes append here with:
     - GitHub Pages workflow `28340746849` succeeded for `41dd896`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-CYUhT_Bq.js` plus `assets/index-BEQYFkjl.css`
   - next recommendation: state-specific UX QA pass on spell aim / armed / backlash / invalid snap-back, now that terminal result hierarchy is materially stronger
+
+- 2026-06-29T00:29:48Z
+  - bounded pass: State-specific UX QA for spell aim / armed / backlash / snap-back
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/STATE_SPECIFIC_UX_QA_PASS_2026-06-29.md`
+    - `screenshots/research/state-spell-aim-390x700.png`
+    - `screenshots/research/state-spell-armed-390x700.png`
+    - `screenshots/research/state-backlash-390x844.png`
+    - `screenshots/research/state-snapback-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile captures taken for the four new state-debug presets
+  - commit/push/deploy status: local only so far at this log point
+  - next recommendation: shell depth and anti-card cleanup, unless a real-phone QA slot opens for live touch validation first
