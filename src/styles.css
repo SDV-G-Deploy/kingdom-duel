@@ -884,6 +884,34 @@ button {
   color: #8f1068;
 }
 
+.board-frame.is-selection-state .board-status {
+  border-color: rgba(255, 226, 92, 0.62);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 238, 148, 0.26)),
+    rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 10px 24px rgba(255, 176, 45, 0.10);
+}
+
+.board-frame.is-selection-state .board-status span {
+  color: #a15a00;
+}
+
+.board-frame.is-valid-swap-state .board-status {
+  border-color: rgba(118, 246, 96, 0.60);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(155, 255, 79, 0.22)),
+    rgba(255, 255, 255, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 10px 24px rgba(37, 215, 242, 0.10);
+}
+
+.board-frame.is-valid-swap-state .board-status span {
+  color: #0d7d4f;
+}
+
 .intent-strip {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -975,6 +1003,18 @@ button {
     rgba(255, 255, 255, 0.58);
 }
 
+.action-dock .decision-panel.is-selection {
+  border-color: rgba(255, 226, 92, 0.60);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.88), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 238, 148, 0.22) 62%, rgba(255, 226, 92, 0.12)),
+    rgba(255, 255, 255, 0.56);
+}
+
+.action-dock .decision-panel.is-selection span {
+  color: #a15a00;
+}
+
 .action-dock .decision-panel.is-aim {
   border-color: rgba(68, 214, 255, 0.56);
   background:
@@ -1005,6 +1045,18 @@ button {
     radial-gradient(circle at 90% 18%, rgba(255, 255, 255, 0.82), transparent 18%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 116, 200, 0.18)),
     rgba(255, 255, 255, 0.42);
+}
+
+.action-dock .decision-panel.is-valid-route {
+  border-color: rgba(118, 246, 96, 0.58);
+  background:
+    radial-gradient(circle at 90% 18%, rgba(255, 255, 255, 0.84), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(155, 255, 79, 0.18)),
+    rgba(255, 255, 255, 0.44);
+}
+
+.action-dock .decision-panel.is-valid-route span {
+  color: #0d7d4f;
 }
 
 .action-dock .decision-panel.is-snapback {

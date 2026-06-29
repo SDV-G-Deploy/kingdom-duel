@@ -29,6 +29,8 @@ type BattleRecap = {
 type DebugPreset =
   | 'result-victory'
   | 'result-defeat'
+  | 'state-selected'
+  | 'state-valid-swap'
   | 'state-spell-aim'
   | 'state-spell-armed'
   | 'state-backlash'
@@ -147,6 +149,15 @@ if (debugPreset === 'state-spell-aim') {
   duel.player = { ...duel.player, sun: 6 };
   activeSpell = 'sun_bloom';
   hoverCell = { x: 3, y: 3 };
+}
+
+if (debugPreset === 'state-selected') {
+  selectedCell = { x: 2, y: 1 };
+}
+
+if (debugPreset === 'state-valid-swap') {
+  selectedCell = { x: 2, y: 1 };
+  hoverCell = { x: 2, y: 0 };
 }
 
 if (debugPreset === 'state-spell-armed') {
@@ -533,10 +544,10 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
 
   if (!preview) {
     return `
-      <div class="decision-panel is-empty is-deck">
-        <span>Command deck</span>
+      <div class="decision-panel is-empty is-deck is-selection">
+        <span>Tile claimed</span>
         <strong>Choose a lit socket</strong>
-        <p>Aqua sockets can strike. Pale sockets are only a test and may snap back.</p>
+        <p>Aqua sockets will strike from this gem. Pale sockets are only a feint and may snap back.</p>
       </div>
     `;
   }
@@ -554,8 +565,8 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
   const backlash = previewBacklash(preview);
   const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   return `
-    <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk is-backlash' : ''}">
-      <span>${backlash ? 'Risk strike' : preview.extraTurn ? 'Tempo strike' : 'Strike locked'} · ${swapTruthLabel(preview.from, preview.to)}</span>
+    <div class="decision-panel ${preview.extraTurn ? 'is-extra' : ''} ${backlash ? 'is-risk is-backlash' : 'is-valid-route'}">
+      <span>${backlash ? 'Risk strike' : preview.extraTurn ? 'Tempo strike' : 'Strike ready'} · ${swapTruthLabel(preview.from, preview.to)}</span>
       <strong>${backlash ? backlashPreviewTitle(backlash, fatalBacklash) : preview.summary}</strong>
       ${backlash ? `<p>${backlashPreviewHint(backlash, fatalBacklash)}</p>` : ''}
       <div class="effect-row">
@@ -748,8 +759,10 @@ function renderBoardFrame(
   const backlash = previewBacklash(preview);
   const fatalBacklash = backlash > 0 && backlash >= duel.player.hp;
   const spellPreview = activeSpell ? activeSpellTargetPreview() : null;
+  const hasSelection = !!selectedCell && !activeSpell;
+  const hasValidSwap = !!preview?.valid && !backlash;
   return `
-    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''} ${spellPreview && !confirmedSpellTarget ? 'is-spell-aim' : ''} ${spellPreview && confirmedSpellTarget ? 'is-spell-armed' : ''} ${snapBackCue || invalidPreview ? 'is-snap-back' : ''}" aria-label="Battle board">
+    <section class="board-frame ${canMove ? 'is-ready' : ''} ${enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''} ${spellPreview && !confirmedSpellTarget ? 'is-spell-aim' : ''} ${spellPreview && confirmedSpellTarget ? 'is-spell-armed' : ''} ${snapBackCue || invalidPreview ? 'is-snap-back' : ''} ${hasSelection && !preview ? 'is-selection-state' : ''} ${hasValidSwap ? 'is-valid-swap-state' : ''}" aria-label="Battle board">
       <div class="board-status">
         <span>${
           enemyCue
@@ -771,7 +784,9 @@ function renderBoardFrame(
             : preview?.valid
                 ? preview.extraTurn
                   ? 'Tempo strike'
-                  : 'Strike lock'
+                  : 'Strike ready'
+                : hasSelection
+                  ? 'Tile claimed'
                 : canMove
                   ? 'Aurora turn'
                   : 'Arena locked'
@@ -799,6 +814,8 @@ function renderBoardFrame(
                   : 'No match on this target'
                 : preview?.valid
                   ? preview.summary
+                : hasSelection
+                  ? 'Trace a bright socket to route the strike'
                 : canMove
                     ? 'Command the glass board'
                     : enemyThinking
