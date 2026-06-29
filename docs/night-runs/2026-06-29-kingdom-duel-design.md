@@ -307,5 +307,21 @@ Future wakes append here with:
     - public Pages endpoint still returns HTTP 200 with unchanged live assets
     - no code or visual changes made by design
   - commit/push/deploy status:
+    - committed as `76b86d9` (`Update design run ledger`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28350620639` succeeded for `76b86d9`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and continued serving `assets/index-Z6lah3Yx.js` plus `assets/index-D5g6oj1W.css`
+  - next recommendation: keep the overnight design chain stopped; do not resume without a fresh explicit brief, a concrete regression, or real-device touch QA findings
+
+- 2026-06-29T05:50:41Z
+  - bounded pass: NO_OP closeout
+  - files changed:
+    - `docs/night-runs/2026-06-29-kingdom-duel-design.md`
+  - verification:
+    - startup checks only; repo clean, no overlap lock found
+    - confirmed prior ledger-only deploy success for `76b86d9`
+    - public Pages endpoint still returns HTTP 200 with unchanged live assets
+    - no code or visual changes made by design
+  - commit/push/deploy status:
     - pending
   - next recommendation: keep the overnight design chain stopped; do not resume without a fresh explicit brief, a concrete regression, or real-device touch QA findings
