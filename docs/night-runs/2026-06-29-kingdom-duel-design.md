@@ -169,5 +169,9 @@ Future wakes append here with:
     - `npm run build` passed
     - `git diff --check` passed
     - local Chromium mobile captures taken at both target heights
-  - commit/push/deploy status: local only so far at this log point
+  - commit/push/deploy status:
+    - committed as `db86a6d` (`Tighten short mobile deck layout`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28344267098` succeeded for `db86a6d`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-CC-ZleiH.js` plus `assets/index-6jnRxEip.css`
   - next recommendation: stop for now unless a new concrete issue appears; recent passes are still producing gains, but the next useful jump likely needs either real-device feel QA or a fresh targeted brief
