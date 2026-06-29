@@ -195,3 +195,21 @@ Future wakes append here with:
     - GitHub Pages workflow `28345140130` succeeded for `492a6c1` after the combined push
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-B8O3fpnE.js` plus `assets/index-DMID_Hp3.css`
   - next recommendation: stop again unless Serg wants another deliberate pass; the remaining likely value is real-device touch feel or a fresh explicit brief
+
+- 2026-06-29T02:59:00Z
+  - bounded pass: Victory / Defeat terminal CTA polish
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/RESULT_CTA_PASS_2026-06-29.md`
+    - `screenshots/research/result-cta-victory-390x700.png`
+    - `screenshots/research/result-cta-defeat-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile captures taken for `?debug=result-victory` and `?debug=result-defeat`
+  - commit/push/deploy status:
+    - committed as `88581e8` (`Polish terminal result CTA`)
+    - push/deploy pending
+  - next recommendation: stop unless a new explicit brief appears; terminal states now have result drama plus a surviving review CTA, so the next meaningful gain likely needs real-device feel or a true continue/rematch flow
