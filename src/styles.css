@@ -549,6 +549,7 @@ button {
   font-size: 0.62rem;
   font-weight: 900;
   line-height: 1;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -567,13 +568,22 @@ button {
   display: block;
   margin-top: 2px;
   overflow: hidden;
-  color: rgba(4, 48, 74, 0.58);
-  font-size: 0.52rem;
+  color: rgba(4, 48, 74, 0.62);
+  font-size: 0.54rem;
   font-weight: 950;
   line-height: 1;
   text-overflow: ellipsis;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.combatant-hero .combatant-body > small {
+  color: rgba(0, 105, 133, 0.74);
+}
+
+.combatant-enemy .combatant-body > small {
+  color: rgba(124, 21, 95, 0.78);
 }
 
 .combatant .stat-bar {
@@ -746,6 +756,12 @@ button {
     rgba(255, 255, 255, 0.28);
 }
 
+.combat-strip.has-enemy-cue .duel-pulse span,
+.combat-strip.has-enemy-cue .duel-pulse em,
+.combat-strip.has-enemy-cue .duel-pulse p {
+  color: #8f1068;
+}
+
 .duel-pulse em,
 .duel-pulse p {
   margin: 4px 0 0;
@@ -886,10 +902,25 @@ button {
     0 8px 18px rgba(143, 16, 104, 0.10);
 }
 
+.intent-strip::before {
+  width: 16px;
+  height: 16px;
+  border-radius: 42% 58% 45% 55%;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.88), transparent 24%),
+    linear-gradient(145deg, rgba(255, 116, 200, 0.96), rgba(75, 26, 163, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 5px 10px rgba(143, 16, 104, 0.18);
+  content: "";
+  transform: rotate(18deg);
+}
+
 .intent-strip span {
   color: #8f1068;
   font-size: 0.58rem;
   font-weight: 900;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 

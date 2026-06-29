@@ -137,3 +137,18 @@ Future wakes append here with:
     - GitHub Pages workflow `28342719013` succeeded for `a0fe8ff`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-bRSaitp6.js` plus `assets/index-DiBh1GyN.css`
   - next recommendation: Aurora/Shade character fantasy and enemy intent clarity
+
+- 2026-06-29T01:43:31Z
+  - bounded pass: Aurora/Shade character fantasy and enemy intent clarity
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/AURORA_SHADE_INTENT_PASS_2026-06-29.md`
+    - `screenshots/research/aurora-shade-intent-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile capture taken at `390x844`
+  - commit/push/deploy status: local only so far at this log point
+  - next recommendation: mobile screenshot QA at `390x700` and `390x844`, unless a fresh board-adjacent readability issue appears first

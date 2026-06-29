@@ -659,6 +659,24 @@ function latestEvent(): string {
   return duel.log[0] ?? 'Battle ready. Select a tile to begin.';
 }
 
+function factionTitle(actorId: 'player' | 'enemy'): string {
+  return actorId === 'player' ? 'Dawn glass knight' : 'Veil nightbreaker';
+}
+
+function intentLead(intent: EnemyIntent): string {
+  const parts = intent.preview.effects
+    .filter((effect) => effect.label !== 'backlash')
+    .map((effect) => {
+      if (effect.label === 'damage' || effect.label === 'shade damage') return `cuts ${effect.value}`;
+      if (effect.label === 'guard') return `braces ${effect.value}`;
+      if (effect.label === 'sun' || effect.label === 'moon' || effect.label === 'crown') return `claims ${effect.value} ${effect.label}`;
+      return `takes ${effect.value} ${combatEffectLabel(effect)}`;
+    });
+
+  if (intent.preview.extraTurn) parts.push('keeps turn');
+  return parts.length ? parts.join(' · ') : intent.preview.summary;
+}
+
 function renderTopGameBar(canMove: boolean): string {
   return `
     <nav class="game-bar" aria-label="Kingdom Duel cockpit">
@@ -682,7 +700,7 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
   const pressureClass = hpPct <= 0 ? 'is-ko' : hpPct <= 0.28 ? 'is-critical' : actor.guard >= 4 ? 'is-braced' : '';
   const status = hpPct <= 0 ? 'KO' : hpPct <= 0.28 ? 'Critical' : actor.guard >= 4 ? 'Braced' : actor.id === duel.current ? 'Acting' : 'Ready';
   const faction = actor.id === 'player' ? 'Aurora Glass' : 'Shade Veil';
-  const title = actor.id === 'player' ? 'Dawn duelist' : 'Night duelist';
+  const title = factionTitle(actor.id);
   return `
     <article class="combatant combatant-${side} ${pressureClass} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
       ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
@@ -712,7 +730,7 @@ function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): stri
         <span>${duel.winner ? 'Duel seal' : enemyCue ? 'Shade turn' : duel.current === 'player' ? 'Aurora turn' : 'Shade turn'}</span>
         <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? 'Strike' : duel.current === 'player' ? 'Command' : 'Scheme'}</strong>
         <em>${legalMoves} moves</em>
-        ${intent ? `<p>Shade prepares: ${intentReason(intent)}</p>` : ''}
+        ${intent ? `<p>Veil omen: ${intentLead(intent)}</p>` : ''}
       </div>
       ${renderActorMeters(duel.enemy, 'enemy')}
     </section>
@@ -792,8 +810,8 @@ function renderBoardFrame(
         intent && canMove && !enemyCue && !activeSpellName
           ? `
             <div class="intent-strip" aria-label="Enemy intent">
-              <span>Shade prepares</span>
-              <strong>${intentReason(intent)}</strong>
+              <span>Veil omen</span>
+              <strong>${intentLead(intent)}</strong>
             </div>
           `
           : ''
@@ -1360,7 +1378,7 @@ function maybeRunEnemy(): void {
     const result = runEnemyTurn(duel);
     duel = result.state;
     enemyThinking = false;
-    enemyCue = intent ? { cells: [intent.from, intent.to], summary: intent.preview.summary } : { cells: [], summary: 'board shifts' };
+    enemyCue = intent ? { cells: [intent.from, intent.to], summary: intentLead(intent) } : { cells: [], summary: 'board shifts' };
     renderApp();
     if (enemyCueTimer !== null) window.clearTimeout(enemyCueTimer);
     const enemyKeepsTurn = duel.current === 'enemy' && !duel.winner;
