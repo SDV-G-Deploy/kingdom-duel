@@ -2960,14 +2960,14 @@ button {
   .action-dock {
     grid-template-columns: minmax(0, 1fr);
     gap: 3px;
-    min-height: 96px;
-    padding: 4px 5px;
+    min-height: 84px;
+    padding: 3px 5px;
   }
 
   .action-dock .decision-panel {
     min-height: 0;
-    padding: 5px 7px;
-    border-radius: 12px;
+    padding: 4px 6px;
+    border-radius: 11px;
   }
 
   .action-dock .decision-panel span {
@@ -2983,10 +2983,10 @@ button {
     display: -webkit-box;
     margin-top: 2px;
     overflow: hidden;
-    font-size: 0.58rem;
-    line-height: 1.08;
+    font-size: 0.54rem;
+    line-height: 1.06;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
   }
 
   .action-dock .effect-row {
@@ -3010,8 +3010,8 @@ button {
   }
 
   .action-dock .spell-button {
-    min-height: 44px;
-    padding: 4px 3px;
+    min-height: 38px;
+    padding: 3px 3px 4px;
     border-radius: 11px;
   }
 
@@ -3028,12 +3028,11 @@ button {
   }
 
   .action-dock .spell-button strong {
-    font-size: 0.64rem;
+    font-size: 0.60rem;
   }
 
   .action-dock .spell-button b {
-    margin-top: 2px;
-    font-size: 0.50rem;
+    display: none;
   }
 
   .action-dock .spell-button em {

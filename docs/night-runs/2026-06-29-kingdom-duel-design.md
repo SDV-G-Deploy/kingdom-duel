@@ -156,3 +156,18 @@ Future wakes append here with:
     - GitHub Pages workflow `28343488558` succeeded for `be59d23`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-BDxDTuMk.js` plus `assets/index-Bug5dPnN.css`
   - next recommendation: mobile screenshot QA at `390x700` and `390x844`, unless a fresh board-adjacent readability issue appears first
+
+- 2026-06-29T02:08:32Z
+  - bounded pass: Mobile screenshot QA at `390x700` and `390x844`
+  - files changed:
+    - `src/styles.css`
+    - `docs/MOBILE_SCREENSHOT_QA_PASS_2026-06-29.md`
+    - `screenshots/research/mobile-qa-390x700.png`
+    - `screenshots/research/mobile-qa-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile captures taken at both target heights
+  - commit/push/deploy status: local only so far at this log point
+  - next recommendation: stop for now unless a new concrete issue appears; recent passes are still producing gains, but the next useful jump likely needs either real-device feel QA or a fresh targeted brief
