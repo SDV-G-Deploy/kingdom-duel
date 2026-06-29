@@ -72,5 +72,9 @@ Future wakes append here with:
     - `npm run build` passed
     - `git diff --check` passed
     - local Chromium mobile captures taken with `?debug=result-victory` at `390x700` and `?debug=result-defeat` at `390x844`
-  - commit/push/deploy status: local only so far at this log point
+  - commit/push/deploy status:
+    - committed as `41dd896` (`Add result drama pass`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28340746849` succeeded for `41dd896`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-CYUhT_Bq.js` plus `assets/index-BEQYFkjl.css`
   - next recommendation: state-specific UX QA pass on spell aim / armed / backlash / invalid snap-back, now that terminal result hierarchy is materially stronger
