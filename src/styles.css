@@ -319,14 +319,22 @@ button {
 
 .combat-strip {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(80px, 0.48fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
   gap: 6px;
-  min-height: 86px;
+  min-height: 0;
   padding: 6px;
   border-radius: 18px 18px 10px 10px;
   background:
     linear-gradient(90deg, rgba(37, 215, 242, 0.16), rgba(255, 255, 255, 0.80) 42%, rgba(255, 116, 200, 0.14)),
     var(--shell-surface-top);
+}
+
+.duel-hud-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(92px, 0.44fr) minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
 }
 
 .battle-console .combat-strip,
@@ -700,81 +708,106 @@ button {
   filter: saturate(0.58);
 }
 
-.duel-pulse {
+.turn-chip {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-width: 0;
+  min-height: 58px;
   padding: 6px;
   border: 2px solid rgba(255, 226, 92, 0.72);
-  border-radius: 999px;
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, 0.98), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 226, 92, 0.38) 58%, rgba(255, 157, 61, 0.16)),
+    linear-gradient(90deg, rgba(37, 215, 242, 0.22), rgba(255, 226, 92, 0.34), rgba(255, 116, 200, 0.18)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 226, 92, 0.28) 62%, rgba(255, 157, 61, 0.12)),
     rgba(255, 255, 255, 0.46);
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.94),
-    inset 0 -10px 16px rgba(255, 157, 61, 0.14),
-    0 9px 18px rgba(255, 157, 61, 0.16);
+    inset 0 -8px 12px rgba(255, 157, 61, 0.10),
+    0 6px 12px rgba(255, 157, 61, 0.12);
   text-align: center;
 }
 
-.duel-pulse::before {
-  display: block;
-  width: 18px;
-  height: 6px;
-  margin: 0 auto 3px;
-  border-radius: 999px;
+.turn-chip::before {
+  position: absolute;
+  inset: 4px 8px auto;
+  height: 3px;
+  border-radius: 3px;
   background: linear-gradient(90deg, rgba(37, 215, 242, 0.72), rgba(255, 226, 92, 0.74), rgba(255, 116, 200, 0.66));
   box-shadow: 0 0 12px rgba(255, 226, 92, 0.30);
   content: "";
 }
 
-.duel-pulse span {
+.turn-chip span {
   color: #007092;
   font-size: 0.56rem;
   font-weight: 900;
+  line-height: 1;
   text-transform: uppercase;
 }
 
-.duel-pulse strong {
+.turn-chip strong {
   display: block;
   margin-top: 3px;
   overflow: hidden;
   color: #04304a;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.combat-strip.has-enemy-cue .duel-pulse {
+.combat-strip.has-enemy-cue .turn-chip {
   border-color: rgba(255, 116, 200, 0.60);
   background:
-    radial-gradient(circle at 76% 14%, rgba(255, 255, 255, 0.90), transparent 28%),
+    linear-gradient(90deg, rgba(255, 116, 200, 0.24), rgba(255, 255, 255, 0.54), rgba(155, 131, 255, 0.22)),
     linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 116, 200, 0.20)),
     rgba(255, 255, 255, 0.28);
 }
 
-.combat-strip.has-enemy-cue .duel-pulse span,
-.combat-strip.has-enemy-cue .duel-pulse em,
-.combat-strip.has-enemy-cue .duel-pulse p {
+.combat-strip.has-enemy-cue .turn-chip span {
   color: #8f1068;
 }
 
-.duel-pulse em,
-.duel-pulse p {
-  margin: 4px 0 0;
-  color: rgba(4, 48, 74, 0.70);
-  font-size: 0.58rem;
-  font-style: normal;
+.intent-rail {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 116, 200, 0.42);
+  border-radius: 11px;
+  background:
+    linear-gradient(90deg, rgba(255, 116, 200, 0.18), rgba(255, 255, 255, 0.62), rgba(155, 131, 255, 0.14)),
+    rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 5px 12px rgba(143, 16, 104, 0.08);
+}
+
+.intent-rail span {
+  color: #8f1068;
+  font-size: 0.56rem;
   font-weight: 900;
-  line-height: 1.12;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.intent-rail strong {
+  overflow: hidden;
+  color: #04304a;
+  font-size: 0.72rem;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .board-frame {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 6px;
   min-height: 0;
   padding: 8px;
@@ -910,55 +943,6 @@ button {
 
 .board-frame.is-valid-swap-state .board-status span {
   color: #0d7d4f;
-}
-
-.intent-strip {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-  min-height: 24px;
-  padding: 3px 7px;
-  border: 2px solid rgba(255, 116, 200, 0.42);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.82), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.70), rgba(255, 116, 200, 0.20)),
-    rgba(255, 255, 255, 0.34);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.76),
-    0 8px 18px rgba(143, 16, 104, 0.10);
-}
-
-.intent-strip::before {
-  width: 16px;
-  height: 16px;
-  border-radius: 42% 58% 45% 55%;
-  background:
-    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.88), transparent 24%),
-    linear-gradient(145deg, rgba(255, 116, 200, 0.96), rgba(75, 26, 163, 0.92));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    0 5px 10px rgba(143, 16, 104, 0.18);
-  content: "";
-  transform: rotate(18deg);
-}
-
-.intent-strip span {
-  color: #8f1068;
-  font-size: 0.58rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.intent-strip strong {
-  overflow: hidden;
-  color: #04304a;
-  font-size: 0.74rem;
-  line-height: 1.08;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .board-frame .play-board {
@@ -3133,10 +3117,15 @@ button {
   }
 
   .combat-strip {
-    grid-template-columns: minmax(0, 1fr) minmax(64px, 0.42fr) minmax(0, 1fr);
-    min-height: 62px;
+    grid-template-rows: auto auto;
+    min-height: 0;
     gap: 3px;
-    padding: 3px;
+    padding: 3px 5px;
+  }
+
+  .duel-hud-row {
+    grid-template-columns: minmax(0, 1fr) minmax(82px, 0.44fr) minmax(0, 1fr);
+    gap: 3px;
   }
 
   .combatant {
@@ -3174,17 +3163,40 @@ button {
     margin-top: 2px;
   }
 
-  .duel-pulse {
-    padding: 4px 2px;
-    border-radius: 999px;
+  .turn-chip {
+    min-height: 40px;
+    padding: 5px 3px 4px;
+    border-width: 1px;
+    border-radius: 9px;
   }
 
-  .duel-pulse strong {
-    font-size: 0.70rem;
+  .turn-chip::before {
+    inset: 3px 6px auto;
+    height: 2px;
   }
 
-  .duel-pulse p {
-    display: none;
+  .turn-chip span {
+    font-size: 0.46rem;
+  }
+
+  .turn-chip strong {
+    font-size: 0.62rem;
+    line-height: 1.05;
+  }
+
+  .intent-rail {
+    min-height: 20px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    gap: 5px;
+  }
+
+  .intent-rail span {
+    font-size: 0.48rem;
+  }
+
+  .intent-rail strong {
+    font-size: 0.58rem;
   }
 
   .board-frame {
@@ -3206,16 +3218,8 @@ button {
 
   .board-frame .play-board {
     align-self: center;
-    width: min(calc(100vw - 22px), clamp(320px, calc(100dvh - 342px), 366px));
+    width: min(calc(100vw - 22px), clamp(320px, calc(100dvh - 300px), 366px));
     margin: 0 auto;
-  }
-
-  .intent-strip {
-    min-height: 22px;
-    padding: 2px 6px;
-    border-width: 1px;
-    border-color: rgba(255, 116, 200, 0.40);
-    border-radius: 999px;
   }
 
   .play-board {
@@ -3445,8 +3449,44 @@ button {
 }
 
 @media (max-width: 720px) and (max-height: 760px) {
-  .latest-event.is-terminal {
+  .game-bar {
+    min-height: 36px;
+  }
+
+  .icon-action {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .board-frame .play-board {
+    width: min(calc(100vw - 22px), clamp(320px, calc(100dvh - 340px), 342px));
+  }
+
+  .action-dock {
+    min-height: 68px;
+  }
+
+  .action-dock .decision-panel p {
     display: none;
+  }
+
+  .action-dock .effect-row {
+    margin-top: 2px;
+  }
+
+  .action-dock .effect-pill {
+    min-height: 16px;
+    padding: 0 4px;
+    font-size: 0.46rem;
+  }
+
+  .latest-event {
+    min-height: 30px;
+  }
+
+  .latest-event button {
+    min-height: 30px;
+    padding: 0 9px;
   }
 
   .battle-recap {

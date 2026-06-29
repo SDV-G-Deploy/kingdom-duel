@@ -546,7 +546,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
       <div class="decision-panel is-empty is-deck">
         <span>Command deck</span>
         <strong>Pick a strike gem</strong>
-        <p>Select one gem. Bright sockets are safe swaps; pink notches show Shade pressure.</p>
+        <p>Tap a gem. Bright sockets are safe; pink marks Shade risk.</p>
       </div>
     `;
   }
@@ -556,7 +556,7 @@ function renderPreviewPanel(preview: MovePreview | null, snapBackCue: string | n
       <div class="decision-panel is-empty is-deck is-selection">
         <span>Tile claimed</span>
         <strong>Choose a lit socket</strong>
-        <p>Aqua sockets will strike from this gem. Pale sockets are only a feint and may snap back.</p>
+        <p>Aqua sockets strike. Pale sockets snap back.</p>
       </div>
     `;
   }
@@ -699,10 +699,6 @@ function terminalEventMeta(): TerminalEventMeta | null {
   };
 }
 
-function factionTitle(actorId: 'player' | 'enemy'): string {
-  return actorId === 'player' ? 'Dawn glass knight' : 'Veil nightbreaker';
-}
-
 function intentLead(intent: EnemyIntent): string {
   const parts = intent.preview.effects
     .filter((effect) => effect.label !== 'backlash')
@@ -739,15 +735,13 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
   const hpPct = actor.hp / actor.maxHp;
   const pressureClass = hpPct <= 0 ? 'is-ko' : hpPct <= 0.28 ? 'is-critical' : actor.guard >= 4 ? 'is-braced' : '';
   const status = hpPct <= 0 ? 'KO' : hpPct <= 0.28 ? 'Critical' : actor.guard >= 4 ? 'Braced' : actor.id === duel.current ? 'Acting' : 'Ready';
-  const faction = actor.id === 'player' ? 'Aurora Glass' : 'Shade Veil';
-  const title = factionTitle(actor.id);
+  const faction = actor.id === 'player' ? 'Aurora' : 'Shade';
   return `
     <article class="combatant combatant-${side} ${pressureClass} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (enemyThinking || enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
       ${renderPortraitSlot(side === 'hero' ? 'hero' : 'enemy')}
       <div class="combatant-body">
         <span>${faction}</span>
         <strong>${actor.name}</strong>
-        <small>${title}</small>
         ${statBar('HP', actor.hp, actor.maxHp, actor.id === 'player' ? '#25d7f2' : '#ff74c8')}
         <div class="combat-readout" aria-label="${actor.name} combat resources">
           <b class="guard-chip" title="${status}, Guard ${actor.guard}">Guard ${actor.guard}</b>
@@ -763,16 +757,43 @@ function renderActorMeters(actor: DuelState['player'], side: 'hero' | 'enemy'): 
 }
 
 function renderCombatStrip(intent: EnemyIntent | null, legalMoves: number): string {
+  const turnLabel = duel.winner
+    ? duel.winner === 'player'
+      ? 'Victory'
+      : 'Defeat'
+    : enemyCue
+      ? 'Shade action'
+      : duel.current === 'player'
+        ? 'Aurora turn'
+        : 'Shade turn';
+  const turnValue = duel.winner
+    ? duel.winner === 'player'
+      ? 'Board sealed'
+      : 'Board broken'
+    : enemyCue
+      ? 'Resolving'
+      : `${legalMoves} moves`;
+  const intentCopy = enemyCue ? enemyCue.summary : intent ? intentLead(intent) : '';
   return `
     <section class="combat-strip ${enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
-      ${renderActorMeters(duel.player, 'hero')}
-      <div class="duel-pulse">
-        <span>${duel.winner ? 'Duel seal' : enemyCue ? 'Shade turn' : duel.current === 'player' ? 'Aurora turn' : 'Shade turn'}</span>
-        <strong>${duel.winner ? (duel.winner === 'player' ? 'Aurora wins' : 'Shade wins') : enemyCue ? 'Strike' : duel.current === 'player' ? 'Command' : 'Scheme'}</strong>
-        <em>${legalMoves} moves</em>
-        ${intent ? `<p>Veil omen: ${intentLead(intent)}</p>` : ''}
+      <div class="duel-hud-row">
+        ${renderActorMeters(duel.player, 'hero')}
+        <div class="turn-chip">
+          <span>${turnLabel}</span>
+          <strong>${turnValue}</strong>
+        </div>
+        ${renderActorMeters(duel.enemy, 'enemy')}
       </div>
-      ${renderActorMeters(duel.enemy, 'enemy')}
+      ${
+        intentCopy
+          ? `
+            <div class="intent-rail" aria-label="Enemy intent">
+              <span>${enemyCue ? 'Shade moved' : 'Shade next'}</span>
+              <strong>${intentCopy}</strong>
+            </div>
+          `
+          : ''
+      }
     </section>
   `;
 }
@@ -852,16 +873,6 @@ function renderBoardFrame(
                       : 'Resolving cascades'
         }</strong>
       </div>
-      ${
-        intent && canMove && !enemyCue && !activeSpellName
-          ? `
-            <div class="intent-strip" aria-label="Enemy intent">
-              <span>Veil omen</span>
-              <strong>${intentLead(intent)}</strong>
-            </div>
-          `
-          : ''
-      }
       ${renderPlayableBoard(preview, intent)}
     </section>
   `;
