@@ -867,7 +867,7 @@ function renderBoardFrame(
                 : hasSelection
                   ? 'Trace a bright socket to route the strike'
                 : canMove
-                    ? 'Command the glass board'
+                    ? 'Pick a gem'
                     : enemyThinking
                       ? 'Shade Knight is choosing'
                       : 'Resolving cascades'
