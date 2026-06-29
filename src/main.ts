@@ -30,6 +30,11 @@ type TerminalBeat = {
   title: string;
   detail: string;
 };
+type TerminalEventMeta = {
+  label: string;
+  summary: string;
+  action: string;
+};
 type DebugPreset =
   | 'result-victory'
   | 'result-defeat'
@@ -674,6 +679,26 @@ function latestEvent(): string {
   return duel.log[0] ?? 'Battle ready. Select a tile to begin.';
 }
 
+function terminalEventMeta(): TerminalEventMeta | null {
+  if (!duel.winner) return null;
+
+  const recap = battleRecap();
+  const beat = terminalBeat();
+  if (duel.winner === 'player') {
+    return {
+      label: 'Victory sealed',
+      summary: beat?.title ?? recap?.cause ?? 'Aurora closed the duel.',
+      action: 'Review victory log',
+    };
+  }
+
+  return {
+    label: 'Board broken',
+    summary: beat?.title ?? recap?.cause ?? 'Shade took the duel.',
+    action: 'Review defeat log',
+  };
+}
+
 function factionTitle(actorId: 'player' | 'enemy'): string {
   return actorId === 'player' ? 'Dawn glass knight' : 'Veil nightbreaker';
 }
@@ -852,10 +877,20 @@ function renderActionDock(preview: MovePreview | null, canMove: boolean): string
 }
 
 function renderLatestEvent(): string {
+  const terminalMeta = terminalEventMeta();
   return `
     <section class="latest-event ${duel.winner ? 'is-terminal' : ''}" aria-label="Latest combat event">
-      <span>${latestEvent()}</span>
-      <button data-action="toggle-log" type="button" aria-expanded="${logOpen}">Full log</button>
+      ${
+        terminalMeta
+          ? `
+            <div class="latest-event-copy">
+              <b>${terminalMeta.label}</b>
+              <span>${terminalMeta.summary}</span>
+            </div>
+          `
+          : `<span>${latestEvent()}</span>`
+      }
+      <button data-action="toggle-log" type="button" aria-expanded="${logOpen}">${terminalMeta?.action ?? 'Full log'}</button>
     </section>
   `;
 }
