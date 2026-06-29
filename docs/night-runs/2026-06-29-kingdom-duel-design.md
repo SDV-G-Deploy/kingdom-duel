@@ -218,6 +218,30 @@ Future wakes append here with:
 
 - 2026-06-29T03:20:00Z
   - bounded pass: NO_OP closeout
+  - files changed: none
+  - verification: none
+  - commit/push/deploy status: none
+  - next recommendation: wait for a fresh explicit brief before resuming
+
+- 2026-06-29T04:14:58Z
+  - bounded pass: Victory / Defeat result drama follow-up with terminal metrics
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/RESULT_DRAMA_METRICS_PASS_2026-06-29.md`
+    - `screenshots/research/result-metrics-victory-390x700.png`
+    - `screenshots/research/result-metrics-defeat-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile captures taken for `?debug=result-victory` at `390x700` and `?debug=result-defeat` at `390x844`
+  - commit/push/deploy status:
+    - committed as `9755511` (`Add terminal result metrics`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28348210570` succeeded for `9755511`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-vKI6ulau.js` plus `assets/index-CGKxRiZY.css`
+  - next recommendation: stop again unless Serg wants a fresh continue/rematch flow or explicit real-device feel QA; terminal states now have cause, final exchange, and compact outcome metrics
   - files changed:
     - `docs/night-runs/2026-06-29-kingdom-duel-design.md`
   - verification:
