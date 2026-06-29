@@ -175,3 +175,21 @@ Future wakes append here with:
     - GitHub Pages workflow `28344267098` succeeded for `db86a6d`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-CC-ZleiH.js` plus `assets/index-6jnRxEip.css`
   - next recommendation: stop for now unless a new concrete issue appears; recent passes are still producing gains, but the next useful jump likely needs either real-device feel QA or a fresh targeted brief
+
+- 2026-06-29T02:36:30Z
+  - bounded pass: State-specific UX QA for selected tile and valid swap
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/SELECTED_VALID_SWAP_QA_PASS_2026-06-29.md`
+    - `screenshots/research/state-selected-390x700.png`
+    - `screenshots/research/state-valid-swap-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile captures taken for `?debug=state-selected` and `?debug=state-valid-swap`
+  - commit/push/deploy status:
+    - committed as `0bb6b33` (`Polish selected swap state cues`)
+    - push/deploy pending
+  - next recommendation: stop again unless Serg wants another deliberate pass; the remaining likely value is real-device touch feel or a fresh explicit brief
