@@ -258,6 +258,29 @@ Future wakes append here with:
   - bounded pass: NO_OP closeout
   - files changed:
     - `docs/night-runs/2026-06-29-kingdom-duel-design.md`
+  - verification: startup checks only
+  - commit/push/deploy status: recorded previously in follow-up ledger commits
+  - next recommendation: stop unless a fresh concrete issue appears
+
+- 2026-06-29T04:38:07Z
+  - bounded pass: Victory / Defeat terminal event strip polish
+  - files changed:
+    - `src/main.ts`
+    - `src/styles.css`
+    - `docs/RESULT_TERMINAL_EVENT_PASS_2026-06-29.md`
+    - `screenshots/research/result-terminal-event-victory-390x700.png`
+    - `screenshots/research/result-terminal-event-defeat-390x844.png`
+  - verification:
+    - `npm test` passed
+    - `npm run build` passed
+    - `git diff --check` passed
+    - local Chromium mobile captures taken for `?debug=result-victory` at `390x700` and `?debug=result-defeat` at `390x844`
+  - commit/push/deploy status:
+    - committed as `80d069a` (`Polish terminal event strip`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28348998342` succeeded for `80d069a`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-Z6lah3Yx.js` plus `assets/index-D5g6oj1W.css`
+  - next recommendation: stop again unless Serg wants a true continue/rematch flow; terminal states are now close to diminishing returns for overnight micro-passes
   - verification:
     - startup checks only; repo clean, no overlap lock found
     - no code or visual changes made by design
