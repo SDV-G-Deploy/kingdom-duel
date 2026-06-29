@@ -627,7 +627,7 @@ button {
   min-height: 19px;
   padding: 3px 4px;
   border: 1px solid rgba(255, 255, 255, 0.54);
-  border-radius: 999px;
+  border-radius: 7px;
   background: rgba(255, 255, 255, 0.30);
   color: rgba(4, 48, 74, 0.78);
   font-size: 0.55rem;
@@ -653,7 +653,7 @@ button {
   min-width: 0;
   min-height: 15px;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 6px;
   color: rgba(4, 48, 74, 0.76);
   font-size: 0.48rem;
   font-style: normal;
@@ -3171,6 +3171,21 @@ button {
   .combatant .stat-bar strong,
   .mini-stats b {
     font-size: 0.48rem;
+  }
+
+  .combat-readout {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 2px;
+  }
+
+  .combat-readout b {
+    min-height: 17px;
+    padding: 2px 4px;
+    border-radius: 6px;
+  }
+
+  .combat-readout .mana-bank {
+    display: none;
   }
 
   .mini-stats {
