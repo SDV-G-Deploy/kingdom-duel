@@ -2038,12 +2038,36 @@ button {
   left: 8px;
   right: 18px;
   bottom: 6px;
-  height: 8px;
+  height: 12px;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(0, 74, 133, 0.10), transparent);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background:
+    linear-gradient(90deg, rgba(37, 215, 242, 0.40), rgba(255, 226, 92, 0.34) var(--spell-charge, 0%), rgba(4, 48, 74, 0.08) 0),
+    rgba(255, 255, 255, 0.42);
   content: "";
-  opacity: 0.46;
+  opacity: 0.76;
   pointer-events: none;
+}
+
+.spell-meter {
+  position: absolute;
+  left: 11px;
+  right: 22px;
+  bottom: 9px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(4, 48, 74, 0.10);
+  pointer-events: none;
+}
+
+.spell-meter::after {
+  display: block;
+  width: var(--spell-charge, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(255, 226, 92, 0.86), rgba(37, 215, 242, 0.72));
+  content: "";
 }
 
 .spell-sun::before {
@@ -2100,6 +2124,10 @@ button {
     inset 0 2px 0 rgba(255, 255, 255, 0.94),
     inset 0 -12px 16px rgba(0, 74, 133, 0.08),
     0 12px 20px rgba(13, 96, 151, 0.16);
+}
+
+.spell-button.is-ready .spell-meter::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(155, 255, 79, 0.84), rgba(37, 215, 242, 0.82));
 }
 
 .spell-button.is-locked {
@@ -3199,8 +3227,8 @@ button {
 
   .action-dock {
     grid-template-columns: minmax(0, 1fr);
-    gap: 3px;
-    min-height: 84px;
+    gap: 2px;
+    min-height: 78px;
     padding: 3px 5px;
   }
 
@@ -3215,7 +3243,7 @@ button {
   }
 
   .action-dock .decision-panel strong {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     line-height: 1.05;
   }
 
@@ -3246,12 +3274,12 @@ button {
 
   .action-dock .spell-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 3px;
+    gap: 2px;
   }
 
   .action-dock .spell-button {
-    min-height: 38px;
-    padding: 3px 3px 4px;
+    min-height: 35px;
+    padding: 2px 3px 4px;
     border-radius: 11px;
   }
 
@@ -3261,14 +3289,21 @@ button {
 
   .action-dock .spell-gem {
     right: 5px;
-    top: 5px;
-    width: 18px;
-    height: 18px;
+    top: 4px;
+    width: 17px;
+    height: 17px;
     font-size: 0.52rem;
   }
 
   .action-dock .spell-button strong {
-    font-size: 0.60rem;
+    font-size: 0.58rem;
+  }
+
+  .action-dock .spell-meter {
+    left: 7px;
+    right: 20px;
+    bottom: 5px;
+    height: 3px;
   }
 
   .action-dock .spell-button b {

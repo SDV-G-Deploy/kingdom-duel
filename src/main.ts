@@ -1234,13 +1234,15 @@ function renderSpellRow(canMove: boolean): string {
         .map((spellId, index) => {
           const spell = DEFAULT_DUEL_RULES.spells[spellId];
           const canCast = canMove && canPayCost(duel.player, spell.cost);
+          const charge = spellCharge(spell.cost);
           return `
-            <button class="spell-button spell-${index + 1} spell-${spellPrimaryGem(spellId)} ${canCast ? 'is-ready' : 'is-locked'} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" ${canCast ? '' : 'disabled'}>
+            <button class="spell-button spell-${index + 1} spell-${spellPrimaryGem(spellId)} ${canCast ? 'is-ready' : 'is-locked'} ${activeSpell === spellId ? 'is-active' : ''}" type="button" data-spell="${spellId}" style="--spell-charge: ${charge.percent};" ${canCast ? '' : 'disabled'}>
               <i class="spell-gem spell-gem-${spellPrimaryGem(spellId)}" aria-hidden="true">${spellGemShort(spellId)}</i>
-              <span>${costLabel(spell.cost)}</span>
+              <span>${compactCostLabel(spell.cost)}</span>
               <strong>${spell.name}</strong>
               <b>${spellActionLabel(spellId)}</b>
-              <em>${canCast ? spellHint(spellId) : missingCostLabel(spell.cost)}</em>
+              <em>${canCast ? spellHint(spellId) : charge.label}</em>
+              <i class="spell-meter" aria-hidden="true"></i>
             </button>
           `;
         })
@@ -1263,6 +1265,26 @@ function costLabel(cost: ManaCost): string {
     .join(' / ');
 }
 
+function compactCostLabel(cost: ManaCost): string {
+  return [
+    cost.sun ? `${cost.sun} SUN` : '',
+    cost.moon ? `${cost.moon} MOON` : '',
+    cost.crown ? `${cost.crown} CROWN` : '',
+  ]
+    .filter(Boolean)
+    .join(' / ');
+}
+
+function spellCharge(cost: ManaCost): { percent: string; label: string } {
+  const current =
+    Math.min(duel.player.sun, cost.sun ?? 0) +
+    Math.min(duel.player.moon, cost.moon ?? 0) +
+    Math.min(duel.player.crown, cost.crown ?? 0);
+  const required = (cost.sun ?? 0) + (cost.moon ?? 0) + (cost.crown ?? 0);
+  const ratio = required > 0 ? Math.min(1, current / required) : 1;
+  return { percent: `${Math.round(ratio * 100)}%`, label: `${current}/${required} charged` };
+}
+
 function spellPrimaryGem(spellId: SpellId): 'sun' | 'moon' | 'crown' {
   if (spellId === 'sun_bloom') return 'sun';
   if (spellId === 'glass_ward') return 'moon';
@@ -1273,10 +1295,6 @@ function spellGemShort(spellId: SpellId): string {
   if (spellId === 'sun_bloom') return 'S';
   if (spellId === 'glass_ward') return 'M';
   return 'C';
-}
-
-function missingCostLabel(cost: ManaCost): string {
-  return `need ${costLabel(cost)}`;
 }
 
 function spellRoleLabel(spellId: SpellId): string {
