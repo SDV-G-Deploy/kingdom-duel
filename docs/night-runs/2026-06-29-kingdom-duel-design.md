@@ -281,8 +281,14 @@ Future wakes append here with:
     - GitHub Pages workflow `28348998342` succeeded for `80d069a`
     - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-Z6lah3Yx.js` plus `assets/index-D5g6oj1W.css`
   - next recommendation: stop again unless Serg wants a true continue/rematch flow; terminal states are now close to diminishing returns for overnight micro-passes
+
+- 2026-06-29T05:01:03Z
+  - bounded pass: NO_OP closeout
+  - files changed:
+    - `docs/night-runs/2026-06-29-kingdom-duel-design.md`
   - verification:
     - startup checks only; repo clean, no overlap lock found
+    - ledger review showed repeated terminal-state micro-passes with diminishing returns
     - no code or visual changes made by design
   - commit/push/deploy status:
     - pending
