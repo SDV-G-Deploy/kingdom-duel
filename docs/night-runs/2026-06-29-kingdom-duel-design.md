@@ -224,5 +224,19 @@ Future wakes append here with:
     - startup checks only; repo clean, no overlap lock found
     - no code or visual changes made by design
   - commit/push/deploy status:
-    - pending
+    - committed as `ec6eae2` (`Update design run ledger`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28346482274` succeeded for `ec6eae2`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and continued serving `assets/index-BVWd0A2L.js` plus `assets/index-BNdalToW.css`
   - next recommendation: stop the overnight design chain here unless a fresh concrete issue, real-device touch QA, or a new explicit brief appears
+
+- 2026-06-29T03:45:00Z
+  - bounded pass: NO_OP closeout
+  - files changed:
+    - `docs/night-runs/2026-06-29-kingdom-duel-design.md`
+  - verification:
+    - startup checks only; repo clean, no overlap lock found
+    - no code or visual changes made by design
+  - commit/push/deploy status:
+    - pending
+  - next recommendation: keep the overnight design chain stopped; resume only on a new explicit brief, a concrete regression, or real-device touch QA findings
