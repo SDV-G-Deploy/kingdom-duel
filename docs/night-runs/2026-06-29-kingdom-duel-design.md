@@ -191,5 +191,7 @@ Future wakes append here with:
     - local Chromium mobile captures taken for `?debug=state-selected` and `?debug=state-valid-swap`
   - commit/push/deploy status:
     - committed as `0bb6b33` (`Polish selected swap state cues`)
-    - push/deploy pending
+    - pushed to `origin/main` together with follow-up ledger commit `492a6c1`
+    - GitHub Pages workflow `28345140130` succeeded for `492a6c1` after the combined push
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-B8O3fpnE.js` plus `assets/index-DMID_Hp3.css`
   - next recommendation: stop again unless Serg wants another deliberate pass; the remaining likely value is real-device touch feel or a fresh explicit brief
