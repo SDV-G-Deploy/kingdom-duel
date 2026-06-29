@@ -339,5 +339,30 @@ Future wakes append here with:
     - public Pages endpoint still returns HTTP 200 with unchanged live assets
     - no code or visual changes made by design
   - commit/push/deploy status:
-    - pending
+    - committed as `dfc4a21` (`Update design run ledger`)
+    - pushed to `origin/main`
+    - GitHub Pages workflow `28352522675` succeeded for `dfc4a21`
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and continued serving `assets/index-Z6lah3Yx.js` plus `assets/index-D5g6oj1W.css`
   - next recommendation: overnight design chain complete; resume only from a fresh explicit brief, concrete regression, or real-device touch QA findings
+
+## Closeout
+
+- 2026-06-29T06:45:38Z
+  - run summary:
+    - major visible gains landed in terminal states, tactical state cues, shell depth, command-deck tactility, enemy intent clarity, and short mobile layout resilience
+    - strongest user-facing upgrades were `41dd896`, `abd15e3`, `f95fa65`, `a0fe8ff`, `be59d23`, `db86a6d`, `0bb6b33`, `88581e8`, `9755511`, and `80d069a`
+    - later wakes correctly shifted into NO_OP closeouts after terminal-state polish hit diminishing returns
+  - repo/deploy state:
+    - working tree clean
+    - local HEAD matched upstream before closeout write
+    - latest Pages deploy status before closeout write: workflow `28352522675` success
+    - live asset hashes before closeout write: `assets/index-Z6lah3Yx.js`, `assets/index-D5g6oj1W.css`
+  - final verification:
+    - no extra test/build rerun needed in closeout because repo was clean and already matched upstream
+    - latest public Pages endpoint returned HTTP 200
+  - unresolved design risks:
+    - true continue/rematch flow is still absent, so result drama ends in review rather than onward play
+    - touch feel remains unvalidated on a real phone; current QA is desktop-headless mobile viewport only
+    - further overnight micro-passes on terminal polish are likely low-yield without a fresh brief
+  - best next step:
+    - next useful move is real-device touch QA or an explicit brief for continue/rematch flow, not more generic visual polish
