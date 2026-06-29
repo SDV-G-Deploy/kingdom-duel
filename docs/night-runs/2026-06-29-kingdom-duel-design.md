@@ -211,5 +211,18 @@ Future wakes append here with:
     - local Chromium mobile captures taken for `?debug=result-victory` and `?debug=result-defeat`
   - commit/push/deploy status:
     - committed as `88581e8` (`Polish terminal result CTA`)
-    - push/deploy pending
+    - pushed to `origin/main` together with follow-up ledger commit `42f055e`
+    - GitHub Pages workflow `28345784619` succeeded for `42f055e` after the combined push
+    - public URL `https://sdv-g-deploy.github.io/kingdom-duel/` returned HTTP 200 and served `assets/index-BVWd0A2L.js` plus `assets/index-BNdalToW.css`
   - next recommendation: stop unless a new explicit brief appears; terminal states now have result drama plus a surviving review CTA, so the next meaningful gain likely needs real-device feel or a true continue/rematch flow
+
+- 2026-06-29T03:20:00Z
+  - bounded pass: NO_OP closeout
+  - files changed:
+    - `docs/night-runs/2026-06-29-kingdom-duel-design.md`
+  - verification:
+    - startup checks only; repo clean, no overlap lock found
+    - no code or visual changes made by design
+  - commit/push/deploy status:
+    - pending
+  - next recommendation: stop the overnight design chain here unless a fresh concrete issue, real-device touch QA, or a new explicit brief appears
