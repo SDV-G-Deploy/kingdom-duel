@@ -1,0 +1,308 @@
+.run-shell {
+  min-height: 100dvh;
+  padding: 18px;
+}
+
+.run-stage {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 30%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.80), rgba(125, 223, 255, 0.42) 55%, rgba(155, 131, 255, 0.28));
+  box-shadow: var(--object-shadow);
+}
+
+.run-header,
+.run-result-seal {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.run-header > div,
+.run-result-seal {
+  flex-direction: column;
+}
+
+.run-header span,
+.run-result-seal span,
+.reward-intro span,
+.run-build > span {
+  color: var(--ink-700);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.run-header strong,
+.run-result-seal strong,
+.reward-intro strong {
+  display: block;
+  color: var(--ink);
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  line-height: 1.05;
+}
+
+.run-header b,
+.run-result-seal b {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-700);
+  font-size: 0.78rem;
+}
+
+.run-route {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.run-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid rgba(4, 48, 74, 0.12);
+  border-radius: 14px;
+  color: var(--ink-700);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.run-node span {
+  display: grid;
+  width: 22px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: #7f9eb0;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.run-node b {
+  overflow: hidden;
+  font-size: 0.64rem;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.run-node.is-current {
+  border-color: rgba(36, 124, 255, 0.44);
+  color: var(--ink);
+  box-shadow: 0 0 0 2px rgba(125, 223, 255, 0.22);
+}
+
+.run-node.is-current span {
+  background: var(--ocean-600);
+}
+
+.run-node.tier-elite span {
+  background: var(--violet-500);
+}
+
+.run-node.tier-boss span {
+  background: var(--magenta-400);
+}
+
+.run-node.is-complete span {
+  background: var(--lime-400);
+}
+
+.run-node.is-failed {
+  border-color: rgba(255, 62, 151, 0.46);
+  color: var(--ink);
+}
+
+.run-node.is-failed span {
+  background: var(--magenta-400);
+}
+
+.reward-intro {
+  margin: 18px 0 12px;
+}
+
+.reward-intro p {
+  margin: 7px 0 0;
+  color: var(--ink-700);
+  font-size: 0.84rem;
+}
+
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reward-card {
+  min-height: 190px;
+  padding: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  border-radius: 22px;
+  color: var(--ink);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(125, 223, 255, 0.38));
+  box-shadow: 0 12px 26px rgba(13, 96, 151, 0.16);
+  text-align: left;
+}
+
+.reward-card.path-aether,
+.run-build-chip.path-aether {
+  background: linear-gradient(150deg, rgba(123, 255, 238, 0.88), rgba(155, 131, 255, 0.72));
+}
+
+.reward-card.path-shade,
+.run-build-chip.path-shade {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.92), rgba(255, 116, 200, 0.58));
+}
+
+.reward-card.path-crown,
+.run-build-chip.path-crown {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.94), rgba(255, 226, 92, 0.72));
+}
+
+.reward-card span,
+.reward-card em {
+  display: block;
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.reward-card strong,
+.reward-card b {
+  display: block;
+}
+
+.reward-card strong {
+  margin-top: 9px;
+  font-size: 1.05rem;
+}
+
+.reward-card b {
+  margin-top: 8px;
+  color: var(--ink-700);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.reward-card em {
+  margin-top: 22px;
+  color: var(--ocean-600);
+}
+
+.run-build {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.run-build > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.run-build-chip,
+.run-build-empty {
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(125, 223, 255, 0.42);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.run-battle-list {
+  display: grid;
+  gap: 8px;
+}
+
+.run-battle-row {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.run-battle-row span,
+.run-battle-row b {
+  color: var(--ink-700);
+  font-size: 0.68rem;
+}
+
+.run-battle-row.is-player {
+  box-shadow: inset 4px 0 var(--lime-400);
+}
+
+.run-battle-row.is-enemy {
+  box-shadow: inset 4px 0 var(--magenta-400);
+}
+
+.run-result-actions {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.run-result-actions button {
+  min-height: 44px;
+  border-radius: 14px;
+}
+
+.run-result-actions .primary-run-action {
+  color: white;
+  background: linear-gradient(135deg, var(--ocean-600), var(--violet-500));
+}
+
+@media (max-width: 620px) {
+  .run-shell {
+    padding: 8px;
+  }
+
+  .run-stage {
+    padding: 13px;
+    border-radius: 22px;
+  }
+
+  .reward-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reward-card {
+    min-height: 0;
+  }
+
+  .reward-card em {
+    margin-top: 12px;
+  }
+
+  .run-result-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .run-battle-row {
+    grid-template-columns: 48px 1fr;
+  }
+
+  .run-battle-row b {
+    grid-column: 2;
+  }
+}

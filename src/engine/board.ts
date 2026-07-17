@@ -1,7 +1,7 @@
 import { randomInt } from './rng';
-import type { Board, Cell, MatchGroup, TileKind } from './types';
+import type { BaseTileKind, Board, Cell, MatchGroup, TileKind } from './types';
 
-export const TILE_KINDS: TileKind[] = ['sword', 'shield', 'sun', 'moon', 'crown', 'shade'];
+export const TILE_KINDS: BaseTileKind[] = ['sword', 'shield', 'sun', 'moon', 'crown', 'shade'];
 
 export function createBoard(width = 8, height = 8, seed = 1207): { board: Board; seed: number } {
   let currentSeed = seed;
@@ -34,22 +34,39 @@ export function indexFor(board: Board, cell: Cell): number {
 }
 
 export function inBounds(board: Board, cell: Cell): boolean {
-  return cell.x >= 0 && cell.x < board.width && cell.y >= 0 && cell.y < board.height;
+  return (
+    Number.isInteger(cell.x) &&
+    Number.isInteger(cell.y) &&
+    cell.x >= 0 &&
+    cell.x < board.width &&
+    cell.y >= 0 &&
+    cell.y < board.height
+  );
 }
 
 export function getTile(board: Board, cell: Cell): TileKind {
+  assertInBounds(board, cell);
   return board.tiles[indexFor(board, cell)];
 }
 
 export function setTile(board: Board, cell: Cell, tile: TileKind): void {
+  assertInBounds(board, cell);
   board.tiles[indexFor(board, cell)] = tile;
 }
 
 export function areAdjacent(a: Cell, b: Cell): boolean {
-  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
+  return (
+    Number.isInteger(a.x) &&
+    Number.isInteger(a.y) &&
+    Number.isInteger(b.x) &&
+    Number.isInteger(b.y) &&
+    Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1
+  );
 }
 
 export function swapTiles(board: Board, a: Cell, b: Cell): void {
+  assertInBounds(board, a);
+  assertInBounds(board, b);
   const ai = indexFor(board, a);
   const bi = indexFor(board, b);
   const tmp = board.tiles[ai];
@@ -58,8 +75,7 @@ export function swapTiles(board: Board, a: Cell, b: Cell): void {
 }
 
 export function findMatches(board: Board): MatchGroup[] {
-  const groups: MatchGroup[] = [];
-  const seen = new Set<string>();
+  const runs: MatchGroup[] = [];
 
   for (let y = 0; y < board.height; y++) {
     let runStart = 0;
@@ -70,8 +86,7 @@ export function findMatches(board: Board): MatchGroup[] {
       const length = x - runStart;
       if (length >= 3) {
         const cells = Array.from({ length }, (_, offset) => ({ x: runStart + offset, y }));
-        groups.push({ tile: previous, cells });
-        for (const cell of cells) seen.add(`${cell.x},${cell.y}`);
+        runs.push({ tile: previous, cells });
       }
       runStart = x;
     }
@@ -86,14 +101,13 @@ export function findMatches(board: Board): MatchGroup[] {
       const length = y - runStart;
       if (length >= 3) {
         const cells = Array.from({ length }, (_, offset) => ({ x, y: runStart + offset }));
-        const novel = cells.filter((cell) => !seen.has(`${cell.x},${cell.y}`));
-        groups.push({ tile: previous, cells: novel.length ? cells : [] });
+        runs.push({ tile: previous, cells });
       }
       runStart = y;
     }
   }
 
-  return groups.filter((group) => group.cells.length > 0);
+  return mergeIntersectingRuns(runs);
 }
 
 export function removeAndDrop(board: Board, matches: MatchGroup[], seed: number): { board: Board; seed: number } {
@@ -135,14 +149,68 @@ export function findLegalMoves(board: Board): Array<{ from: Cell; to: Cell }> {
 
       for (const to of candidates) {
         if (!inBounds(board, to)) continue;
-        const test = cloneBoard(board);
-        swapTiles(test, from, to);
-        if (findMatches(test).length > 0) moves.push({ from, to });
+        if (isLegalSwap(board, from, to)) moves.push({ from, to });
       }
     }
   }
 
   return moves;
+}
+
+export function isLegalSwap(board: Board, from: Cell, to: Cell): boolean {
+  if (!inBounds(board, from) || !inBounds(board, to) || !areAdjacent(from, to)) return false;
+  if (getTile(board, from) === getTile(board, to)) return false;
+  if (getTile(board, from) === 'aether' || getTile(board, to) === 'aether') return true;
+
+  const test = cloneBoard(board);
+  swapTiles(test, from, to);
+  return findMatches(test).some((match) => match.cells.some((cell) => sameCell(cell, from) || sameCell(cell, to)));
+}
+
+function mergeIntersectingRuns(runs: MatchGroup[]): MatchGroup[] {
+  const merged: MatchGroup[] = [];
+
+  for (const run of runs) {
+    const overlapping = merged
+      .map((group, index) => ({ group, index }))
+      .filter(({ group }) => group.tile === run.tile && groupsOverlap(group, run));
+
+    if (!overlapping.length) {
+      merged.push({ tile: run.tile, cells: [...run.cells] });
+      continue;
+    }
+
+    const primaryIndex = overlapping[0].index;
+    const cells = new Map<string, Cell>();
+    for (const cell of run.cells) cells.set(cellKey(cell), cell);
+    for (const { group } of overlapping) {
+      for (const cell of group.cells) cells.set(cellKey(cell), cell);
+    }
+    merged[primaryIndex] = { tile: run.tile, cells: [...cells.values()] };
+
+    for (const { index } of overlapping.slice(1).reverse()) merged.splice(index, 1);
+  }
+
+  return merged;
+}
+
+function groupsOverlap(a: MatchGroup, b: MatchGroup): boolean {
+  const aCells = new Set(a.cells.map(cellKey));
+  return b.cells.some((cell) => aCells.has(cellKey(cell)));
+}
+
+function sameCell(a: Cell, b: Cell): boolean {
+  return a.x === b.x && a.y === b.y;
+}
+
+function cellKey(cell: Cell): string {
+  return `${cell.x},${cell.y}`;
+}
+
+function assertInBounds(board: Board, cell: Cell): void {
+  if (!inBounds(board, cell)) {
+    throw new RangeError(`Cell (${cell.x},${cell.y}) is outside the ${board.width}x${board.height} board`);
+  }
 }
 
 function wouldCreateStartingMatch(tiles: TileKind[], width: number, x: number, y: number, tile: TileKind): boolean {
@@ -153,4 +221,3 @@ function wouldCreateStartingMatch(tiles: TileKind[], width: number, x: number, y
 
   return (leftOne === tile && leftTwo === tile) || (upOne === tile && upTwo === tile);
 }
-

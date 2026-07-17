@@ -31,11 +31,8 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
+      - name: Check
+        run: npm run check
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

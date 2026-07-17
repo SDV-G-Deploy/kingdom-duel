@@ -82,8 +82,8 @@ function testRulesCanConfigureActorsAndBoard(): void {
     ...DEFAULT_DUEL_RULES,
     board: { width: 6, height: 6 },
     actors: {
-      player: { name: 'Test Hero', hp: 12, guard: 1 },
-      enemy: { name: 'Test Enemy', hp: 9, guard: 0 },
+      player: { ...DEFAULT_DUEL_RULES.actors.player, id: 'test_hero', name: 'Test Hero', hp: 12, guard: 1 },
+      enemy: { ...DEFAULT_DUEL_RULES.actors.enemy, id: 'test_enemy', name: 'Test Enemy', hp: 9, guard: 0 },
     },
   };
   const state = createDuel(44, rules);
@@ -112,7 +112,7 @@ function testPreviewReportsLegalMoveEffects(): void {
   }
 }
 
-function testOverMatchBonusAppliesToPreviewAndSwap(): void {
+function testMatchFourKeepsTurnWithoutHiddenEffectBonus(): void {
   const tiles: TileKind[] = Array.from({ length: 64 }, (_, index) => {
     const x = index % 8;
     const y = Math.floor(index / 8);
@@ -128,15 +128,15 @@ function testOverMatchBonusAppliesToPreviewAndSwap(): void {
   const preview = previewSwap(board, { x: 2, y: 1 }, { x: 2, y: 0 });
   assert.equal(preview.valid, true);
   if (preview.valid) {
-    assert.equal(preview.effects.find((effect) => effect.label === 'sun')?.value, 5);
+    assert.equal(preview.effects.find((effect) => effect.label === 'sun')?.value, 4);
     assert.equal(preview.extraTurn, true);
-    assert.match(preview.summary, /\+5 sun mana/);
+    assert.match(preview.summary, /\+4 sun mana/);
     assert.match(preview.summary, /keeps turn/);
   }
 
   const state = { ...createDuel(2007), board, seed: 99 };
   const result = applySwap(state, { x: 2, y: 1 }, { x: 2, y: 0 });
-  assert.equal(result.state.player.sun, 5);
+  assert.equal(result.state.player.sun, 4);
   assert.match(result.state.log[0], /Aurora Knight matches sun for mana and keeps the turn\./);
 }
 
@@ -156,9 +156,9 @@ function testShadePreviewShowsBacklashBeforeSwap(): void {
   const preview = previewSwap(board, { x: 2, y: 1 }, { x: 2, y: 0 });
   assert.equal(preview.valid, true);
   if (preview.valid) {
-    assert.equal(preview.effects.find((effect) => effect.label === 'shade damage')?.value, 10);
-    assert.equal(preview.effects.find((effect) => effect.label === 'backlash')?.value, 5);
-    assert.match(preview.summary, /-5 Aurora HP backlash/);
+    assert.equal(preview.effects.find((effect) => effect.label === 'shade damage')?.value, 8);
+    assert.equal(preview.effects.find((effect) => effect.label === 'backlash')?.value, 4);
+    assert.match(preview.summary, /-4 Aurora Knight HP backlash/);
   }
 }
 
@@ -181,7 +181,7 @@ function testBacklashSelfKoUsesActualWinnerInSummary(): void {
   assert.equal(result.state.winner, 'enemy');
   assert.match(result.state.history[0]?.summary ?? '', /Shade Knight wins the duel\./);
   assert.match(result.state.history[0]?.detail ?? '', /Shade Knight wins because Aurora Knight reached 0 HP\./);
-  assert.ok(result.state.history[0]?.events.some((event) => event.includes('paid 5 HP backlash')));
+  assert.ok(result.state.history[0]?.events.some((event) => event.includes('paid 4 HP backlash')));
 }
 
 function testDoubleKoFromBacklashDoesNotAwardAuroraWin(): void {
@@ -219,9 +219,10 @@ function testDoubleKoFromBacklashDoesNotAwardAuroraWin(): void {
 
 function testEnemyIntentUsesLegalPreview(): void {
   const state = createDuel(2007);
-  const intent = getEnemyIntent(state.board);
+  const intent = getEnemyIntent(state);
   assert.ok(intent, 'enemy intent should exist on a playable board');
-  assert.equal(intent?.preview.valid, true);
+  assert.equal(intent?.type, 'swap');
+  if (intent?.type === 'swap') assert.equal(intent.preview.valid, true);
 }
 
 function testSpellRejectsMissingMana(): void {
@@ -233,7 +234,7 @@ function testSpellRejectsMissingMana(): void {
 
 function testSunBloomCastsAndConvertsTiles(): void {
   const state = createDuel(2007);
-  const result = castSpell({ ...state, player: { ...state.player, sun: 6 } }, 'sun_bloom', { x: 3, y: 3 });
+  const result = castSpell({ ...state, player: { ...state.player, sun: 8 } }, 'sun_bloom', { x: 3, y: 3 });
   assert.ok(result.events.some((event) => event.type === 'spell_cast'));
   assert.ok(result.events.some((event) => event.type === 'tiles_converted'));
 }
@@ -265,7 +266,7 @@ testResolvedBoardRemainsPlayable();
 testRulesCanConfigureActorsAndBoard();
 testPreviewRejectsBadSwap();
 testPreviewReportsLegalMoveEffects();
-testOverMatchBonusAppliesToPreviewAndSwap();
+testMatchFourKeepsTurnWithoutHiddenEffectBonus();
 testShadePreviewShowsBacklashBeforeSwap();
 testBacklashSelfKoUsesActualWinnerInSummary();
 testDoubleKoFromBacklashDoesNotAwardAuroraWin();

@@ -5,12 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
     "build": "tsc && vite build",
-    "test": "tsx src/engine/engine.test.ts && tsx src/input.test.ts",
-    "sim:balance": "tsx scripts/sim-battles.ts",
+    "test": "node --import tsx src/engine/engine.test.ts && node --import tsx src/engine/correctness.test.ts && node --import tsx src/engine/content.test.ts && node --import tsx src/engine/actions.test.ts && node --import tsx src/engine/combat-expansion.test.ts && node --import tsx src/run/run.test.ts && node --import tsx scripts/sim-metrics.test.ts && node --import tsx scripts/visible-player-policy.test.ts && node --import tsx src/input.test.ts && node --import tsx src/ui-lifecycle.test.ts && node --import tsx src/ui/state.test.ts && node --import tsx src/ui/playback.test.ts && node --import tsx src/ui/views/views.test.ts",
+    "check": "npm run typecheck && npm test && npm run test:e2e:list && vite build",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
+    "test:e2e:install": "playwright install chromium",
+    "sim:balance": "node --import tsx scripts/sim-battles.ts",
+    "sim:run": "node --import tsx scripts/sim-runs.ts",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.1",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3",

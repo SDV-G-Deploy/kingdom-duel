@@ -1,0 +1,133 @@
+.combat-log {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.combat-log li {
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.36);
+  color: rgba(4, 48, 74, 0.80);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.combat-log li span,
+.combat-log li small {
+  display: block;
+  color: rgba(4, 48, 74, 0.58);
+  font-size: 0.66rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.combat-log li strong {
+  display: block;
+  margin-top: 3px;
+  color: #04304a;
+  font-size: 0.84rem;
+}
+
+.combat-log li p {
+  margin: 4px 0 0;
+  color: rgba(4, 48, 74, 0.74);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.combat-log li small {
+  margin-top: 5px;
+  line-height: 1.25;
+  text-transform: none;
+}
+
+.play-shell.is-resolving .play-board {
+  pointer-events: none;
+}
+
+.play-shell.is-resolving .combatant,
+.play-shell.is-resolving .gem,
+.play-shell.is-resolving .stat-bar i,
+.play-shell.is-resolving .turn-chip {
+  transition:
+    transform 140ms ease,
+    filter 140ms ease,
+    width 160ms ease;
+}
+
+.play-shell[data-resolution-frame='swap'] .play-board {
+  animation: resolution-board-shift 110ms ease-out;
+}
+
+.play-shell[data-resolution-frame='cascade'] .play-board,
+.play-shell[data-resolution-frame='match'] .play-board {
+  animation: resolution-board-pulse 140ms ease-out;
+}
+
+.play-shell[data-resolution-frame='special'] .play-board {
+  animation: resolution-aether-flash 190ms ease-out;
+}
+
+.play-shell[data-resolution-frame='damage'] .duel-hud-row,
+.play-shell[data-resolution-frame='backlash'] .duel-hud-row {
+  animation: resolution-hit-pulse 160ms ease-out;
+}
+
+.play-shell[data-resolution-frame='fall'] .gem,
+.play-shell[data-resolution-frame='refill'] .gem {
+  animation: resolution-gem-settle 160ms ease-out;
+}
+
+.play-shell[data-resolution-frame='turn'] .turn-chip {
+  animation: resolution-turn-settle 120ms ease-out;
+}
+
+@keyframes resolution-board-shift {
+  0% { transform: scale(0.992); }
+  100% { transform: scale(1); }
+}
+
+@keyframes resolution-board-pulse {
+  0% { filter: brightness(1); }
+  45% { filter: brightness(1.14) saturate(1.08); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes resolution-hit-pulse {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(-2px); filter: saturate(1.18); }
+  70% { transform: translateX(2px); }
+  100% { transform: translateX(0); filter: none; }
+}
+
+@keyframes resolution-aether-flash {
+  0% { filter: brightness(1) saturate(1); }
+  45% { filter: brightness(1.24) saturate(1.28) hue-rotate(12deg); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes resolution-gem-settle {
+  0% { transform: translateY(-4px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes resolution-turn-settle {
+  0% { transform: scale(0.96); filter: brightness(1.14); }
+  100% { transform: scale(1); filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-shell.is-resolving .combatant,
+  .play-shell.is-resolving .gem,
+  .play-shell.is-resolving .play-board,
+  .play-shell.is-resolving .duel-hud-row,
+  .play-shell.is-resolving .turn-chip {
+    animation: none !important;
+    transition: none !important;
+  }
+}
