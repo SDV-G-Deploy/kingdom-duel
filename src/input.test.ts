@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert';
-import { chooseDragCommitCell, chooseSpellTargetTapAction } from './input';
+import { chooseDragCommitCell, choosePointerReleaseAction, chooseSpellTargetTapAction } from './input';
 import type { Board, Cell } from './engine/types';
 import { dragTargetCell } from './ui/input-controller';
 
@@ -31,6 +31,27 @@ function testDirectionalCellStaysWhenReleaseIsNotAdjacent(): void {
   assert.deepEqual(picked, directional);
 }
 
+function testStationaryPointerReleaseRemainsATap(): void {
+  const start = { x: 3, y: 3 };
+  const action = choosePointerReleaseAction(start, null, start, false, {
+    isAdjacent: () => false,
+    isValidSwap: () => false,
+  });
+
+  assert.deepEqual(action, { kind: 'tap', cell: start });
+}
+
+function testDirectionalPointerReleaseCommitsSwap(): void {
+  const start = { x: 3, y: 3 };
+  const target = { x: 4, y: 3 };
+  const action = choosePointerReleaseAction(start, target, target, false, {
+    isAdjacent: () => true,
+    isValidSwap: () => true,
+  });
+
+  assert.deepEqual(action, { kind: 'swap', from: start, to: target });
+}
+
 function testSpellTargetFirstTapOnlyPreviews(): void {
   const target = { x: 2, y: 4 };
 
@@ -60,6 +81,8 @@ function testDragDirectionAndBoardBounds(): void {
 
 testReleaseCellWinsWhenDirectionalSwipeIsInvalid();
 testDirectionalCellStaysWhenReleaseIsNotAdjacent();
+testStationaryPointerReleaseRemainsATap();
+testDirectionalPointerReleaseCommitsSwap();
 testSpellTargetFirstTapOnlyPreviews();
 testSpellTargetSecondTapCastsSameCell();
 testSpellTargetChangedCellPreviewsAgain();

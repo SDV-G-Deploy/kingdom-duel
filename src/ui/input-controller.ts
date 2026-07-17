@@ -1,6 +1,6 @@
 import { areAdjacent } from '../engine/board';
 import type { AbilityId, Board, Cell } from '../engine/types';
-import { chooseDragCommitCell } from '../input';
+import { choosePointerReleaseAction } from '../input';
 import { cellFromBoardIndex, sameCell } from './assets';
 import type { AppView } from './state';
 
@@ -124,20 +124,22 @@ export function bindBattleInput(
       context.getBoard(),
     );
     const releaseCell = cellAtPoint(event.clientX, event.clientY);
-    const commitCell = chooseDragCommitCell(endedDrag.startCell, targetCell, releaseCell, {
-      isAdjacent: areAdjacent,
-      isValidSwap: context.isValidSwap,
-    });
+    const action = choosePointerReleaseAction(
+      endedDrag.startCell,
+      targetCell,
+      releaseCell,
+      context.hasActiveAbility(),
+      {
+        isAdjacent: areAdjacent,
+        isValidSwap: context.isValidSwap,
+      },
+    );
 
-    if (targetCell || releaseCell) {
-      if (context.hasActiveAbility()) {
-        context.onCellTap(releaseCell ?? targetCell ?? commitCell);
-        return;
-      }
-      context.onSwapCommit(endedDrag.startCell, commitCell);
+    if (action.kind === 'tap' || action.kind === 'ability') {
+      context.onCellTap(action.cell);
       return;
     }
-    context.onCellTap(commitCell);
+    context.onSwapCommit(action.from, action.to);
   };
 
   const onPointerCancel = (event: PointerEvent): void => {
