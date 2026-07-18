@@ -1,4 +1,4 @@
-import type { Cell, TileKind } from '../engine/types';
+import type { BuiltInAbilityId, Cell, TileKind } from '../engine/types';
 
 export type GemKind = TileKind;
 type CharacterSlot = 'hero' | 'enemy';
@@ -35,6 +35,15 @@ const gemAssetSlots: Record<GemKind, AssetSlot> = {
   aether: { path: 'assets/gems/aether.webp', src: null },
 };
 
+const spellAssetSlots: Record<BuiltInAbilityId, AssetSlot> = {
+  sun_bloom: { path: 'assets/spells/sun-bloom.webp', src: null },
+  glass_ward: { path: 'assets/spells/glass-ward.webp', src: null },
+  crown_strike: { path: 'assets/spells/crown-strike.webp', src: null },
+  veil_rift: { path: 'assets/spells/veil-rift.webp', src: null },
+  lunar_lock: { path: 'assets/spells/lunar-lock.webp', src: null },
+  eclipse_surge: { path: 'assets/spells/eclipse-surge.webp', src: null },
+};
+
 export function gemLabel(kind: GemKind): string {
   if (kind === 'sword') return 'Sword';
   if (kind === 'shield') return 'Shield';
@@ -52,6 +61,17 @@ export function renderPortraitSlot(slot: CharacterSlot, characterId?: string): s
     <span class="portrait-slot portrait-${slot}${variant} ${asset.src ? 'has-asset' : ''}" aria-hidden="true" data-asset-path="${asset.path}"${assetStyle(asset.src)}>
       <span class="portrait-fallback"></span>
     </span>
+  `;
+}
+
+export function renderSpellIcon(abilityId: string, shortLabel: string, gem: string): string {
+  const asset = spellAssetSlots[abilityId as BuiltInAbilityId];
+  const assetPath = asset?.path ?? `assets/spells/${abilityId.replace(/_/g, '-')}.webp`;
+  const assetSrc = asset?.src ?? null;
+  return `
+    <i class="spell-gem spell-gem-${gem} ${assetSrc ? 'has-asset' : ''}" aria-hidden="true" data-asset-path="${assetPath}"${assetStyle(assetSrc)}>
+      <span class="spell-gem-fallback">${shortLabel}</span>
+    </i>
   `;
 }
 

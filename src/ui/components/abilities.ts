@@ -1,4 +1,5 @@
 import type { AbilityId, DuelRules, DuelState, ManaCost } from '../../engine/types';
+import { renderSpellIcon } from '../assets';
 import type { BattleUiState } from '../state';
 
 export function renderAbilityRow(
@@ -21,7 +22,7 @@ export function renderAbilityRow(
           const statusLabel = canCast ? compactCostLabel(ability.cost) : charge.label;
           return `
             <button class="spell-button spell-${index + 1} spell-${gem} ${canCast ? 'is-ready' : 'is-locked'} ${charge.isNearReady && !canCast ? 'is-near-ready' : ''} ${ui.activeAbilityId === abilityId ? 'is-active' : ''}" type="button" data-spell="${abilityId}" style="--spell-charge: ${charge.percent};" aria-label="${ability.name}: ${canCast ? ability.presentation.readyHint : charge.label}" ${canCast ? '' : 'disabled'}>
-              <i class="spell-gem spell-gem-${gem}" aria-hidden="true">${ability.presentation.shortLabel}</i>
+              ${renderSpellIcon(abilityId, ability.presentation.shortLabel, gem)}
               <span>${statusLabel}</span>
               <strong>${ability.name}</strong>
               <b>${ability.presentation.actionLabel}</b>

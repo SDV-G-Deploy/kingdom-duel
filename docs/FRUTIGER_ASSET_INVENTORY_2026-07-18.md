@@ -21,8 +21,16 @@ Present bitmap assets:
 Declared but missing:
 
 - `public/assets/gems/aether.webp`
+- `public/assets/spells/sun-bloom.webp`
+- `public/assets/spells/glass-ward.webp`
+- `public/assets/spells/crown-strike.webp`
+- `public/assets/spells/veil-rift.webp`
+- `public/assets/spells/lunar-lock.webp`
+- `public/assets/spells/eclipse-surge.webp`
 
 The Aether tile still falls back to CSS treatment. It is a real gameplay object now and should be treated as a high-priority asset slot before broad decorative work.
+
+Spell icon slots are now intentionally declared with CSS/text fallbacks. Missing files do not block play, but TeleClo output can be dropped into those exact paths and enabled in `src/ui/assets.ts` after QA.
 
 ## What Did Not Land In Current Main
 
