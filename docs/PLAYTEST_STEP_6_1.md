@@ -1,6 +1,6 @@
 # Kingdom Duel — Step 6.1 Mobile Playtest Protocol
 
-Status: ready to run; no human sessions have been recorded
+Status: ready to run; no five-person protocol sessions have been recorded
 Decision under test: whether the short run is understandable, appropriately paced, and intrinsically replayable before Step 7 or metaprogression expands scope
 
 ## Research Questions
@@ -36,6 +36,8 @@ Before the first session, record one immutable build identity for the entire coh
 | Rules version | `rules-2026.07-step6` |
 | Content version | `content-2026.07-step6` |
 | Daily version | `daily-v1` |
+| Trace schema | `1` |
+| Debug export metadata | build, dirty flag, contract, run context required |
 
 For each phone:
 
@@ -45,6 +47,7 @@ For each phone:
 4. Confirm tap-tap input; test swipe only before the participant arrives, then reset again.
 5. Record device, OS, browser/version, CSS viewport, orientation, and network type.
 6. Do not mix daily and standard seeds within the five-person first-session cohort. Use one fixed test seed if the build exposes it; otherwise record every generated seed.
+7. Before accepting a copied trace as evidence, confirm it includes `traceSchemaVersion`, `build`, `contract`, and `run`. For the frozen cohort build, `build.dirty` must be `false` or the dirty diff must be archived with the trace.
 
 ## Moderator Script
 
@@ -154,4 +157,5 @@ The completed report must include:
 5. gate-by-gate pass/fail/inconclusive status;
 6. simulator-versus-human comparison;
 7. one bounded next change, or an explicit decision to begin Step 7;
-8. a note that no result was inferred for absent participants or incomplete sessions.
+8. trace export identity for any copied battle logs;
+9. a note that no result was inferred for absent participants or incomplete sessions.

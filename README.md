@@ -35,6 +35,8 @@ This is not yet a content-complete RPG or store-ready application. The short-run
 - [Execution roadmap](docs/ROADMAP.md)
 - [Replayability benchmark](docs/REPLAYABILITY_BENCHMARK.md)
 - [Step 6.1 mobile playtest protocol](docs/PLAYTEST_STEP_6_1.md)
+- [2026-07-18 playtest review](docs/PLAYTEST_REVIEW_2026-07-18.md)
+- [2026-07-18 asset inventory](docs/FRUTIGER_ASSET_INVENTORY_2026-07-18.md)
 
 Dated research and implementation reports are preserved under `docs/archive/` and are historical evidence rather than current instructions.
 
@@ -58,7 +60,9 @@ npm run test:e2e:install
 npm run test:e2e
 ```
 
-`npm run check` type-checks and discovers the browser scenarios; it does not launch them. A full step handoff must also record `npm run test:e2e` on a machine with the Playwright Chromium binary.
+`npm run check` type-checks and discovers the browser scenarios; it does not launch them. A full step handoff must also record `npm run test:e2e` on a machine with the Playwright Chromium binary. The 2026-07-18 stabilization pass installed Chromium locally and passed the 10-scenario mobile suite.
+
+Copied debug traces now include build, dirty flag, rules/content/daily contract, and run context. Treat older trace exports as incomplete evidence unless the frozen build and encounter are recorded separately.
 
 Balance probe:
 

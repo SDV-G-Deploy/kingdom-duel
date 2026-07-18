@@ -122,6 +122,7 @@ The remaining structural risks are intentionally assigned to later steps:
 6. Passives support one scheduled trigger and Aether is the single special-tile contract. Generalise either only when a second concrete mechanic requires it.
 7. Save/resume now rejects mismatched schema, rules, content, and daily contracts. There is no migration or bundled legacy-rules runtime yet, so an incompatible in-progress run is intentionally discarded. User-facing expiry copy, cross-device sync, lifecycle telemetry, installability, and native adapters remain PWA/platform work.
 8. Browser E2E covers the current mobile product path, but it still needs to run in CI and against real iOS Safari/Android Chrome devices; Chromium emulation is a regression contour, not device certification.
+9. Debug traces before schema `1` may be replayable but cannot prove build, run, rules, content, or daily identity without external notes.
 
 ## Current Content And Effect Model
 
@@ -162,6 +163,16 @@ type GameAction =
 Each action appends an `ActionRecord` with its turn, acceptance state, optional rejection, and structured events. `replayDuel` recreates a duel from its initial seed and those actions. The no-move refill is an explicit action so that this rare RNG-consuming branch is replayable too.
 
 Interactive resolutions expose detached board and combatant snapshots for swap, ability, cascade, match, special creation/activation, stat effect, fall, refill, turn transfer, and battle end. Simulation mode uses the same dispatcher and rules but skips frames, rolling log copy, and human-readable battle history. `ResolutionPlaybackController` presents those snapshots in order, locks board input until completion, cancels stale sequences on restart/view changes, and jumps directly to the final frame when reduced motion is requested. The committed duel state stays separate from the transient presentation snapshot, so logs, replay traces, and enemy sequencing always use the final authoritative result.
+
+Debug trace exports are evidence files, not only clipboard conveniences. A copied trace must include:
+
+- `traceSchemaVersion`;
+- build identity (`appVersion`, `buildCommit`, `buildTime`, `dirty`);
+- version contract (`runSchemaVersion`, `rulesVersion`, `contentVersion`, `dailyVersion`);
+- run context when present (`mode`, `seed`, `dailyKey`, `encounterIndex`, selected upgrades, reward state, recorded battles);
+- duel seed/action/frame/history payload.
+
+This prevents a run encounter trace from being replayed against the standalone default duel contract. For example, Glass Edge intentionally changes base Shade Knight from `38 HP / 2 Guard` to `32 HP / 1 Guard`. A dirty build is allowed for local debugging, but a frozen cohort trace must either report `dirty: false` or archive the exact dirty diff beside the trace.
 
 ## Run Version And Release Contract
 

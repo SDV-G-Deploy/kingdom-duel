@@ -1,7 +1,7 @@
 # Kingdom Duel — Roadmap
 
 Status: canonical execution order
-Current milestone: Step 6.1 implementation complete; browser and human execution gates remain open
+Current milestone: Step 6.1 implementation complete; debug-export metadata and Chromium E2E gates closed; human execution gate remains open
 Product direction: tactical match-3 duel → short replayable run → PWA → optional native wrappers
 
 ## Working Principle
@@ -162,12 +162,14 @@ Scope:
 - [x] record visible-policy single-duel and full-run cohorts;
 - [x] add typed Chromium E2E scenarios at 390×700 and 390×844 for play, save, pending enemy turn, reward, daily contract, result, and restart;
 - [x] publish a five-person real-phone protocol with explicit comprehension, pacing, and replay gates;
-- [ ] execute the Chromium suite in an environment with a valid browser binary;
+- [x] add trace export metadata for build, run, rules, content, and daily identity;
+- [x] execute the Chromium suite in an environment with a valid browser binary;
 - [ ] execute and record the five real-phone sessions.
 
 Decision:
 
 - the 24.4% visible-policy first-duel rate and 0–1% run completion are an accessibility warning, not a human result;
+- the 2026-07-18 playtest loss is a spell-literacy warning; the `32/1` Shade stats match Glass Edge's current run contract, but old exports made that easy to misread as rules drift;
 - no combat values change until the human protocol distinguishes difficulty from clarity, interaction, and heuristic weakness;
 - Step 7 may begin only after P0/P1 mobile issues are closed and the Step 6 gates are explicitly passed or bounded as inconclusive.
 
@@ -226,4 +228,4 @@ Only after the PWA run is stable:
 
 ## Immediate Next Step
 
-Run the [Step 6.1 protocol](PLAYTEST_STEP_6_1.md) on the frozen build before numerical tuning: five first-session players, real elapsed time, encounter reached, prism comprehension, boss readability, and voluntary restart intent. Execute `npm run test:e2e` where Chromium is available. Fix critical comprehension, pacing, or mobile-lifecycle failures, then begin **Step 7 — Game Feel And Frutiger World** without adding metaprogression yet.
+Run the [Step 6.1 protocol](PLAYTEST_STEP_6_1.md) on a frozen build with the new trace metadata before numerical tuning: five first-session players, real elapsed time, encounter reached, prism comprehension, boss readability, and voluntary restart intent. Chromium E2E is green locally; real iOS Safari and Android Chrome sessions remain the product gate. Fix critical comprehension, pacing, or mobile-lifecycle failures, then begin **Step 7 — Game Feel And Frutiger World** without adding metaprogression yet.

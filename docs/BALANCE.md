@@ -3,6 +3,7 @@
 Status: canonical balance record after Step 6.1 validation hardening
 Rules baseline: Step 6 short replayable run; Step 5 duel retained as regression cohort
 Latest independent probes: 500 single duels and 100 runs from seed 2007, 180-action encounter cap
+Latest human trace evidence: 2026-07-18 first-session Glass Edge defeat, documented in `PLAYTEST_REVIEW_2026-07-18.md`
 
 ## Why This Document Exists
 
@@ -72,6 +73,14 @@ The visible policy scores only the current board, legal swap previews, affordabl
 This is a major accessibility warning, not a measured human win rate. The policy is deterministic and respects visible information, but its fixed heuristic does not learn long-term setup, denial, or encounter-specific tactics. The exhaustive greedy and spell-aware policies both inspect fully resolved candidate swaps, so neither is a clean lower human bound. Human observation must now determine whether Glass Edge is genuinely too difficult, insufficiently taught, or simply undervalued by the heuristic.
 
 No HP, cost, reward, or enemy value was changed in Step 6.1. Tuning against the visible policy alone would risk making the game trivial for players who understand setup and denial.
+
+### 2026-07-18 Human Trace Note
+
+One real playtest trace ended in an Aurora defeat on turn 7 against Glass Edge. Aurora made legal board moves but cast no spells; Shade cast `Veil Rift` twice and won through Shade clusters, Aether pressure, and a terminal Sword cascade.
+
+The trace's Shade Knight ended as `14/32 HP` with `5 Guard`. This is consistent with the current Glass Edge run contract: the base Shade Knight is `38 HP / 2 Guard`, and the opening encounter applies `-6 HP / -1 Guard`. The old debug export did not include run/encounter/version metadata, so the same trace could be incorrectly compared against the standalone default duel and misread as stale rules.
+
+Interpretation: this is first-duel spell-literacy evidence, not a standalone reason to change combat numbers. Keep using the five-person protocol before tuning.
 
 ### Resource And Pressure Split
 
@@ -175,7 +184,7 @@ These remain iteration gates, not permanent product promises:
 ## Next Balance Work
 
 1. Run the [five-person protocol](PLAYTEST_STEP_6_1.md) and record completion time, first-action comprehension, Veil Rift fairness, Aether discoverability, prism meaning, and voluntary replay.
-2. Compare human first-duel outcomes with the 24.4% visible and 78.8% spell-aware diagnostics before choosing a tuning direction.
+2. Compare human first-duel outcomes with the 24.4% visible and 78.8% spell-aware diagnostics before choosing a tuning direction; ensure each trace includes run/build/version metadata.
 3. Compare per-ability selection and outcome across encounter profiles in the short run.
 4. Tune the smallest encounter-specific value only after policy and human evidence agree on the direction.
 5. Preserve this seed range as the Step 5 regression cohort.
