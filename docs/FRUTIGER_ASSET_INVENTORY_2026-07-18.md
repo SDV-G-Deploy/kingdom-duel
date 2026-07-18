@@ -32,7 +32,7 @@ Aether and the three player spell icons are now integrated TeleClo runtime expor
 
 Enemy spell icon slots are still intentionally declared with CSS/text fallbacks. Missing files do not block play, but TeleClo output can be dropped into those exact paths and enabled in `src/ui/assets.ts` after QA.
 
-## What Did Not Land In Current Main
+## What Was Not Carried From The Old Spike Branch
 
 The older Frutiger spike branch contains useful art/handoff work, but it is not synchronized with the current run implementation. In particular, the current main branch does not include the spike's spell `.webp` assets:
 
@@ -40,7 +40,10 @@ The older Frutiger spike branch contains useful art/handoff work, but it is not 
 - `public/assets/spells/glass-ward.webp`
 - `public/assets/spells/crown-strike.webp`
 
-Do not merge the spike branch wholesale. Bring over assets only after checking the current `src/ui/views/battle.ts`, `src/ui/components/abilities.ts`, and responsive layout expectations.
+Those old spike files should still not be merged wholesale. The current branch
+now contains fresh TeleClo exports for those same runtime paths. Treat the spike
+files only as historical references unless a later visual review explicitly asks
+to compare them.
 
 ## Step 2 Graphics Planning Notes
 

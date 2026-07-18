@@ -50,4 +50,6 @@ The 1024x1024 TeleClo master remains in the artifact review root, not in the run
 
 ## Follow-Up Scope
 
-Do not generate or integrate spell icons until this Aether style slice passes in-game visual QA.
+This Aether style slice passed in-game visual QA and was followed by the
+player spell icon slice. The active pause state is tracked in
+`TELECLO_GRAPHICS_WRAP_PAUSE_2026-07-18.md`.
