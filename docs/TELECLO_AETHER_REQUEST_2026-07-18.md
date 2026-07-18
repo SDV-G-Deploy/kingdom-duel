@@ -3,7 +3,14 @@
 Use this as the next message to TeleClo.
 
 ```text
-Принято, согласуемся с твоим выводом: это ui_pack, не персонажная анимация и не широкий reskin.
+Принято. Сухой UI-pack routing smoke без генерации принят.
+
+Запиши, пожалуйста, этот smoke result как green для Kingdom Duel route:
+- active skill: asset-pack-pipeline v9;
+- route: ui_pack;
+- scope: ordinary 2D UI/gameplay asset;
+- not character animation;
+- no generation happened during smoke.
 
 Production scope пока сужаем до одного style-slice:
 
@@ -11,9 +18,7 @@ Production scope пока сужаем до одного style-slice:
 2. После ревью и утверждения Aether — отдельно пойдём к `glass-ward`, `sun-bloom`, `crown-strike`.
 3. Enemy icons, overlays, portraits, arena/world frame — не сейчас.
 
-Перед генерацией проверь, пожалуйста, свой asset-pack v9 gate:
-- если post-apply no-generation smokes для UI-pack route уже green, коротко подтверди и переходи к Aether candidate;
-- если нет, сначала сделай no-generation UI-pack routing smoke и верни короткий статус, без генерации.
+После записи green-result переходи к Aether candidate.
 
 Требования к Aether:
 - final runtime path: `public/assets/gems/aether.webp`;

@@ -41,6 +41,19 @@ Before new live production, the TeleClo asset-pack v9 post-apply no-generation s
 
 If that gate is not green yet, the next TeleClo step is a no-generation `ui_pack` routing smoke and a short status report. If green, proceed only to the single Aether candidate.
 
+## UI-Pack Smoke Result
+
+Forwarded TeleClo status at 2026-07-18 13:05 UTC:
+
+- v9 post-apply UI-pack smoke had not previously been recorded as green;
+- TeleClo ran a dry UI-pack routing smoke with no generation;
+- active skill: `asset-pack-pipeline` v9;
+- route: `ui_pack`;
+- Kingdom Duel scope: ordinary 2D UI/gameplay asset, not character animation;
+- no spell icons, overlays, full pack, or broad production started.
+
+Decision: treat the route classification as correct. The next safe TeleClo action is to record the dry `ui_pack` routing smoke as green, then generate only `1-3` Aether candidates for review.
+
 ## Review Gate
 
 The next artifact expected from TeleClo is a review artifact for `aether.webp`, not a full pack.
