@@ -36,9 +36,9 @@ const gemAssetSlots: Record<GemKind, AssetSlot> = {
 };
 
 const spellAssetSlots: Record<BuiltInAbilityId, AssetSlot> = {
-  sun_bloom: { path: 'assets/spells/sun-bloom.webp', src: null },
-  glass_ward: { path: 'assets/spells/glass-ward.webp', src: null },
-  crown_strike: { path: 'assets/spells/crown-strike.webp', src: null },
+  sun_bloom: { path: 'assets/spells/sun-bloom.webp', src: 'assets/spells/sun-bloom.webp' },
+  glass_ward: { path: 'assets/spells/glass-ward.webp', src: 'assets/spells/glass-ward.webp' },
+  crown_strike: { path: 'assets/spells/crown-strike.webp', src: 'assets/spells/crown-strike.webp' },
   veil_rift: { path: 'assets/spells/veil-rift.webp', src: null },
   lunar_lock: { path: 'assets/spells/lunar-lock.webp', src: null },
   eclipse_surge: { path: 'assets/spells/eclipse-surge.webp', src: null },

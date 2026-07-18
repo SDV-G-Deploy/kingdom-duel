@@ -17,20 +17,20 @@ Present bitmap assets:
 - `public/assets/gems/moon.webp`
 - `public/assets/gems/crown.webp`
 - `public/assets/gems/shade.webp`
+- `public/assets/gems/aether.webp`
+- `public/assets/spells/glass-ward.webp`
+- `public/assets/spells/sun-bloom.webp`
+- `public/assets/spells/crown-strike.webp`
 
 Declared but missing:
 
-- `public/assets/gems/aether.webp`
-- `public/assets/spells/sun-bloom.webp`
-- `public/assets/spells/glass-ward.webp`
-- `public/assets/spells/crown-strike.webp`
 - `public/assets/spells/veil-rift.webp`
 - `public/assets/spells/lunar-lock.webp`
 - `public/assets/spells/eclipse-surge.webp`
 
-The Aether tile still falls back to CSS treatment. It is a real gameplay object now and should be treated as a high-priority asset slot before broad decorative work.
+Aether and the three player spell icons are now integrated TeleClo runtime exports. They are still the first visual slice, not a broad reskin.
 
-Spell icon slots are now intentionally declared with CSS/text fallbacks. Missing files do not block play, but TeleClo output can be dropped into those exact paths and enabled in `src/ui/assets.ts` after QA.
+Enemy spell icon slots are still intentionally declared with CSS/text fallbacks. Missing files do not block play, but TeleClo output can be dropped into those exact paths and enabled in `src/ui/assets.ts` after QA.
 
 ## What Did Not Land In Current Main
 
@@ -46,10 +46,11 @@ Do not merge the spike branch wholesale. Bring over assets only after checking t
 
 Recommended asset order after Step 6.1 human/playtest gates:
 
-1. Aether gem sprite, because it is an active special tile with no bitmap asset.
-2. Spell icons for `Glass Ward`, `Sun Bloom`, and `Crown Strike`, because the 2026-07-18 trace shows spell literacy is a first-duel risk.
-3. Distinct enemy silhouettes for Moon Warden and Eclipse Regent, because both currently reuse Shade Knight's portrait with CSS variants.
-4. World/frame art for the glass arena, only after the gameplay-critical tiles/spells remain readable at 390×700 and 390×844.
+1. Validate Aether plus `Glass Ward`, `Sun Bloom`, and `Crown Strike` in-game at phone sizes.
+2. If `Crown Strike` reads noisy at 22px, request a simplified TeleClo revision before broadening the pack.
+3. Enemy spell icons for `Veil Rift`, `Lunar Lock`, and `Eclipse Surge`.
+4. Distinct enemy silhouettes for Moon Warden and Eclipse Regent, because both currently reuse Shade Knight's portrait with CSS variants.
+5. World/frame art for the glass arena, only after the gameplay-critical tiles/spells remain readable at 390×700 and 390×844.
 
 Acceptance for any asset batch:
 

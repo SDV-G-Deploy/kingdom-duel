@@ -436,13 +436,14 @@
     color: rgba(4, 48, 74, 0.72);
     font-size: 0.48rem;
     font-weight: 950;
+    padding-right: 25px;
   }
 
   .action-dock .spell-gem {
-    right: 5px;
+    right: 4px;
     top: 4px;
-    width: 17px;
-    height: 17px;
+    width: 22px;
+    height: 22px;
     font-size: 0.52rem;
   }
 
@@ -454,7 +455,7 @@
 
   .action-dock .spell-meter {
     left: 7px;
-    right: 20px;
+    right: 26px;
     bottom: 5px;
     height: 3px;
   }
