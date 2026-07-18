@@ -32,7 +32,7 @@ const gemAssetSlots: Record<GemKind, AssetSlot> = {
   moon: { path: 'assets/gems/moon.webp', src: 'assets/gems/moon.webp' },
   crown: { path: 'assets/gems/crown.webp', src: 'assets/gems/crown.webp' },
   shade: { path: 'assets/gems/shade.webp', src: 'assets/gems/shade.webp' },
-  aether: { path: 'assets/gems/aether.webp', src: null },
+  aether: { path: 'assets/gems/aether.webp', src: 'assets/gems/aether.webp' },
 };
 
 const spellAssetSlots: Record<BuiltInAbilityId, AssetSlot> = {
