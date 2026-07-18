@@ -61,7 +61,7 @@ export function createBattleView(context: BattleViewContext): BattleView {
   const duel = context.duel;
   const duelRules = context.rules;
   const ui = context.ui;
-  const reportView = createBattleReportView(context.committedDuel ?? duel, ui, terminalRunAction());
+  const reportView = createBattleReportView(context.committedDuel ?? duel, ui, context.run, terminalRunAction());
 
   function terminalRunAction(): BattleTerminalAction | undefined {
     if (!context.run || !duel.winner) return undefined;

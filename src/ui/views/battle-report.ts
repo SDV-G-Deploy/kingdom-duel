@@ -1,4 +1,12 @@
 import type { DuelState } from '../../engine/types';
+import type { RunState } from '../../run/types';
+import {
+  DAILY_CHALLENGE_VERSION,
+  RUN_CONTENT_VERSION,
+  RUN_RULES_VERSION,
+  RUN_SCHEMA_VERSION,
+} from '../../run/version';
+import { BUILD_IDENTITY } from '../../build-info';
 import { renderPortraitSlot } from '../assets';
 import type { BattleUiState } from '../state';
 
@@ -32,6 +40,7 @@ export type BattleReportView = {
 export function createBattleReportView(
   duel: DuelState,
   ui: Readonly<BattleUiState>,
+  run?: RunState,
   terminalAction?: BattleTerminalAction,
 ): BattleReportView {
   function readableBattleLog(): string {
@@ -107,6 +116,26 @@ export function createBattleReportView(
   function debugBattleTrace(): string {
     return JSON.stringify(
       {
+        traceSchemaVersion: 1,
+        build: BUILD_IDENTITY,
+        contract: {
+          runSchemaVersion: RUN_SCHEMA_VERSION,
+          rulesVersion: run?.rulesVersion ?? RUN_RULES_VERSION,
+          contentVersion: run?.contentVersion ?? RUN_CONTENT_VERSION,
+          dailyVersion: run?.dailyVersion ?? (run?.mode === 'daily' ? DAILY_CHALLENGE_VERSION : null),
+        },
+        run: run
+          ? {
+              seed: run.seed,
+              mode: run.mode,
+              dailyKey: run.dailyKey,
+              phase: run.phase,
+              encounterIndex: run.encounterIndex,
+              selectedUpgradeIds: run.selectedUpgradeIds,
+              rewardOptions: run.rewardOptions,
+              battles: run.battles,
+            }
+          : null,
         initialSeed: duel.initialSeed,
         rngSeed: duel.seed,
         turn: duel.turn,

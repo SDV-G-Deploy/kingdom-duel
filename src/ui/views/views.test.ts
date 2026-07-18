@@ -71,9 +71,22 @@ function testDebugTraceUsesStructuredActionsAndFrames(): void {
   const duel = createDuel(2007);
   const ui = new BattleUiStore();
   const trace = JSON.parse(createBattleView({ duel, rules: DEFAULT_DUEL_RULES, ui: ui.state }).debugBattleTrace());
+  assert.equal(trace.traceSchemaVersion, 1);
+  assert.equal(trace.contract.rulesVersion, 'rules-2026.07-step6');
+  assert.equal(trace.contract.contentVersion, 'content-2026.07-step6');
+  assert.equal(trace.contract.dailyVersion, null);
+  assert.equal(typeof trace.build.dirty, 'boolean');
+  assert.equal(trace.run, null);
   assert.equal(trace.initialSeed, 2007);
   assert.deepEqual(trace.actions, []);
   assert.deepEqual(trace.resolutionFrames, []);
+
+  const run = createRun(4242);
+  const runDuel = createRunDuel(run);
+  const runTrace = JSON.parse(createBattleView({ duel: runDuel, rules: DEFAULT_DUEL_RULES, ui: ui.state, run }).debugBattleTrace());
+  assert.equal(runTrace.run.encounterIndex, 0);
+  assert.equal(runTrace.run.phase, 'battle');
+  assert.equal(runTrace.contract.rulesVersion, run.rulesVersion);
 }
 
 function testRunBattleRewardAndResultContracts(): void {
