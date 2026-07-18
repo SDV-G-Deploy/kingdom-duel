@@ -89,6 +89,16 @@ function testDebugTraceUsesStructuredActionsAndFrames(): void {
   assert.equal(runTrace.contract.rulesVersion, run.rulesVersion);
 }
 
+function testLockedSpellsExplainMissingMana(): void {
+  const duel = { ...createDuel(2007), player: { ...createDuel(2007).player, moon: 3 } };
+  const ui = new BattleUiStore();
+  const battle = createBattleView({ duel, rules: DEFAULT_DUEL_RULES, ui: ui.state });
+
+  assert.match(battle.html, /Glass Ward/);
+  assert.match(battle.html, /Need 2 Moon/);
+  assert.match(battle.html, /is-near-ready/);
+}
+
 function testRunBattleRewardAndResultContracts(): void {
   const run = createRun(4242);
   const ui = new BattleUiStore();
@@ -128,6 +138,7 @@ function testRunBattleRewardAndResultContracts(): void {
 testBattleAndMoodboardMarkupContracts();
 testResolutionFrameIsPresentedWithoutMutatingCommittedDuel();
 testDebugTraceUsesStructuredActionsAndFrames();
+testLockedSpellsExplainMissingMana();
 testRunBattleRewardAndResultContracts();
 
 console.log('UI view contract tests passed');
