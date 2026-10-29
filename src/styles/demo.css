@@ -552,6 +552,13 @@
     display: none;
   }
 
+  /* Keep the ready "shine" above the status line instead of striking through it. */
+  .action-dock .spell-row .spell-button.is-ready::after,
+  .action-dock .spell-row .spell-button.is-active::after {
+    top: 2px;
+    height: 3px;
+  }
+
   .action-dock .spell-button .spell-meter {
     position: static;
     grid-row: 5;
@@ -580,4 +587,24 @@
   content: "";
   transform: rotate(-40deg);
   pointer-events: none;
+}
+
+/* Desktop command deck: a fixed height that fits two rows of effect chips, so
+   arming a spell (or hovering a move) never grows the deck and pushes the
+   board's bottom row out of its frame. The board budget accounts for it. */
+@media (min-width: 721px) {
+  .battle-console .action-dock {
+    height: 124px;
+    min-height: 124px;
+    overflow: hidden;
+  }
+
+  .battle-console .action-dock .decision-panel {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .battle-console:not(:has(.battle-recap)) .board-frame .play-board {
+    width: min(100%, 380px, calc(100dvh - 460px));
+  }
 }
