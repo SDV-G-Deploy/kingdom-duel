@@ -22,6 +22,7 @@ import { loadRun, saveRun } from './run/storage';
 import type { RunMode, RunState, UpgradeId } from './run/types';
 import { RUN_SCHEMA_VERSION } from './run/version';
 import { BUILD_IDENTITY } from './build-info';
+import { registerServiceWorker } from './pwa/register';
 import { sameCell } from './ui/assets';
 import { GameAudio } from './ui/audio';
 import { AUDIO_STORAGE_KEY, cuesForFrame, parseAudioPreferences, summaryCues, type AudioPreferences } from './ui/audio-cues';
@@ -652,3 +653,4 @@ document.addEventListener('visibilitychange', () => gameAudio.setPageVisible(doc
 persistCurrentRun();
 renderApp();
 maybeRunEnemy();
+registerServiceWorker();
