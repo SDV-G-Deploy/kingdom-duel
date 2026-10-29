@@ -470,3 +470,33 @@
   border-color: rgba(255, 255, 255, 0.9);
   font-weight: 800;
 }
+
+/* Compact spell buttons: stop the cost line, name, and charge meter from overlapping. */
+@media (max-width: 720px) {
+  .action-dock .spell-button {
+    padding-bottom: 8px;
+  }
+
+  .action-dock .spell-button span,
+  .action-dock .spell-button strong {
+    margin: 0;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .action-dock .spell-meter {
+    bottom: 3px;
+  }
+
+  .action-dock .spell-button.is-ready span {
+    color: #006a8a;
+  }
+
+  .action-dock .spell-row .spell-button.is-ready::after {
+    top: 1px;
+    height: 2px;
+    opacity: 0.5;
+  }
+}
