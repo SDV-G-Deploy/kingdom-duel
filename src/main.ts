@@ -23,6 +23,8 @@ import type { RunMode, RunState, UpgradeId } from './run/types';
 import { RUN_SCHEMA_VERSION } from './run/version';
 import { BUILD_IDENTITY } from './build-info';
 import { sameCell } from './ui/assets';
+import { GameAudio } from './ui/audio';
+import { AUDIO_STORAGE_KEY, cuesForFrame, parseAudioPreferences, summaryCues, type AudioPreferences } from './ui/audio-cues';
 import {
   COACH_STORAGE_KEY,
   chooseCoachTip,
@@ -73,6 +75,7 @@ uiStore.update(debugSession.ui);
 // A first-time visitor gets a placeholder run at boot; it is offered as "Continue" only once it is chosen or played.
 let bootRunIsPlaceholder = !restored;
 let coachPreferences: CoachPreferences = loadCoachPreferences();
+const gameAudio = new GameAudio(loadAudioPreferences());
 let fxSequence = 0;
 let fxRefreshTimer: number | null = null;
 let bumpTimer: number | null = null;
@@ -97,6 +100,7 @@ function currentBattleView() {
     rules: duelRules,
     ui,
     run: runEnabled ? run : undefined,
+    sound: gameAudio.preferences,
     coachTip: runEnabled && canUseBoard() ? chooseCoachTip(duel, duelRules, coachPreferences) : null,
   });
 }
@@ -106,6 +110,23 @@ function loadCoachPreferences(): CoachPreferences {
     return parseCoachPreferences(runStorage?.getItem(COACH_STORAGE_KEY) ?? null);
   } catch {
     return parseCoachPreferences(null);
+  }
+}
+
+function loadAudioPreferences(): AudioPreferences {
+  try {
+    return parseAudioPreferences(runStorage?.getItem(AUDIO_STORAGE_KEY) ?? null);
+  } catch {
+    return parseAudioPreferences(null);
+  }
+}
+
+function saveAudioPreferences(next: AudioPreferences): void {
+  gameAudio.setPreferences(next);
+  try {
+    runStorage?.setItem(AUDIO_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // The toggle still applies for this session.
   }
 }
 
@@ -167,13 +188,21 @@ function safeLocalStorage(): Storage | null {
 
 function presentResolution(result: Resolution, onComplete: () => void = () => {}): void {
   let shown: ActorPair = { player: duel.player, enemy: duel.enemy };
+  let cascade = 1;
+  const reducedMotion = prefersReducedMotion.matches;
   duel = result.state;
   persistCurrentRun();
   uiStore.beginResolution(result.frames);
+  if (reducedMotion) gameAudio.playCues(summaryCues(result.frames));
   resolutionPlayback.play(
     result.frames,
     {
       onFrame: (frame) => {
+        if (!reducedMotion) {
+          const sound = cuesForFrame(frame, cascade);
+          cascade = sound.cascade;
+          gameAudio.playCues(sound.cues, 0.04);
+        }
         pushCombatFx(shown, frame.snapshot);
         shown = { player: frame.snapshot.player, enemy: frame.snapshot.enemy };
         uiStore.presentFrame(frame);
@@ -191,7 +220,7 @@ function presentResolution(result: Resolution, onComplete: () => void = () => {}
         onComplete();
       },
     },
-    { reducedMotion: prefersReducedMotion.matches },
+    { reducedMotion },
   );
 }
 
@@ -217,6 +246,7 @@ function renderApp(): void {
       run: restoredOrCurrentRun(),
       dailyKey: dailyRunKey(),
       hintsEnabled: coachPreferences.enabled,
+      sound: gameAudio.preferences,
       buildLabel: `v${BUILD_IDENTITY.appVersion} · ${BUILD_IDENTITY.buildCommit.slice(0, 7)}`,
     });
     app.innerHTML = title.html;
@@ -367,6 +397,7 @@ function commitSwap(from: Cell, to: Cell): void {
   const preview = previewSwap(duel.board, from, to, duelRules);
   if (!preview.valid) {
     ui.selectedCell = from;
+    gameAudio.play('invalid');
     bumpInvalidTarget(to, 'No match: the target tile snapped back.');
     return;
   }
@@ -387,6 +418,7 @@ function handleBoardTap(cell: Cell): void {
 
   if (ui.activeAbilityId) {
     if (chooseSpellTargetTapAction(ui.confirmedAbilityTarget, cell) === 'preview') {
+      gameAudio.play('select');
       ui.hoverCell = cell;
       ui.confirmedAbilityTarget = cell;
       ui.selectedCell = null;
@@ -408,6 +440,7 @@ function handleBoardTap(cell: Cell): void {
   }
 
   if (!ui.selectedCell) {
+    gameAudio.play('select');
     ui.selectedCell = cell;
     ui.hoverCell = null;
     ui.bumpCell = null;
@@ -488,6 +521,24 @@ function chooseUpgrade(upgradeId: UpgradeId): void {
 }
 
 function handleUiAction(action: string): void {
+  if (action === 'toggle-sound') {
+    const prefs = gameAudio.preferences;
+    saveAudioPreferences({ ...prefs, muted: !prefs.muted });
+    gameAudio.play('ui');
+    renderApp();
+    return;
+  }
+
+  if (action === 'toggle-music') {
+    const prefs = gameAudio.preferences;
+    // Turning music on from a muted state unmutes too, so the toggle is never a no-op.
+    saveAudioPreferences(prefs.music && !prefs.muted ? { ...prefs, music: false } : { muted: false, music: true });
+    renderApp();
+    return;
+  }
+
+  if (!action.startsWith('copy-')) gameAudio.play('ui');
+
   if (action === 'continue-run-save') {
     handleViewChange('play');
     return;
@@ -555,6 +606,7 @@ function handleUiAction(action: string): void {
 
 function handleAbilitySelect(abilityId: AbilityId): void {
   if (!canUseBoard() || !duel.player.abilityIds.includes(abilityId)) return;
+  gameAudio.play('ui');
   clearEnemyCue();
   clearBumpCue();
   ui.activeAbilityId = ui.activeAbilityId === abilityId ? null : abilityId;
@@ -590,6 +642,12 @@ bindBattleInput({
     renderApp();
   },
 });
+
+// Browsers only start audio from a user gesture; every gesture re-arms it (iOS can interrupt a context).
+for (const type of ['pointerdown', 'keydown', 'touchend'] as const) {
+  window.addEventListener(type, () => gameAudio.unlock(), { capture: true, passive: true });
+}
+document.addEventListener('visibilitychange', () => gameAudio.setPageVisible(document.visibilityState === 'visible'));
 
 persistCurrentRun();
 renderApp();

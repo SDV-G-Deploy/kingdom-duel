@@ -559,3 +559,25 @@
     height: 4px;
   }
 }
+
+/* Cockpit mute toggle: a struck-through note when muted. */
+.icon-action.sound-toggle {
+  position: relative;
+}
+
+.icon-action.sound-toggle.is-muted {
+  opacity: 0.72;
+}
+
+.icon-action.sound-toggle.is-muted::after {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+  transform: rotate(-40deg);
+  pointer-events: none;
+}

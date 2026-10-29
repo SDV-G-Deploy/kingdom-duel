@@ -10,6 +10,8 @@ export type TitleViewContext = {
   dailyKey: string;
   hintsEnabled: boolean;
   buildLabel: string;
+  /** Sound preferences for the footer toggles; omitted in tests that do not care. */
+  sound?: { muted: boolean; music: boolean };
 };
 
 export type TitleView = { html: string; announcement: string };
@@ -70,6 +72,12 @@ export function renderTitleView(context: TitleViewContext): TitleView {
         </section>
         <footer class="title-footer">
           <button data-action="toggle-hints" type="button" aria-pressed="${context.hintsEnabled}">Coach hints: ${context.hintsEnabled ? 'on' : 'off'}</button>
+          ${
+            context.sound
+              ? `<button data-action="toggle-sound" type="button" aria-pressed="${!context.sound.muted}">Sound: ${context.sound.muted ? 'off' : 'on'}</button>
+          <button data-action="toggle-music" type="button" aria-pressed="${context.sound.music && !context.sound.muted}">Music: ${context.sound.music && !context.sound.muted ? 'on' : 'off'}</button>`
+              : ''
+          }
           <button data-view="moodboard" type="button">Moodboard</button>
           <small>${context.buildLabel}</small>
         </footer>

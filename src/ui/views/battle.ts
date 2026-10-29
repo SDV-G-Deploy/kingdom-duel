@@ -51,6 +51,8 @@ export type BattleViewContext = {
   coachTip?: CoachTip | null;
   /** Presentation clock for float/hit/banner effects (defaults to Date.now()). */
   now?: number;
+  /** Sound preferences; adds the cockpit mute toggle when present. */
+  sound?: { muted: boolean };
 };
 
 export type BattleView = {
@@ -352,6 +354,7 @@ export function createBattleView(context: BattleViewContext): BattleView {
         <div class="game-actions">
           ${duel.winner || context.run ? '' : '<button class="icon-action" data-action="restart" type="button" aria-label="Restart duel" title="Restart duel">↻</button>'}
           ${context.run ? '<button class="icon-action" data-view="title" type="button" aria-label="Title screen" title="Title screen (run is saved)">⌂</button>' : ''}
+          ${context.sound ? `<button class="icon-action sound-toggle ${context.sound.muted ? 'is-muted' : ''}" data-action="toggle-sound" type="button" aria-pressed="${!context.sound.muted}" aria-label="${context.sound.muted ? 'Sound off' : 'Sound on'}" title="${context.sound.muted ? 'Unmute sound' : 'Mute sound'}">♪</button>` : ''}
           <button class="icon-action" data-action="toggle-log" type="button" aria-expanded="${ui.logOpen}" aria-label="Open combat log" title="Combat log">≡</button>
           <button class="icon-action" data-view="moodboard" type="button" aria-label="Open AeroCandy moodboard" title="AeroCandy moodboard">✦</button>
         </div>

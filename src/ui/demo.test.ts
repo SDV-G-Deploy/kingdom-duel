@@ -141,6 +141,18 @@ function testTitleView(): void {
   assert.match(resumed.html, /data-action="continue-run-save"/);
   assert.match(resumed.html, /Replaces the saved run/);
   assert.match(resumed.html, /Coach hints: off/);
+  assert.doesNotMatch(resumed.html, /toggle-sound/, 'sound toggles only render when preferences are passed');
+
+  const muted = renderTitleView({ run: null, dailyKey: '2026-10-29', hintsEnabled: true, buildLabel: 'v0', sound: { muted: true, music: true } });
+  assert.match(muted.html, /data-action="toggle-sound" type="button" aria-pressed="false">Sound: off/);
+  assert.match(muted.html, /Music: off/, 'music reads off while everything is muted');
+  const loud = renderTitleView({ run: null, dailyKey: '2026-10-29', hintsEnabled: true, buildLabel: 'v0', sound: { muted: false, music: true } });
+  assert.match(loud.html, /Sound: on/);
+  assert.match(loud.html, /Music: on/);
+
+  const battleRun = createRun(2007);
+  const cockpit = createBattleView({ duel: createRunDuel(battleRun), rules: buildRunDuelRules(battleRun), ui: new BattleUiStore('play').state, run: battleRun, sound: { muted: true } });
+  assert.match(cockpit.html, /sound-toggle is-muted" data-action="toggle-sound"[^>]*aria-label="Sound off"/);
 }
 
 testCoachTipOrderAndGating();
