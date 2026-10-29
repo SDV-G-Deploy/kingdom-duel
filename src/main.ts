@@ -21,14 +21,26 @@ import {
 import { loadRun, saveRun } from './run/storage';
 import type { RunMode, RunState, UpgradeId } from './run/types';
 import { RUN_SCHEMA_VERSION } from './run/version';
+import { BUILD_IDENTITY } from './build-info';
 import { sameCell } from './ui/assets';
+import {
+  COACH_STORAGE_KEY,
+  chooseCoachTip,
+  markCoachTipSeen,
+  parseCoachPreferences,
+  type CoachPreferences,
+  type CoachTipId,
+} from './ui/coach';
+import { FLOAT_FX_DURATION_MS, diffCombatFx, activeFloatFx, type ActorPair } from './ui/fx';
 import { createDebugSession } from './ui/debug-presets';
 import { bindBattleInput } from './ui/input-controller';
 import { ResolutionPlaybackController } from './ui/playback';
 import { BattleUiStore, canUseBoard as canUseBoardSelector, duelForPresentation } from './ui/state';
 import { createBattleView } from './ui/views/battle';
 import { renderMoodboard } from './ui/views/moodboard';
+import { TERMINAL_BANNER_MS } from './ui/views/battle';
 import { renderRewardView, renderRunResult } from './ui/views/run';
+import { renderTitleView } from './ui/views/title';
 import { CancellableTimer, FOCUS_ATTRIBUTES, chooseFocusIdentity, type FocusIdentity } from './ui-lifecycle';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
@@ -50,7 +62,7 @@ const debugPreset = search.get('debug');
 const runEnabled = !debugPreset;
 const runStorage = safeLocalStorage();
 
-const uiStore = new BattleUiStore(search.get('view') === 'moodboard' ? 'moodboard' : 'play');
+const uiStore = new BattleUiStore(search.get('view') === 'moodboard' ? 'moodboard' : runEnabled ? 'title' : 'play');
 const ui = uiStore.state;
 const restored = runEnabled && runStorage ? loadRun(runStorage) : null;
 let run: RunState = restored?.run ?? createRun(Date.now() >>> 0);
@@ -58,6 +70,11 @@ let duelRules = runEnabled ? buildRunDuelRules(run) : DEFAULT_DUEL_RULES;
 const debugSession = createDebugSession(debugPreset, duelRules);
 let duel: DuelState = runEnabled ? restored?.duel ?? createRunDuel(run) : debugSession.duel;
 uiStore.update(debugSession.ui);
+// A first-time visitor gets a placeholder run at boot; it is offered as "Continue" only once it is chosen or played.
+let bootRunIsPlaceholder = !restored;
+let coachPreferences: CoachPreferences = loadCoachPreferences();
+let fxSequence = 0;
+let fxRefreshTimer: number | null = null;
 let bumpTimer: number | null = null;
 let invalidCueTimer: number | null = null;
 const browserTimerPlatform = {
@@ -80,7 +97,55 @@ function currentBattleView() {
     rules: duelRules,
     ui,
     run: runEnabled ? run : undefined,
+    coachTip: runEnabled && canUseBoard() ? chooseCoachTip(duel, duelRules, coachPreferences) : null,
   });
+}
+
+function loadCoachPreferences(): CoachPreferences {
+  try {
+    return parseCoachPreferences(runStorage?.getItem(COACH_STORAGE_KEY) ?? null);
+  } catch {
+    return parseCoachPreferences(null);
+  }
+}
+
+function saveCoachPreferences(next: CoachPreferences): void {
+  coachPreferences = next;
+  try {
+    runStorage?.setItem(COACH_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Hints still work for this session when storage is unavailable.
+  }
+}
+
+function markCoachSeen(id: CoachTipId): void {
+  if (!coachPreferences.seen.includes(id)) saveCoachPreferences(markCoachTipSeen(coachPreferences, id));
+}
+
+function pushCombatFx(before: ActorPair, after: ActorPair): void {
+  const now = Date.now();
+  const fresh = diffCombatFx(before, after).map((entry) => ({ ...entry, id: ++fxSequence, startedAt: now }));
+  if (!fresh.length) return;
+  ui.floatFx = [...activeFloatFx(ui.floatFx, now), ...fresh];
+  if (fresh.some((entry) => entry.side === 'hero' && entry.tone === 'damage')) vibrate(28);
+  scheduleFxRefresh(FLOAT_FX_DURATION_MS);
+}
+
+function scheduleFxRefresh(delay: number): void {
+  if (fxRefreshTimer !== null) window.clearTimeout(fxRefreshTimer);
+  fxRefreshTimer = window.setTimeout(() => {
+    fxRefreshTimer = null;
+    ui.floatFx = activeFloatFx(ui.floatFx, Date.now());
+    renderApp();
+  }, delay + 20);
+}
+
+function vibrate(pattern: number | number[]): void {
+  try {
+    if (!prefersReducedMotion.matches) navigator.vibrate?.(pattern);
+  } catch {
+    // Haptics are optional.
+  }
 }
 
 function persistCurrentRun(): void {
@@ -101,6 +166,7 @@ function safeLocalStorage(): Storage | null {
 }
 
 function presentResolution(result: Resolution, onComplete: () => void = () => {}): void {
+  let shown: ActorPair = { player: duel.player, enemy: duel.enemy };
   duel = result.state;
   persistCurrentRun();
   uiStore.beginResolution(result.frames);
@@ -108,11 +174,19 @@ function presentResolution(result: Resolution, onComplete: () => void = () => {}
     result.frames,
     {
       onFrame: (frame) => {
+        pushCombatFx(shown, frame.snapshot);
+        shown = { player: frame.snapshot.player, enemy: frame.snapshot.enemy };
         uiStore.presentFrame(frame);
         renderApp();
       },
       onComplete: () => {
+        pushCombatFx(shown, duel);
         uiStore.finishResolution();
+        if (duel.winner) {
+          ui.terminalFxAt = Date.now();
+          vibrate(duel.winner === 'player' ? [30, 60, 30] : 80);
+          scheduleFxRefresh(TERMINAL_BANNER_MS);
+        }
         renderApp();
         onComplete();
       },
@@ -138,6 +212,21 @@ async function copyToClipboard(text: string, label: string): Promise<void> {
 
 function renderApp(): void {
   const focusIdentity = captureFocusIdentity();
+  if (ui.view === 'title') {
+    const title = renderTitleView({
+      run: restoredOrCurrentRun(),
+      dailyKey: dailyRunKey(),
+      hintsEnabled: coachPreferences.enabled,
+      buildLabel: `v${BUILD_IDENTITY.appVersion} · ${BUILD_IDENTITY.buildCommit.slice(0, 7)}`,
+    });
+    app.innerHTML = title.html;
+    if (title.announcement !== lastAnnouncement) {
+      liveRegion.textContent = title.announcement;
+      lastAnnouncement = title.announcement;
+    }
+    restoreFocus(focusIdentity);
+    return;
+  }
   const battleView = ui.view === 'play' && (!runEnabled || run.phase === 'battle') ? currentBattleView() : null;
   const runView = ui.view === 'play' && runEnabled
     ? run.phase === 'reward'
@@ -153,6 +242,13 @@ function renderApp(): void {
     lastAnnouncement = announcement;
   }
   restoreFocus(focusIdentity);
+}
+
+/** The run worth offering on the title screen: anything the player has started or finished. */
+function restoredOrCurrentRun(): RunState | null {
+  if (!runEnabled) return null;
+  const started = run.phase !== 'battle' || run.battles.length > 0 || duel.actionLog.length > 0;
+  return started || !bootRunIsPlaceholder ? run : null;
 }
 
 function captureFocusIdentity(): FocusIdentity | null {
@@ -276,6 +372,7 @@ function commitSwap(from: Cell, to: Cell): void {
   }
 
   const result = applySwap(duel, from, to, duelRules);
+  markCoachSeen('first-move');
   ui.selectedCell = null;
   ui.hoverCell = null;
   ui.bumpCell = null;
@@ -299,6 +396,7 @@ function handleBoardTap(cell: Cell): void {
     }
 
     const result = castSpell(duel, ui.activeAbilityId, cell, duelRules);
+    if (!result.events.some((event) => event.type === 'invalid_spell')) markCoachSeen('spell-ready');
     ui.activeAbilityId = null;
     ui.confirmedAbilityTarget = null;
     ui.selectedCell = null;
@@ -330,7 +428,7 @@ function handleBoardTap(cell: Cell): void {
   commitSwap(ui.selectedCell, cell);
 }
 
-function handleViewChange(nextView: 'play' | 'moodboard'): void {
+function handleViewChange(nextView: 'title' | 'play' | 'moodboard'): void {
   cancelEnemySequence();
   clearBumpCue();
   clearInvalidCue();
@@ -347,11 +445,13 @@ function startRun(mode: RunMode): void {
   const key = mode === 'daily' ? dailyRunKey() : null;
   const seed = key ? dailyRunSeed(key) : Date.now() >>> 0;
   run = createRun(seed, mode, key);
+  bootRunIsPlaceholder = false;
   duelRules = buildRunDuelRules(run);
   duel = createRunDuel(run);
   uiStore.clearResolution();
   uiStore.resetInteraction();
   ui.logOpen = false;
+  ui.view = 'play';
   persistCurrentRun();
   renderApp();
 }
@@ -388,6 +488,23 @@ function chooseUpgrade(upgradeId: UpgradeId): void {
 }
 
 function handleUiAction(action: string): void {
+  if (action === 'continue-run-save') {
+    handleViewChange('play');
+    return;
+  }
+
+  if (action === 'toggle-hints') {
+    saveCoachPreferences(coachPreferences.enabled ? { ...coachPreferences, enabled: false } : { enabled: true, seen: [] });
+    renderApp();
+    return;
+  }
+
+  if (action.startsWith('dismiss-coach:')) {
+    markCoachSeen(action.slice('dismiss-coach:'.length) as CoachTipId);
+    renderApp();
+    return;
+  }
+
   if (action === 'continue-run') {
     continueRun();
     return;

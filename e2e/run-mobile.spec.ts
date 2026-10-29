@@ -28,7 +28,7 @@ test('mobile battle performs a legal tap move and persists it', async ({ page })
   expect(move, 'fixed seed must expose a legal opening move').toBeTruthy();
   await injectSave(page, { version: RUN_SCHEMA_VERSION, run, duel });
 
-  await page.goto('/');
+  await openSavedRun(page);
 
   await expect(page.getByText('Kingdom Duel', { exact: true })).toBeVisible();
   await expect(page.locator('.game-brand span')).toHaveText('Run 1/4 · Glass Edge');
@@ -52,7 +52,7 @@ test('pending enemy turn resumes from the saved state', async ({ page }) => {
   const initialActionCount = duel.actionLog.length;
   await injectSave(page, { version: RUN_SCHEMA_VERSION, run, duel });
 
-  await page.goto('/');
+  await openSavedRun(page);
 
   await expect.poll(() => savedActionCount(page)).toBeGreaterThan(initialActionCount);
   const resumed = await readSave(page);
@@ -66,7 +66,7 @@ test('reward choice advances the route and persists the prism', async ({ page })
   const reward = resolveRunBattle(opening, terminalDuel);
   await injectSave(page, { version: RUN_SCHEMA_VERSION, run: reward, duel: terminalDuel });
 
-  await page.goto('/');
+  await openSavedRun(page);
 
   await expect(page.getByRole('main').getByText('Prism choice', { exact: true })).toBeVisible();
   const choices = page.locator('[data-action^="choose-upgrade:"]');
@@ -85,7 +85,7 @@ test('completed run renders its result and starts a fresh run', async ({ page })
   const completed = completedRunSave(FIXED_SEED + 3);
   await injectSave(page, completed);
 
-  await page.goto('/');
+  await openSavedRun(page);
 
   await expect(page.getByLabel('Run result')).toBeVisible();
   await expect(page.getByText('Run complete', { exact: true })).toBeVisible();
@@ -106,12 +106,42 @@ test('daily save exposes the pinned daily contract', async ({ page }) => {
   const reward = resolveRunBattle(run, terminalDuel);
   await injectSave(page, { version: RUN_SCHEMA_VERSION, run: reward, duel: terminalDuel });
 
-  await page.goto('/');
+  await openSavedRun(page);
 
   await expect(page.getByText(`Daily ${dailyKey} · ${DAILY_CHALLENGE_VERSION}`, { exact: true })).toBeVisible();
   await expect(page.locator('[data-action^="choose-upgrade:"]')).toHaveCount(3);
   await expectNoHorizontalOverflow(page);
 });
+
+test('fresh visitor starts from the title, sees the coach, and can return home', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByRole('heading', { name: 'Kingdom Duel' })).toBeVisible();
+  await expect(page.getByLabel('How to play')).toBeVisible();
+  await expect(page.locator('[data-action="continue-run-save"]')).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+
+  await page.getByRole('button', { name: /New run/ }).click();
+  await expect(page.locator('.game-brand span')).toHaveText('Run 1/4 · Glass Edge');
+  const coach = page.locator('[data-coach-tip="first-move"]');
+  await expect(coach).toBeVisible();
+  await coach.getByRole('button', { name: 'Got it' }).click();
+  await expect(coach).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+
+  await page.getByRole('button', { name: 'Title screen' }).click();
+  await expect(page.locator('[data-action="continue-run-save"]')).toContainText('Run 1/4 · Glass Edge');
+  await page.reload();
+  await page.locator('[data-action="continue-run-save"]').click();
+  await expect(page.locator('.game-brand span')).toHaveText('Run 1/4 · Glass Edge');
+  await expect(page.locator('[data-coach-tip="first-move"]')).toHaveCount(0);
+});
+
+async function openSavedRun(page: Page): Promise<void> {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Kingdom Duel' })).toBeVisible();
+  await page.locator('[data-action="continue-run-save"]').click();
+}
 
 async function injectSave(page: Page, save: RunSave): Promise<void> {
   await page.addInitScript(({ key, value }) => {

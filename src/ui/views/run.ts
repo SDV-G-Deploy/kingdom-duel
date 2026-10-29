@@ -49,7 +49,7 @@ export function renderRewardView(run: RunState): RunView {
             <strong>Prism choice</strong>
             <b>${cleared.name} cleared · ${next.name} ahead</b>
           </div>
-          <button class="icon-action" data-view="moodboard" type="button" aria-label="Open AeroCandy moodboard">✦</button>
+          <button class="icon-action" data-view="title" type="button" aria-label="Title screen" title="Title screen (run is saved)">⌂</button>
         </header>
         ${renderRunRoute(run)}
         <section class="reward-intro">
@@ -112,7 +112,7 @@ export function renderRunResult(run: RunState): RunView {
         <div class="run-result-actions">
           <button class="primary-run-action" data-action="new-standard-run" type="button">New standard run</button>
           <button data-action="new-daily-run" type="button">Today’s daily seed</button>
-          <button data-view="moodboard" type="button">AeroCandy moodboard</button>
+          <button data-view="title" type="button">Title screen</button>
         </div>
       </section>
     </main>

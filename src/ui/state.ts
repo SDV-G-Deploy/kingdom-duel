@@ -5,8 +5,9 @@ import type {
   ResolutionFrame,
   ResolutionSnapshot,
 } from '../engine/types';
+import type { FloatFx } from './fx';
 
-export type AppView = 'play' | 'moodboard';
+export type AppView = 'title' | 'play' | 'moodboard';
 
 export type EnemyCue = {
   cells: Cell[];
@@ -28,6 +29,8 @@ export type BattleUiState = {
   activeResolutionFrame: ResolutionFrame | null;
   presentedSnapshot: ResolutionSnapshot | null;
   isResolving: boolean;
+  floatFx: FloatFx[];
+  terminalFxAt: number | null;
 };
 
 type UiListener = (state: Readonly<BattleUiState>) => void;
@@ -83,6 +86,8 @@ export class BattleUiStore {
 
   clearResolution(): void {
     this.update({
+      floatFx: [],
+      terminalFxAt: null,
       resolutionFrames: [],
       activeResolutionFrame: null,
       presentedSnapshot: null,
@@ -116,6 +121,8 @@ export function createInitialBattleUiState(view: AppView = 'play'): BattleUiStat
     activeResolutionFrame: null,
     presentedSnapshot: null,
     isResolving: false,
+    floatFx: [],
+    terminalFxAt: null,
   };
 }
 
