@@ -500,3 +500,18 @@
     opacity: 0.5;
   }
 }
+
+/* Desktop terminal state: the recap is taller than the action dock, so keep the
+   finished board inside its frame instead of bleeding under the recap. */
+@media (min-width: 721px) {
+  .battle-console .board-frame {
+    overflow: hidden;
+  }
+
+  .battle-console:has(.battle-recap) .board-frame .play-board {
+    width: auto;
+    height: 100%;
+    max-width: min(100%, 380px);
+    aspect-ratio: 1 / 1;
+  }
+}
