@@ -515,3 +515,47 @@
     aspect-ratio: 1 / 1;
   }
 }
+
+/* Desktop spell buttons: the dock row is height-limited, so lay the copy out in a
+   grid whose last row is the charge meter. The status line already reads
+   "Need N Sun" when locked, so the duplicate hint is dropped instead of being
+   drawn over the charge bar. */
+@media (min-width: 721px) {
+  .action-dock .spell-button {
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr) 4px;
+    align-content: start;
+    row-gap: 2px;
+    padding: 7px 8px 7px 10px;
+  }
+
+  .action-dock .spell-button > span,
+  .action-dock .spell-button > strong,
+  .action-dock .spell-button > b,
+  .action-dock .spell-button > em {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .action-dock .spell-button > em {
+    align-self: start;
+  }
+
+  .action-dock .spell-button.is-locked > em {
+    visibility: hidden;
+  }
+
+  .action-dock .spell-button:not(.is-ready):not(.is-active)::after {
+    display: none;
+  }
+
+  .action-dock .spell-button .spell-meter {
+    position: static;
+    grid-row: 5;
+    width: calc(100% - 4px);
+    height: 4px;
+  }
+}
