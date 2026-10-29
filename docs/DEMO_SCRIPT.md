@@ -24,6 +24,8 @@ DEMO_URL=http://127.0.0.1:4173/ DEMO_SHOTS=tmp/demo-shots DEMO_SEED=2009 \
 # DEMO_VIEWPORT=1280x800, DEMO_MODE=daily, DEMO_MOTION=1 are optional
 ```
 
+Sound starts after the first tap. Toggle it on the title screen (*Sound*, *Music*) or with the ♪ button in the battle cockpit. To show offline play, open the production build (`npx vite build && npx vite preview`), reload once, switch the browser offline and reload again.
+
 The bot plays each turn with the spell-aware simulator policy through the real UI: taps, spell aim and confirm, reward choice and the recap.
 
 ## Two-Minute Walkthrough
@@ -32,6 +34,7 @@ The bot plays each turn with the spell-aware simulator policy through the real U
 2. **First duel, Glass Edge (40 s).** Tap **New run**. The purple **Coach** card explains swapping. Tap *Got it* and make a match (tap a gem, then a neighbour, or swipe).
    - Drag a gem toward a neighbour (or hover with a mouse after selecting) to show the **move preview**: damage, Guard and mana before you commit. Pink sockets warn about Shade backlash.
    - Point out the pink **intent rail**, which shows what Shade Knight will do next and its Veil Rift charge (`M3/5`).
+   - Gems slide, pop and drop through each cascade, with a rising chime per cascade step.
    - Hits show **floating numbers** and the portrait shakes.
 3. **Cast a spell (20 s).** When a spell charges, the coach spotlights it with a pulsing green ring. Tap the spell, tap a target to preview the exact result, then tap the same tile again to cast.
 4. **Victory → prism (20 s).** A **Victory** banner appears and the recap explains the deciding exchange. Tap **Choose a prism** and pick one of three mechanical upgrades. They change rules, not percentages; for example, Solar Halo turns Sun Bloom into a 3×3 field.
