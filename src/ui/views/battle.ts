@@ -440,7 +440,7 @@ export function createBattleView(context: BattleViewContext): BattleView {
                         : 'Resolving cascades'
           }</strong>
         </div>
-        ${renderPlayableBoard(duel, duelRules, ui, preview, intent)}
+        ${renderPlayableBoard(duel, duelRules, ui, preview, intent, now)}
       </section>
     `;
   }

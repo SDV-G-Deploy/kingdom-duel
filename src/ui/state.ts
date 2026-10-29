@@ -5,6 +5,7 @@ import type {
   ResolutionFrame,
   ResolutionSnapshot,
 } from '../engine/types';
+import { nextBoardMotion, type BoardMotion } from './board-motion';
 import type { FloatFx } from './fx';
 
 export type AppView = 'title' | 'play' | 'moodboard';
@@ -31,6 +32,8 @@ export type BattleUiState = {
   isResolving: boolean;
   floatFx: FloatFx[];
   terminalFxAt: number | null;
+  /** Gem slide/pop/drop motion for the frame on screen; null when the board is at rest. */
+  boardMotion: BoardMotion | null;
 };
 
 type UiListener = (state: Readonly<BattleUiState>) => void;
@@ -61,6 +64,7 @@ export class BattleUiStore {
 
   beginResolution(frames: ResolutionFrame[]): void {
     this.update({
+      boardMotion: null,
       resolutionFrames: frames,
       activeResolutionFrame: null,
       presentedSnapshot: null,
@@ -68,8 +72,9 @@ export class BattleUiStore {
     });
   }
 
-  presentFrame(frame: ResolutionFrame): void {
+  presentFrame(frame: ResolutionFrame, now: number = Date.now()): void {
     this.update({
+      boardMotion: nextBoardMotion(this.state.boardMotion, frame, now),
       activeResolutionFrame: frame,
       presentedSnapshot: frame.snapshot,
       isResolving: true,
@@ -78,6 +83,7 @@ export class BattleUiStore {
 
   finishResolution(): void {
     this.update({
+      boardMotion: null,
       activeResolutionFrame: null,
       presentedSnapshot: null,
       isResolving: false,
@@ -86,6 +92,7 @@ export class BattleUiStore {
 
   clearResolution(): void {
     this.update({
+      boardMotion: null,
       floatFx: [],
       terminalFxAt: null,
       resolutionFrames: [],
@@ -123,6 +130,7 @@ export function createInitialBattleUiState(view: AppView = 'play'): BattleUiStat
     isResolving: false,
     floatFx: [],
     terminalFxAt: null,
+    boardMotion: null,
   };
 }
 

@@ -7,7 +7,7 @@
     "dev": "vite",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
     "build": "tsc && vite build",
-    "test": "node --import tsx src/engine/engine.test.ts && node --import tsx src/engine/correctness.test.ts && node --import tsx src/engine/content.test.ts && node --import tsx src/engine/actions.test.ts && node --import tsx src/engine/combat-expansion.test.ts && node --import tsx src/run/run.test.ts && node --import tsx scripts/sim-metrics.test.ts && node --import tsx scripts/visible-player-policy.test.ts && node --import tsx src/input.test.ts && node --import tsx src/ui-lifecycle.test.ts && node --import tsx src/ui/state.test.ts && node --import tsx src/ui/playback.test.ts && node --import tsx src/ui/views/views.test.ts && node --import tsx src/ui/demo.test.ts",
+    "test": "node --import tsx src/engine/engine.test.ts && node --import tsx src/engine/correctness.test.ts && node --import tsx src/engine/content.test.ts && node --import tsx src/engine/actions.test.ts && node --import tsx src/engine/combat-expansion.test.ts && node --import tsx src/run/run.test.ts && node --import tsx scripts/sim-metrics.test.ts && node --import tsx scripts/visible-player-policy.test.ts && node --import tsx src/input.test.ts && node --import tsx src/ui-lifecycle.test.ts && node --import tsx src/ui/state.test.ts && node --import tsx src/ui/playback.test.ts && node --import tsx src/ui/board-motion.test.ts && node --import tsx src/ui/views/views.test.ts && node --import tsx src/ui/demo.test.ts",
     "check": "npm run typecheck && npm test && npm run test:e2e:list && vite build",
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list",

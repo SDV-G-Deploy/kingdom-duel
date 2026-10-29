@@ -60,9 +60,6 @@
     width 160ms ease;
 }
 
-.play-shell[data-resolution-frame='swap'] .play-board {
-  animation: resolution-board-shift 110ms ease-out;
-}
 
 .play-shell[data-resolution-frame='cascade'] .play-board,
 .play-shell[data-resolution-frame='match'] .play-board {
@@ -78,18 +75,8 @@
   animation: resolution-hit-pulse 160ms ease-out;
 }
 
-.play-shell[data-resolution-frame='fall'] .gem,
-.play-shell[data-resolution-frame='refill'] .gem {
-  animation: resolution-gem-settle 160ms ease-out;
-}
-
 .play-shell[data-resolution-frame='turn'] .turn-chip {
   animation: resolution-turn-settle 120ms ease-out;
-}
-
-@keyframes resolution-board-shift {
-  0% { transform: scale(0.992); }
-  100% { transform: scale(1); }
 }
 
 @keyframes resolution-board-pulse {
@@ -109,11 +96,6 @@
   0% { filter: brightness(1) saturate(1); }
   45% { filter: brightness(1.24) saturate(1.28) hue-rotate(12deg); }
   100% { filter: brightness(1) saturate(1); }
-}
-
-@keyframes resolution-gem-settle {
-  0% { transform: translateY(-4px) scale(0.98); }
-  100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes resolution-turn-settle {

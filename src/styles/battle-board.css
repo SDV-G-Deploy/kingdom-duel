@@ -1,7 +1,8 @@
 .play-board {
+  --gem-gap: clamp(5px, 0.65vw, 8px);
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: clamp(5px, 0.65vw, 8px);
+  gap: var(--gem-gap);
   width: min(620px, 100%);
   margin: auto;
   padding: clamp(10px, 1.5vw, 16px);
