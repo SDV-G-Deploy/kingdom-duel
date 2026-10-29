@@ -1,7 +1,7 @@
 # Kingdom Duel — Roadmap
 
 Status: canonical execution order
-Current milestone: Step 6.1 implementation complete; debug-export metadata and Chromium E2E gates closed; human execution gate remains open
+Current milestone: Step 6.1 implementation complete; demo polish (title, coach hints, first Step 7 feedback slice) landed 2026-10-29; human execution gate remains open
 Product direction: tactical match-3 duel → short replayable run → PWA → optional native wrappers
 
 ## Working Principle
@@ -176,6 +176,8 @@ Decision:
 ## Step 7 — Game Feel And Frutiger World
 
 Goal: turn readable systems into an emotionally satisfying game.
+
+Demo slice already landed (2026-10-29, presentation only, no rules change): floating combat numbers, portrait hit shake, a Victory/Defeat banner, optional haptics, reduced-motion fallbacks, plus Step 8's onboarding item as first-session coach hints and a title screen.
 
 Scope:
 

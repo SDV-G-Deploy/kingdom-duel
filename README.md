@@ -25,10 +25,21 @@ The repository contains a playable deterministic short run:
 - typed mobile browser scenarios at 390×700 and 390×844;
 - responsive mobile combat layouts and a static GitHub Pages deployment.
 
-This is not yet a content-complete RPG or store-ready application. The short-run implementation is ready for real phone timing and replay-intent playtests before game-feel work or metaprogression expands the scope.
+Demo polish pass (2026-10-29):
+
+- title screen with Continue / New run / Daily seed, the run route, and a four-line how-to-play; a ⌂ button returns home from battles and rewards (the run stays saved);
+- first-session **coach hints** in the command deck (first move, spell charged, enemy charging, Aether forged), with a spotlighted spell, *Got it*, and an on/off toggle that replays them;
+- combat juice: floating damage/Guard/mana numbers, portrait hit shake, optional haptics, and a Victory/Defeat banner, all with reduced-motion fallbacks;
+- fixes: terminal board status no longer reads "Arena locked · Resolving cascades", two-prism run labels no longer push the boss cockpit off-screen at 390px, route tier labels and compact spell buttons no longer clip or overlap, styled result buttons, real page title and favicon;
+- `npm run demo:play` drives a full run in Chromium with the spell-aware policy and saves screenshots.
+
+See the [demo script](docs/DEMO_SCRIPT.md) for a two-minute walkthrough.
+
+This is not yet a content-complete RPG or store-ready application. Combat values are unchanged: the remaining product gate is the five-person real-phone protocol, which should now also check whether the coach hints fix the first-duel spell-literacy failure.
 
 ## Canonical Documentation
 
+- [Demo script](docs/DEMO_SCRIPT.md)
 - [Game specification](docs/GAME_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Balance baseline](docs/BALANCE.md)
@@ -43,7 +54,7 @@ Dated research and implementation reports are preserved under `docs/archive/` an
 Run:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -58,6 +69,8 @@ Browser E2E (requires a locally installed Playwright Chromium binary):
 ```bash
 npm run test:e2e:install
 npm run test:e2e
+# or reuse a preinstalled Chromium without `playwright install`:
+PW_CHROMIUM_EXECUTABLE=/path/to/chromium npm run test:e2e
 ```
 
 `npm run check` type-checks and discovers the browser scenarios; it does not launch them. A full step handoff must also record `npm run test:e2e` on a machine with the Playwright Chromium binary. The 2026-07-18 stabilization pass installed Chromium locally and passed the 10-scenario mobile suite.
