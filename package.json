@@ -14,6 +14,7 @@
     "test:e2e:install": "playwright install chromium",
     "sim:balance": "node --import tsx scripts/sim-battles.ts",
     "sim:run": "node --import tsx scripts/sim-runs.ts",
+    "icons": "node --import tsx scripts/generate-icons.ts",
     "demo:play": "node --import tsx scripts/demo-playthrough.ts",
     "preview": "vite preview"
   },
