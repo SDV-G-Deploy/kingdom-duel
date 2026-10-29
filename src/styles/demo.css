@@ -460,3 +460,13 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+
+/* Long run labels (e.g. two prism names) must ellipsize instead of widening the cockpit grid. */
+.cockpit-stage {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.run-result-actions .primary-run-action {
+  border-color: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+}

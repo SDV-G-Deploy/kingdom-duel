@@ -137,6 +137,24 @@ test('fresh visitor starts from the title, sees the coach, and can return home',
   await expect(page.locator('[data-coach-tip="first-move"]')).toHaveCount(0);
 });
 
+test('boss duel with a two-prism build keeps the cockpit inside the viewport', async ({ page }) => {
+  let run = createRun(FIXED_SEED + 4);
+  for (let index = 0; index < RUN_ENCOUNTERS.length - 1; index++) {
+    run = resolveRunBattle(run, winningDuel(run));
+    if (run.phase === 'reward') run = chooseRunUpgrade(run, run.rewardOptions[0]);
+  }
+  expect(run.selectedUpgradeIds).toHaveLength(2);
+  await injectSave(page, { version: RUN_SCHEMA_VERSION, run, duel: createRunDuel(run) });
+
+  await openSavedRun(page);
+
+  await expect(page.locator('.game-brand span')).toContainText('Run 4/4 · Eclipse Crown');
+  const widest = await page.evaluate(() =>
+    Math.max(...[...document.querySelectorAll('.game-bar, .battle-console')].map((node) => node.getBoundingClientRect().right)),
+  );
+  expect(widest).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+});
+
 async function openSavedRun(page: Page): Promise<void> {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Kingdom Duel' })).toBeVisible();
