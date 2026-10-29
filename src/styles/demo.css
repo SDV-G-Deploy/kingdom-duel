@@ -608,3 +608,18 @@
     width: min(100%, 380px, calc(100dvh - 460px));
   }
 }
+
+/* Title settings: hints, sound, and music sit on one even row. */
+.title-settings {
+  display: grid;
+  flex: 1 1 100%;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 6px;
+}
+
+.title-settings button {
+  min-width: 0;
+  padding: 0 8px;
+  white-space: nowrap;
+}

@@ -71,6 +71,7 @@ export function renderTitleView(context: TitleViewContext): TitleView {
           </ul>
         </section>
         <footer class="title-footer">
+          <div class="title-settings" role="group" aria-label="Settings">
           <button data-action="toggle-hints" type="button" aria-pressed="${context.hintsEnabled}">Coach hints: ${context.hintsEnabled ? 'on' : 'off'}</button>
           ${
             context.sound
@@ -78,6 +79,7 @@ export function renderTitleView(context: TitleViewContext): TitleView {
           <button data-action="toggle-music" type="button" aria-pressed="${context.sound.music && !context.sound.muted}">Music: ${context.sound.music && !context.sound.muted ? 'on' : 'off'}</button>`
               : ''
           }
+          </div>
           <button data-view="moodboard" type="button">Moodboard</button>
           <small>${context.buildLabel}</small>
         </footer>
