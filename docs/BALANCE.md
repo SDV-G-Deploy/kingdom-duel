@@ -189,3 +189,15 @@ These remain iteration gates, not permanent product promises:
 4. Tune the smallest encounter-specific value only after policy and human evidence agree on the direction.
 5. Preserve this seed range as the Step 5 regression cohort.
 6. Use both visible and spell-aware 100-run cohorts as Step 6 baselines; do not tune against a single showcase seed.
+
+## 2026-10-29 Demo Pass Probe (No Values Changed)
+
+A throwaway probe re-ran Glass Edge alone over 300 seeds from 2007 with weaker Shade stats to see whether a numerical easing would rescue first-session players:
+
+| Glass Edge HP / Guard bonus | Visible-policy wins | Spell-aware wins |
+| --- | ---: | ---: |
+| −6 / −1 (current) | 32.3% | 85.0% |
+| −10 / −1 | 39.0% | 88.3% |
+| −10 / −2 | 39.3% | 88.7% |
+
+A sizeable HP cut moves the visible heuristic by only about 7 points, while spell-aware play already wins 85%. The gap comes from spell use, not raw stats. That matches the 2026-07-18 trace, where Aurora cast no spells. The demo pass therefore left combat values alone and added first-session coach hints that call out a charged spell and an enemy close to its ability. The next human cohort should record whether players cast in their first duel.

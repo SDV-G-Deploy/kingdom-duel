@@ -46,7 +46,7 @@ export function bindBattleInput(
     if (!target) return;
 
     const nextView = target.closest<HTMLElement>('[data-view]')?.dataset.view;
-    if (nextView === 'play' || nextView === 'moodboard') {
+    if (nextView === 'play' || nextView === 'moodboard' || nextView === 'title') {
       context.onView(nextView);
       return;
     }

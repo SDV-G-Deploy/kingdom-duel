@@ -1,0 +1,18 @@
+{
+  "name": "Kingdom Duel",
+  "short_name": "Kingdom Duel",
+  "description": "A bright AeroCandy match-3 RPG duel. Four fights, two prisms, one Eclipse Crown.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#dff8ff",
+  "theme_color": "#7ddfff",
+  "categories": ["games"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

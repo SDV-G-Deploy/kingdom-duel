@@ -1,5 +1,6 @@
 import type { DuelRules, DuelState, EnemyIntent } from '../../engine/types';
 import { renderPortraitSlot } from '../assets';
+import { hitDelay, renderFloatFx } from '../fx';
 import type { BattleUiState } from '../state';
 
 type CombatStripContext = {
@@ -9,10 +10,12 @@ type CombatStripContext = {
   intent: EnemyIntent | null;
   legalMoves: number;
   intentLead(intent: EnemyIntent): string;
+  now?: number;
 };
 
 export function renderCombatStrip(context: CombatStripContext): string {
   const { duel, rules, ui, intent, legalMoves, intentLead } = context;
+  const now = context.now ?? Date.now();
   const turnLabel = duel.winner
     ? duel.winner === 'player'
       ? 'Victory'
@@ -35,12 +38,12 @@ export function renderCombatStrip(context: CombatStripContext): string {
   return `
     <section class="combat-strip ${ui.enemyCue ? 'has-enemy-cue' : ''}" aria-label="Combat state">
       <div class="duel-hud-row">
-        ${renderActorMeters(duel, ui, duel.player, 'hero')}
+        ${renderActorMeters(duel, ui, duel.player, 'hero', now)}
         <div class="turn-chip">
           <span>${turnLabel}</span>
           <strong>${turnValue}</strong>
         </div>
-        ${renderActorMeters(duel, ui, duel.enemy, 'enemy')}
+        ${renderActorMeters(duel, ui, duel.enemy, 'enemy', now)}
       </div>
       <div class="tactic-rails">
         ${passive ? `<div class="passive-rail" aria-label="Aurora passive"><span>Aurora passive</span><strong>${passive.name}</strong><b>${passive.description}</b></div>` : ''}
@@ -64,7 +67,9 @@ function renderActorMeters(
   ui: Readonly<BattleUiState>,
   actor: DuelState['player'],
   side: 'hero' | 'enemy',
+  now: number,
 ): string {
+  const hit = hitDelay(ui.floatFx, side, now);
   const isWinner = duel.winner === actor.id;
   const isDefeated = !!duel.winner && duel.winner !== actor.id;
   const hpPct = actor.hp / actor.maxHp;
@@ -73,8 +78,9 @@ function renderActorMeters(
   const faction = actor.id === 'player' ? 'Aurora' : 'Hostile court';
 
   return `
-    <article class="combatant combatant-${side} ${pressureClass} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (ui.enemyThinking || ui.enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''}">
+    <article class="combatant combatant-${side} ${pressureClass} ${duel.current === actor.id ? 'is-active' : ''} ${side === 'enemy' && (ui.enemyThinking || ui.enemyCue) ? 'is-cue' : ''} ${isWinner ? 'is-winner' : ''} ${isDefeated ? 'is-defeated' : ''} ${hit !== null ? 'is-hit' : ''}"${hit !== null ? ` style="--hit-delay:-${hit}ms"` : ''}>
       ${renderPortraitSlot(side, actor.definitionId)}
+      ${renderFloatFx(ui.floatFx, side, now)}
       <div class="combatant-body">
         <span>${faction}</span>
         <strong>${actor.name}</strong>

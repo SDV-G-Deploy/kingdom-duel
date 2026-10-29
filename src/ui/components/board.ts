@@ -3,6 +3,7 @@ import { previewSwap } from '../../engine/duel';
 import { abilityTargetCells } from '../../engine/rewards';
 import type { Cell, DuelRules, DuelState, EnemyIntent, MovePreview } from '../../engine/types';
 import { cellFromBoardIndex, cellKey, gemLabel, renderGem, sameCell } from '../assets';
+import { gemMotionAttributes } from '../board-motion';
 import type { BattleUiState } from '../state';
 
 export function renderPlayableBoard(
@@ -11,6 +12,7 @@ export function renderPlayableBoard(
   ui: Readonly<BattleUiState>,
   preview: MovePreview | null,
   intent: EnemyIntent | null,
+  now: number = Date.now(),
 ): string {
   const previewCells = previewCellSet(preview);
   const intentCells = intentCellSet(intent);
@@ -37,7 +39,9 @@ export function renderPlayableBoard(
             intentCells.has(key) ? 'is-threat' : '',
             spellTargetCells.has(key) ? 'is-spell-target' : '',
           ].filter(Boolean);
-          return renderGem(kind, index, classes);
+          const motion = gemMotionAttributes(ui.boardMotion, index, now);
+          if (motion) classes.push(motion.className);
+          return renderGem(kind, index, classes, motion?.style);
         })
         .join('')}
     </div>

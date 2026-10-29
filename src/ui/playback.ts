@@ -16,18 +16,19 @@ export type PlaybackOptions = {
 };
 
 const FRAME_DURATIONS: Record<ResolutionFrameKind, number> = {
-  swap: 110,
+  // Board frames leave room for the gem motion in board-motion.ts to finish.
+  swap: 180,
   ability: 140,
-  ability_effect: 130,
+  ability_effect: 220,
   cascade: 90,
-  match: 140,
+  match: 200,
   damage: 160,
   guard: 150,
   mana: 130,
   backlash: 180,
-  fall: 160,
-  refill: 180,
-  special: 190,
+  fall: 250,
+  refill: 380,
+  special: 260,
   turn: 120,
   battle_end: 220,
 };

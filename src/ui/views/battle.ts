@@ -23,6 +23,7 @@ import {
 import { renderCombatLogSheet } from '../components/battle-log';
 import { renderPlayableBoard, swapTruthLabel } from '../components/board';
 import { renderCombatStrip } from '../components/combatants';
+import type { CoachTip } from '../coach';
 import type { BattleUiState } from '../state';
 import { createBattleReportView, type BattleTerminalAction } from './battle-report';
 
@@ -46,6 +47,12 @@ export type BattleViewContext = {
   rules: DuelRules;
   ui: Readonly<BattleUiState>;
   run?: RunState;
+  /** First-session hint to show in the idle command deck. */
+  coachTip?: CoachTip | null;
+  /** Presentation clock for float/hit/banner effects (defaults to Date.now()). */
+  now?: number;
+  /** Sound preferences; adds the cockpit mute toggle when present. */
+  sound?: { muted: boolean };
 };
 
 export type BattleView = {
@@ -57,10 +64,14 @@ export type BattleView = {
   intentLead(intent: EnemyIntent): string;
 };
 
+export const TERMINAL_BANNER_MS = 1600;
+
 export function createBattleView(context: BattleViewContext): BattleView {
   const duel = context.duel;
   const duelRules = context.rules;
   const ui = context.ui;
+  const now = context.now ?? Date.now();
+  const coachTip = context.coachTip ?? null;
   const reportView = createBattleReportView(context.committedDuel ?? duel, ui, context.run, terminalRunAction());
 
   function terminalRunAction(): BattleTerminalAction | undefined {
@@ -120,6 +131,17 @@ export function createBattleView(context: BattleViewContext): BattleView {
           <span>Strike failed</span>
           <strong>No match. Gem snaps back.</strong>
           <p>${snapBackCue}</p>
+        </div>
+      `;
+    }
+
+    if (!ui.selectedCell && coachTip) {
+      return `
+        <div class="decision-panel is-coach" data-coach-tip="${coachTip.id}">
+          <span>Coach · ${coachTip.label}</span>
+          <strong>${coachTip.title}</strong>
+          <p>${coachTip.body}</p>
+          <button class="coach-dismiss" data-action="dismiss-coach:${coachTip.id}" type="button">Got it</button>
         </div>
       `;
     }
@@ -331,6 +353,8 @@ export function createBattleView(context: BattleViewContext): BattleView {
         </div>
         <div class="game-actions">
           ${duel.winner || context.run ? '' : '<button class="icon-action" data-action="restart" type="button" aria-label="Restart duel" title="Restart duel">↻</button>'}
+          ${context.run ? '<button class="icon-action" data-view="title" type="button" aria-label="Title screen" title="Title screen (run is saved)">⌂</button>' : ''}
+          ${context.sound ? `<button class="icon-action sound-toggle ${context.sound.muted ? 'is-muted' : ''}" data-action="toggle-sound" type="button" aria-pressed="${!context.sound.muted}" aria-label="${context.sound.muted ? 'Sound off' : 'Sound on'}" title="${context.sound.muted ? 'Unmute sound' : 'Mute sound'}">♪</button>` : ''}
           <button class="icon-action" data-action="toggle-log" type="button" aria-expanded="${ui.logOpen}" aria-label="Open combat log" title="Combat log">≡</button>
           <button class="icon-action" data-view="moodboard" type="button" aria-label="Open AeroCandy moodboard" title="AeroCandy moodboard">✦</button>
         </div>
@@ -355,7 +379,9 @@ export function createBattleView(context: BattleViewContext): BattleView {
       <section class="board-frame ${canMove ? 'is-ready' : ''} ${ui.enemyCue ? 'has-enemy-cue' : ''} ${backlash ? 'has-backlash-preview' : ''} ${spellPreview && !ui.confirmedAbilityTarget ? 'is-spell-aim' : ''} ${spellPreview && ui.confirmedAbilityTarget ? 'is-spell-armed' : ''} ${snapBackCue || invalidPreview ? 'is-snap-back' : ''} ${hasSelection && !preview ? 'is-selection-state' : ''} ${hasValidSwap ? 'is-valid-swap-state' : ''}" aria-label="Battle board">
         <div class="board-status">
           <span>${
-            ui.enemyCue
+            duel.winner
+              ? duel.winner === 'player' ? 'Victory' : 'Defeat'
+              : ui.enemyCue
               ? 'Enemy moved'
               : spellPreview?.fatal
               ? 'Fatal spell'
@@ -382,7 +408,11 @@ export function createBattleView(context: BattleViewContext): BattleView {
                     : 'Arena locked'
           }</span>
           <strong>${
-            ui.enemyCue
+            duel.winner
+              ? duel.winner === 'player'
+                ? `${duel.enemy.name} falls. Review the recap below.`
+                : `Aurora falls. Review the recap below.`
+              : ui.enemyCue
               ? `${duel.enemy.name} action: ${ui.enemyCue.summary}`
               : spellPreview && ui.confirmedAbilityTarget
               ? `Tap same target again: ${spellPreview.title}`
@@ -413,7 +443,7 @@ export function createBattleView(context: BattleViewContext): BattleView {
                         : 'Resolving cascades'
           }</strong>
         </div>
-        ${renderPlayableBoard(duel, duelRules, ui, preview, intent)}
+        ${renderPlayableBoard(duel, duelRules, ui, preview, intent, now)}
       </section>
     `;
   }
@@ -422,7 +452,7 @@ export function createBattleView(context: BattleViewContext): BattleView {
     return `
       <section class="action-dock" aria-label="Actions">
         ${renderPreviewPanel(preview, ui.invalidCue)}
-        ${renderAbilityRow(duel, duelRules, ui, canMove)}
+        ${renderAbilityRow(duel, duelRules, ui, canMove, !ui.selectedCell && !ui.activeAbilityId ? coachTip?.spellId : undefined)}
       </section>
     `;
   }
@@ -446,6 +476,20 @@ export function createBattleView(context: BattleViewContext): BattleView {
     `;
   }
 
+  function renderTerminalBanner(): string {
+    if (!duel.winner || ui.terminalFxAt === null) return '';
+    const elapsed = Math.max(0, now - ui.terminalFxAt);
+    if (elapsed > TERMINAL_BANNER_MS) return '';
+    const won = duel.winner === 'player';
+    const encounter = context.run ? RUN_ENCOUNTERS[context.run.encounterIndex] : null;
+    return `
+      <div class="terminal-banner ${won ? 'is-victory' : 'is-defeat'}" style="--banner-delay:-${elapsed}ms" aria-hidden="true">
+        <span>${encounter ? `${encounter.tier} · ${encounter.name}` : 'Duel'}</span>
+        <strong>${won ? 'Victory' : 'Defeat'}</strong>
+      </div>
+    `;
+  }
+
   function renderPlayable(): string {
     const canMove = duel.current === 'player' && !duel.winner && !ui.enemyThinking && !ui.isResolving;
     const legalMoves = findLegalMoves(duel.board).length;
@@ -457,12 +501,13 @@ export function createBattleView(context: BattleViewContext): BattleView {
         <section class="play-stage cockpit-stage">
           ${renderTopGameBar(canMove)}
           <section class="battle-console" aria-label="Glass battle console">
-            ${renderCombatStrip({ duel, rules: duelRules, ui, intent, legalMoves, intentLead })}
+            ${renderCombatStrip({ duel, rules: duelRules, ui, intent, legalMoves, intentLead, now })}
             ${renderBoardFrame(preview, intent, canMove, activeSpellName, ui.invalidCue)}
             ${duel.winner ? reportView.renderBattleRecap() : renderActionDock(preview, canMove)}
           </section>
           ${renderLatestEvent()}
           ${renderCombatLogSheet(duel, ui)}
+          ${renderTerminalBanner()}
         </section>
       </main>
     `;

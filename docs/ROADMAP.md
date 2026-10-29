@@ -1,7 +1,7 @@
 # Kingdom Duel — Roadmap
 
 Status: canonical execution order
-Current milestone: Step 6.1 implementation complete; debug-export metadata and Chromium E2E gates closed; human execution gate remains open
+Current milestone: Step 6.1 implementation complete; demo polish (title, coach hints, first Step 7 feedback slice) landed 2026-10-29; human execution gate remains open
 Product direction: tactical match-3 duel → short replayable run → PWA → optional native wrappers
 
 ## Working Principle
@@ -177,6 +177,10 @@ Decision:
 
 Goal: turn readable systems into an emotionally satisfying game.
 
+Demo slice already landed (2026-10-29, presentation only, no rules change): floating combat numbers, portrait hit shake, a Victory/Defeat banner, optional haptics, reduced-motion fallbacks, plus Step 8's onboarding item as first-session coach hints and a title screen.
+
+Round 2 (2026-10-29): gem swap slide, match pop and fall/refill drops driven by the resolution frames; synthesized WebAudio SFX with an optional ambient pad and a persisted mute. Still open: Guard-break and spell transitions beyond sound, weather/world states, and a human check that the longer board frames do not slow repeated play.
+
 Scope:
 
 - gem movement and removal;
@@ -198,9 +202,9 @@ Goal: make the validated run installable and resilient on mobile web.
 
 Scope:
 
-- manifest, icons, theme metadata;
+- [x] manifest, icons, theme metadata (2026-10-29);
 - safe areas and `viewport-fit=cover`;
-- offline shell;
+- [x] offline shell: build-time precaching service worker, verified offline in Chromium under the Pages path (2026-10-29);
 - save/resume lifecycle;
 - onboarding and settings;
 - privacy and basic diagnostics;

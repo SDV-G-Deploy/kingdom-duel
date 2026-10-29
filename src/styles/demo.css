@@ -1,0 +1,625 @@
+/* Demo polish: title screen, coach hints, combat juice, terminal banner. */
+
+/* ---------- Title ---------- */
+.title-shell {
+  display: grid;
+  align-items: center;
+}
+
+.title-stage {
+  position: relative;
+  overflow: hidden;
+  width: min(560px, 100%);
+}
+
+.title-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.96), rgba(125, 223, 255, 0.26) 46%, transparent 70%);
+  pointer-events: none;
+  animation: title-float 7s ease-in-out infinite;
+}
+
+.title-bubble-a {
+  top: -40px;
+  right: -30px;
+  width: 170px;
+  height: 170px;
+}
+
+.title-bubble-b {
+  bottom: 120px;
+  left: -50px;
+  width: 120px;
+  height: 120px;
+  animation-delay: -3s;
+}
+
+.title-hero {
+  position: relative;
+  text-align: center;
+}
+
+.title-hero > span {
+  color: var(--ink-700);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title-hero h1 {
+  margin: 2px 0 6px;
+  background: linear-gradient(180deg, #2f9dff 0%, #1a5fd8 52%, #7c4dff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(2.3rem, 11vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  filter: drop-shadow(0 2px 0 rgba(255, 255, 255, 0.95)) drop-shadow(0 8px 14px rgba(36, 124, 255, 0.24));
+}
+
+.title-hero p {
+  max-width: 420px;
+  margin: 0 auto;
+  color: var(--ink-700);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.title-versus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.title-versus .portrait-slot {
+  width: 92px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.5);
+  animation: title-float 5s ease-in-out infinite;
+}
+
+.title-versus .portrait-enemy {
+  animation-delay: -2.5s;
+}
+
+.title-versus b {
+  display: grid;
+  width: 42px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  color: white;
+  background: linear-gradient(135deg, var(--ocean-600), var(--magenta-400));
+  box-shadow: 0 8px 16px rgba(13, 96, 151, 0.22);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.title-actions {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.title-actions button {
+  display: grid;
+  gap: 2px;
+  min-height: 54px;
+  padding: 9px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  text-align: left;
+}
+
+.title-actions strong {
+  font-size: 1.02rem;
+}
+
+.title-actions small {
+  font-size: 0.72rem;
+  opacity: 0.82;
+}
+
+.primary-run-action {
+  color: white;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.55), transparent 36%),
+    linear-gradient(135deg, var(--ocean-600), var(--violet-500));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    0 12px 22px rgba(36, 124, 255, 0.28);
+}
+
+.secondary-run-action,
+.run-result-actions button:not(.primary-run-action),
+.title-footer button {
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: var(--ink-900);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(199, 248, 255, 0.66) 50%, rgba(37, 215, 242, 0.26)),
+    rgba(255, 255, 255, 0.64);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 8px 16px rgba(13, 96, 151, 0.14);
+  font-weight: 800;
+}
+
+.title-actions button:active,
+.run-result-actions button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.how-to-play {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.how-to-play > span {
+  color: var(--ink-700);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.how-to-play ul {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-to-play li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.how-to-play li .gem {
+  width: 34px;
+  height: 34px;
+  pointer-events: none;
+}
+
+.how-to-play p {
+  margin: 0;
+  color: var(--ink-700);
+  font-size: 0.8rem;
+  line-height: 1.32;
+}
+
+.how-to-play b {
+  color: var(--ink-900);
+}
+
+.title-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.title-footer button {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+}
+
+.title-footer small {
+  margin-left: auto;
+  color: var(--ink-700);
+  font-size: 0.66rem;
+}
+
+@keyframes title-float {
+  0%,
+  100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ---------- Route nodes: keep tier labels readable at 390px ---------- */
+@media (max-width: 620px) {
+  .run-node {
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 2px;
+  }
+
+  .run-node b {
+    font-size: 0.58rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ---------- Coach hint ---------- */
+.action-dock .decision-panel.is-coach {
+  position: relative;
+  padding-right: 84px;
+  border-color: rgba(155, 131, 255, 0.62);
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255, 255, 255, 0.9), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(203, 190, 255, 0.34) 62%, rgba(125, 223, 255, 0.18)),
+    rgba(255, 255, 255, 0.6);
+  animation: coach-in 260ms ease-out both;
+}
+
+.action-dock .decision-panel.is-coach > span {
+  color: #5b3fd6;
+}
+
+.coach-dismiss {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  color: white;
+  background: linear-gradient(135deg, var(--ocean-600), var(--violet-500));
+  box-shadow: 0 6px 12px rgba(36, 124, 255, 0.24);
+  font-size: 0.74rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.spell-button.is-coached {
+  animation: coach-spell-pulse 1.3s ease-in-out infinite;
+}
+
+@keyframes coach-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes coach-spell-pulse {
+  0%,
+  100% { box-shadow: 0 0 0 0 rgba(155, 255, 79, 0.0), 0 12px 20px rgba(13, 96, 151, 0.16); }
+  50% { box-shadow: 0 0 0 5px rgba(155, 255, 79, 0.55), 0 12px 24px rgba(37, 215, 242, 0.32); }
+}
+
+/* ---------- Floating combat numbers & hit shake ---------- */
+.float-fx-stack {
+  position: absolute;
+  z-index: 5;
+  top: 6px;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.float-fx {
+  padding: 2px 8px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  color: white;
+  background: linear-gradient(180deg, #ff6aa8, #e8247a);
+  box-shadow: 0 6px 12px rgba(143, 16, 104, 0.28);
+  font-size: 0.9rem;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+  animation: float-fx-rise 1100ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.float-fx.tone-damage {
+  font-size: 1.12rem;
+}
+
+.float-fx.tone-guard {
+  background: linear-gradient(180deg, #5ee0ff, #247cff);
+  box-shadow: 0 6px 12px rgba(36, 124, 255, 0.26);
+}
+
+.float-fx.tone-heal {
+  background: linear-gradient(180deg, #b6ff73, #2dbf55);
+}
+
+.float-fx.tone-mana {
+  color: #5a3b00;
+  background: linear-gradient(180deg, #fff3a8, #ffc93d);
+  font-size: 0.72rem;
+}
+
+.float-fx.tone-guard-break {
+  background: linear-gradient(180deg, #c7dbe8, #557a92);
+  font-size: 0.72rem;
+}
+
+.combatant.is-hit {
+  animation: combatant-hit 420ms ease-out both;
+  animation-delay: var(--hit-delay, 0ms);
+}
+
+.combatant.is-hit .portrait-slot {
+  filter: brightness(1.35) saturate(1.2);
+}
+
+@keyframes float-fx-rise {
+  0% { opacity: 0; transform: translateY(14px) scale(0.6); }
+  14% { opacity: 1; transform: translateY(0) scale(1.12); }
+  26% { transform: translateY(-2px) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-22px) scale(0.96); }
+}
+
+@keyframes combatant-hit {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px) rotate(-0.6deg); }
+  40% { transform: translateX(4px) rotate(0.5deg); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+/* ---------- Victory / defeat banner ---------- */
+.terminal-banner {
+  position: fixed;
+  z-index: 40;
+  top: 34%;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  min-width: min(320px, 86vw);
+  padding: 16px 28px 18px;
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.95), transparent 40%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.97), rgba(214, 255, 176, 0.94) 55%, rgba(160, 238, 255, 0.95));
+  box-shadow: 0 24px 48px rgba(13, 96, 151, 0.32);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: terminal-banner 1600ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  animation-delay: var(--banner-delay, 0ms);
+}
+
+.terminal-banner.is-defeat {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.95), transparent 40%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.97), rgba(255, 196, 230, 0.95) 55%, rgba(214, 204, 255, 0.95));
+}
+
+.terminal-banner span {
+  color: var(--ink-700);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.terminal-banner strong {
+  color: var(--ink-900);
+  font-size: clamp(2.2rem, 12vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.9);
+}
+
+@keyframes terminal-banner {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+  16% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+  26% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -58%) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-bubble,
+  .title-versus .portrait-slot,
+  .spell-button.is-coached,
+  .combatant.is-hit,
+  .action-dock .decision-panel.is-coach {
+    animation: none;
+  }
+
+  .spell-button.is-coached {
+    box-shadow: 0 0 0 4px rgba(155, 255, 79, 0.55);
+  }
+
+  .float-fx {
+    animation-name: float-fx-fade;
+  }
+
+  .terminal-banner {
+    animation-name: terminal-banner-fade;
+  }
+
+  @keyframes float-fx-fade {
+    0%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes terminal-banner-fade {
+    0%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}
+
+/* Coach copy must stay readable even where the compact deck hides hints. */
+.action-dock .decision-panel.is-coach p {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Long run labels (e.g. two prism names) must ellipsize instead of widening the cockpit grid. */
+.cockpit-stage {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.run-result-actions .primary-run-action {
+  border-color: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+}
+
+/* Compact spell buttons: stop the cost line, name, and charge meter from overlapping. */
+@media (max-width: 720px) {
+  .action-dock .spell-button {
+    padding-bottom: 8px;
+  }
+
+  .action-dock .spell-button span,
+  .action-dock .spell-button strong {
+    margin: 0;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .action-dock .spell-meter {
+    bottom: 3px;
+  }
+
+  .action-dock .spell-button.is-ready span {
+    color: #006a8a;
+  }
+
+  .action-dock .spell-row .spell-button.is-ready::after {
+    top: 1px;
+    height: 2px;
+    opacity: 0.5;
+  }
+}
+
+/* Desktop terminal state: the recap is taller than the action dock, so keep the
+   finished board inside its frame instead of bleeding under the recap. */
+@media (min-width: 721px) {
+  .battle-console .board-frame {
+    overflow: hidden;
+  }
+
+  .battle-console:has(.battle-recap) .board-frame .play-board {
+    width: auto;
+    height: 100%;
+    max-width: min(100%, 380px);
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* Desktop spell buttons: the dock row is height-limited, so lay the copy out in a
+   grid whose last row is the charge meter. The status line already reads
+   "Need N Sun" when locked, so the duplicate hint is dropped instead of being
+   drawn over the charge bar. */
+@media (min-width: 721px) {
+  .action-dock .spell-button {
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr) 4px;
+    align-content: start;
+    row-gap: 2px;
+    padding: 7px 8px 7px 10px;
+  }
+
+  .action-dock .spell-button > span,
+  .action-dock .spell-button > strong,
+  .action-dock .spell-button > b,
+  .action-dock .spell-button > em {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .action-dock .spell-button > em {
+    align-self: start;
+  }
+
+  .action-dock .spell-button.is-locked > em {
+    visibility: hidden;
+  }
+
+  .action-dock .spell-button:not(.is-ready):not(.is-active)::after {
+    display: none;
+  }
+
+  /* Keep the ready "shine" above the status line instead of striking through it. */
+  .action-dock .spell-row .spell-button.is-ready::after,
+  .action-dock .spell-row .spell-button.is-active::after {
+    top: 2px;
+    height: 3px;
+  }
+
+  .action-dock .spell-button .spell-meter {
+    position: static;
+    grid-row: 5;
+    width: calc(100% - 4px);
+    height: 4px;
+  }
+}
+
+/* Cockpit mute toggle: a struck-through note when muted. */
+.icon-action.sound-toggle {
+  position: relative;
+}
+
+.icon-action.sound-toggle.is-muted {
+  opacity: 0.72;
+}
+
+.icon-action.sound-toggle.is-muted::after {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+  transform: rotate(-40deg);
+  pointer-events: none;
+}
+
+/* Desktop command deck: a fixed height that fits two rows of effect chips, so
+   arming a spell (or hovering a move) never grows the deck and pushes the
+   board's bottom row out of its frame. The board budget accounts for it. */
+@media (min-width: 721px) {
+  .battle-console .action-dock {
+    height: 124px;
+    min-height: 124px;
+    overflow: hidden;
+  }
+
+  .battle-console .action-dock .decision-panel {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .battle-console:not(:has(.battle-recap)) .board-frame .play-board {
+    width: min(100%, 380px, calc(100dvh - 460px));
+  }
+}
+
+/* Title settings: hints, sound, and music sit on one even row. */
+.title-settings {
+  display: grid;
+  flex: 1 1 100%;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 6px;
+}
+
+.title-settings button {
+  min-width: 0;
+  padding: 0 8px;
+  white-space: nowrap;
+}

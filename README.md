@@ -25,10 +25,28 @@ The repository contains a playable deterministic short run:
 - typed mobile browser scenarios at 390×700 and 390×844;
 - responsive mobile combat layouts and a static GitHub Pages deployment.
 
-This is not yet a content-complete RPG or store-ready application. The short-run implementation is ready for real phone timing and replay-intent playtests before game-feel work or metaprogression expands the scope.
+Demo polish pass (2026-10-29):
+
+- title screen with Continue / New run / Daily seed, the run route, and a four-line how-to-play; a ⌂ button returns home from battles and rewards (the run stays saved);
+- first-session **coach hints** in the command deck (first move, spell charged, enemy charging, Aether forged), with a spotlighted spell, *Got it*, and an on/off toggle that replays them;
+- combat juice: floating damage/Guard/mana numbers, portrait hit shake, optional haptics, and a Victory/Defeat banner, all with reduced-motion fallbacks;
+- fixes: terminal board status no longer reads "Arena locked · Resolving cascades", two-prism run labels no longer push the boss cockpit off-screen at 390px, route tier labels and compact spell buttons no longer clip or overlap, styled result buttons, real page title and favicon;
+- `npm run demo:play` drives a full run in Chromium with the spell-aware policy and saves screenshots.
+
+Feel and PWA pass (2026-10-29, round 2; presentation only, no rules change):
+
+- **sound**: synthesized WebAudio effects for swap, cascade-stepped match chimes, hits, Guard gain/block/break, mana, backlash, spells, Aether forge/blast, extra turn, victory and defeat, plus an optional ambient pad; no audio files. Audio starts on the first tap or key press, pauses while the tab is hidden, and *Sound* / *Music* toggles (title footer and the cockpit ♪ button) persist in `kingdom-duel.audio.v1`;
+- **gem motion**: swaps slide, matches pop and stay hollow until the fall, survivors and fresh gems drop with a slight overshoot, and board refills cascade in. Motion is derived from the ordered resolution frames (`src/ui/board-motion.ts`, tested against the engine's drop) and is off under reduced motion;
+- **PWA**: web app manifest, generated icons (`npm run icons`), and a build-time service worker that precaches the whole build and reloads offline under the GitHub Pages path;
+- fixes: the desktop spell button no longer draws "Need N Sun" over its charge bar, and an armed spell no longer pushes the desktop board's last row into the command deck.
+
+See the [demo script](docs/DEMO_SCRIPT.md) for a two-minute walkthrough.
+
+This is not yet a content-complete RPG or store-ready application. Combat values are unchanged: the remaining product gate is the five-person real-phone protocol, which should now also check whether the coach hints fix the first-duel spell-literacy failure.
 
 ## Canonical Documentation
 
+- [Demo script](docs/DEMO_SCRIPT.md)
 - [Game specification](docs/GAME_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Balance baseline](docs/BALANCE.md)
@@ -43,7 +61,7 @@ Dated research and implementation reports are preserved under `docs/archive/` an
 Run:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -58,7 +76,13 @@ Browser E2E (requires a locally installed Playwright Chromium binary):
 ```bash
 npm run test:e2e:install
 npm run test:e2e
+# or reuse a preinstalled Chromium without `playwright install`:
+PW_CHROMIUM_EXECUTABLE=/path/to/chromium npm run test:e2e
+# if something else already listens on 4173/4273, move the test servers:
+KD_E2E_PORT=4391 KD_PWA_PORT=4392 npm run test:e2e
 ```
+
+The `pwa-offline` project builds the app, serves it under `/kingdom-duel/` (the Pages path), and checks the manifest, the service worker, an offline reload into a playable duel, and persisted sound settings.
 
 `npm run check` type-checks and discovers the browser scenarios; it does not launch them. A full step handoff must also record `npm run test:e2e` on a machine with the Playwright Chromium binary. The 2026-07-18 stabilization pass installed Chromium locally and passed the 10-scenario mobile suite.
 

@@ -75,10 +75,10 @@ export function renderSpellIcon(abilityId: string, shortLabel: string, gem: stri
   `;
 }
 
-export function renderGem(kind: GemKind, index?: number, classes: string[] = []): string {
+export function renderGem(kind: GemKind, index?: number, classes: string[] = [], style?: string): string {
   const asset = gemAssetSlots[kind];
   return `
-    <button class="gem gem-${kind} ${asset.src ? 'has-sprite' : ''} ${classes.join(' ')}" type="button" aria-label="${gemLabel(kind)} tile"${index === undefined ? '' : ` data-cell="${index}"`}>
+    <button class="gem gem-${kind} ${asset.src ? 'has-sprite' : ''} ${classes.join(' ')}" type="button" aria-label="${gemLabel(kind)} tile"${index === undefined ? '' : ` data-cell="${index}"`}${style ? ` style="${style}"` : ''}>
       <span class="gem-sprite-slot" aria-hidden="true" data-asset-path="${asset.path}"${assetStyle(asset.src)}></span>
       <span class="gem-fallback" aria-hidden="true">
         <span class="gem-shine"></span>
