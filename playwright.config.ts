@@ -1,5 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
+// Optional: point Playwright at a preinstalled Chromium (e.g. sandboxed CI images)
+// without changing the default `playwright install` flow for everyone else.
+const chromiumExecutable = process.env.PW_CHROMIUM_EXECUTABLE;
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -13,6 +17,7 @@ export default defineConfig({
     locale: 'en-US',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
+    ...(chromiumExecutable ? { launchOptions: { executablePath: chromiumExecutable } } : {}),
   },
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4173',
